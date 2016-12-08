@@ -26,7 +26,7 @@
 #endif
 #include "registers.h"
 
-#define NEW_PMAT 1 
+#define NEW_PMAT 0 
 #define write_to_matrix 0 
 #define read_lookup_table 0 
 #define write_lookup_table 0

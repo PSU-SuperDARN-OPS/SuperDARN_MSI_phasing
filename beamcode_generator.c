@@ -5,16 +5,16 @@
 #include <string.h>
 #include <sys/time.h>
 
-#define EXIT_ON_ATTEN_CHECK 1 
-#define MIN_CARD 03
-#define MAX_CARD 03
+#define EXIT_ON_ATTEN_CHECK 0 
+#define MIN_CARD 19
+#define MAX_CARD 19
 #define MAX_FSTEPS 36 
 #define MAX_FREQS 1501 
 //#define MAX_FREQS 1201 
 #define MAX_PHASES 8192
 #define MAX_ANGLES 32 
 #define NUM_ANGLES 16 
-#define USE_MEASURED_ATTENS 1 
+#define USE_MEASURED_ATTENS 0 
 #define MIN_ATTEN_FREQ_HZ 10E6
 #define MAX_ATTEN_FREQ_HZ 16E6
 #define HAS_TDELAY 0 
@@ -27,12 +27,12 @@ struct timeval t0,t1,t2,t3;
 unsigned long elapsed;
 double angles[MAX_ANGLES],angles_requested_delay[MAX_ANGLES],angles_needed_delay[MAX_ANGLES];
 int32_t attenfile_exists=0;
+  
+double spacing=12.8016; //meters : McM 42 feet == 12.8016 meters 
+  
 /*
-double spacing=12.8016; //meters : MSI 42 feet == 12.8016 meters 
-*/
-
 double spacing=15.24; //meters : SPS 50 feet == 15.24 meters 
-
+*/
 double bm_sep=3.24;
 //double middle=11.5; //(NUM_ANGLES-1)/2
 
@@ -168,7 +168,7 @@ int32_t main()
     lowest_pwr_mag=-2.0;
   } else {
     printf("Lowest Power is less than -2 dB\n!!!!!");
-    exit(1);
+    if (EXIT_ON_ATTEN_CHECK) exit(1);
   }
   printf("Final: lowest_pwr_mag %lf\n",lowest_pwr_mag);
   for(c=MIN_CARD;c<=MAX_CARD;c++) {

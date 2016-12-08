@@ -5,8 +5,8 @@
 #include <string.h>
 #include <sys/time.h>
 
-#define MIN_CARD  3 
-#define MAX_CARD  3 
+#define MIN_CARD  19 
+#define MAX_CARD  19 
 #define MAX_CARDS 20 
 #define MAX_FREQS 1201 
 #define MAX_PHASES 8192
@@ -16,13 +16,15 @@
 
 int32_t quick_flag=1;
 int32_t fatal_error=1;
-int32_t verbose=0;
+int32_t verbose=2;
 FILE *calfile=NULL;
 FILE *timedelayfile=NULL;
 struct timeval t0,t1,t2,t3;
 unsigned long elapsed;
 double expected_timedelays[13]={0.25,0.45,0.8,1.5,2.75,5.0,8.0,15.0,25.0,45.0,80.0,140.0,250.0};
+
 double pwr_threshold=-21.0;
+double fail_for_low_power_error = 0;
 
 double expected_timedelay(int32_t delaycode) {
   int32_t bit,i,code;
@@ -173,14 +175,16 @@ int32_t main()
             count=fread(timedelay[ii],sizeof(double),num_phasecodes,calfile);
             if (verbose > 1) fprintf(stdout,"Freq index: %d Time delay Count: %d\n",ii,count);
           }
+      /* 
         i=0;
         while(i<8192) {
-          if(pwr_mag[ii][i] < -10 ) {
+          if(pwr_mag[ii][i] < -21 ) { // changed from -10 (2016-12 mgu)
             printf("Low Pwr: Code: Freq Index:%d Beamcode: %d Mag: %lf\n",ii,i,pwr_mag[ii][i]);
-            error_flag=1;
+            error_flag= 1 * fail_for_low_power_error;
           }
           i=i+1 ;
         }
+*/
         if(error_flag) {
            if (verbose > -1 ) fprintf(stdout,"PhaseCodes: %d\n",num_phasecodes);
            if (verbose > -1 ) fprintf(stdout,"Freqs: %d\n",num_freqs);
