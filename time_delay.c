@@ -5,8 +5,8 @@
 #include <string.h>
 #include <sys/time.h>
 
-#define MIN_CARD  0 
-#define MAX_CARD  19 
+#define MIN_CARD  3 
+#define MAX_CARD  3 
 #define MAX_CARDS 20 
 #define MAX_FREQS 1201 
 #define MAX_PHASES 8192
@@ -79,7 +79,7 @@ int32_t main()
 
   caldir=getenv("MSI_CALDIR");
   if (caldir==NULL) {
-    caldir=strdup("/data/calibrations/");
+    caldir=strdup("/data/cal/");
   }
   fprintf(stdout,"CALDIR: %s\n",caldir);
   printf("\n\nEnter Radar Name: ");

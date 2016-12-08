@@ -133,7 +133,7 @@ int32_t main(int argc, char **argv)
   }
   caldir=getenv("MSI_CALDIR");
   if (caldir==NULL) {
-    caldir=strdup("/data/calibrations/");
+    caldir=strdup("/data/cal/");
   }
   fprintf(stdout,"CALDIR: %s\n",caldir);
   for(f=0;f<MAX_FSTEPS;f++) {

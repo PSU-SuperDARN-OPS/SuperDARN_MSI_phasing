@@ -6,14 +6,14 @@
 #include <sys/time.h>
 
 #define EXIT_ON_ATTEN_CHECK 1 
-#define MIN_CARD 0 
-#define MAX_CARD 19 
+#define MIN_CARD 03
+#define MAX_CARD 03
 #define MAX_FSTEPS 36 
 #define MAX_FREQS 1501 
 //#define MAX_FREQS 1201 
 #define MAX_PHASES 8192
 #define MAX_ANGLES 32 
-#define NUM_ANGLES 22 
+#define NUM_ANGLES 16 
 #define USE_MEASURED_ATTENS 1 
 #define MIN_ATTEN_FREQ_HZ 10E6
 #define MAX_ATTEN_FREQ_HZ 16E6
@@ -27,12 +27,12 @@ struct timeval t0,t1,t2,t3;
 unsigned long elapsed;
 double angles[MAX_ANGLES],angles_requested_delay[MAX_ANGLES],angles_needed_delay[MAX_ANGLES];
 int32_t attenfile_exists=0;
-
-double spacing=12.8016; //meters : MSI 42 feet == 12.8016 meters 
-
 /*
-double spacing=15.24; //meters : SPS 50 feet == 15.24 meters 
+double spacing=12.8016; //meters : MSI 42 feet == 12.8016 meters 
 */
+
+double spacing=15.24; //meters : SPS 50 feet == 15.24 meters 
+
 double bm_sep=3.24;
 //double middle=11.5; //(NUM_ANGLES-1)/2
 
@@ -102,7 +102,7 @@ int32_t main()
   printf("Middle: %lf\n",middle);
   caldir=getenv("MSI_CALDIR");
   if (caldir==NULL) {
-    caldir=strdup("/data/calibrations/");
+    caldir=strdup("/data/cal/");
   }
   fprintf(stdout,"CALDIR: %s\n",caldir);
   printf("\n\nEnter Radar Name: ");
@@ -159,7 +159,7 @@ int32_t main()
   }
   if(highest_time0_value > 10.0 ) {
     printf("Longest Time0 is longer than 10 nanoseconds\n!!!!!");
-    exit(1);
+    //exit(1);
   }
   else highest_time0_value=10.0;
 

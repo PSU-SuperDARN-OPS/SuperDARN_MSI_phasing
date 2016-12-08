@@ -99,8 +99,8 @@ int main(int argc, char **argv ) {
      char *caldir=NULL;
      char dirstub[256]="";
      char filename[512]="";
-     char radar_name[16]="ade";
-     char vna_host[24]="137.229.27.122";
+     char radar_name[16]="cve";
+     char vna_host[24]="192.168.1.2";
      char strout[128]="";
      char output[128]="";
      char command[128]="";
@@ -201,7 +201,7 @@ int main(int argc, char **argv ) {
      }
      caldir=getenv("MSI_CALDIR");
      if (caldir==NULL) {
-          caldir=strdup("/data/calibrations/");
+          caldir=strdup("/data/cal/");
      }
      fprintf(stdout,"CALDIR: %s\n",caldir);
      printf("Radar: <%s>\n",radar_name);
@@ -440,7 +440,7 @@ int main(int argc, char **argv ) {
                fread(&beam_lowest_pwr_dB,sizeof(double),1,beamcodefile);
                if(beam_highest_time0_nsec != MSI_target_tdelay0_nsecs) {
                  fprintf(stderr,"Error:: Card %d Target time0 mismatch: %lf  %lf\n",c,beam_highest_time0_nsec,MSI_target_tdelay0_nsecs);
-                 exit(-1); 
+//                 exit(-1); 
                }
                if(beam_lowest_pwr_dB != MSI_target_pwr_dB) {
                  fprintf(stderr,"Error:: Card %d Target pwr  mismatch: %lf  %lf\n",c,beam_lowest_pwr_dB, MSI_target_pwr_dB);

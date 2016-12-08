@@ -34,12 +34,12 @@
 #define ON       1
 #define OFF      0
 
-#define NEW_PMAT 0 
+#define NEW_PMAT 1
 
 #define CARDS 200 
 #define PHASECODES 8192 
 #define ATTENCODES 64 
-//#define PHASECODES  64 
+//##define PHASECODES  64 
 #define FREQS 1500
 #define _QUICK_
 
@@ -48,14 +48,14 @@ int setup_flag=1;
 int test_flag=-1000;
 int sock=-1;
 int verbose=2;
-//char *hostip="192.168.1.2";
+char *hostip="192.168.1.2";
 //char *hostip="209.114.113.119";
-char *hostip="137.229.27.122";
+//char *hostip="137.229.27.122";
 //char *hostip="67.59.83.38";
 char *file_prefix="phasing_cal";
 char *file_ext=".dat";
 char filename[120];
-char *dir="/data/calibrations/";
+char *dir="/data/cal/";
 FILE *calfile=NULL;
 int port=23;
 char command[80];
@@ -406,10 +406,10 @@ if(test_flag==-1000) {
     button_command(command);
     button_command(":CALC1:PAR:COUN 2\r\n");
     button_command(":CALC1:PAR1:SEL\r\n");
-    button_command(":CALC1:PAR1:DEF S21\r\n");
+    button_command(":CALC1:PAR1:DEF S12\r\n");
     button_command(":CALC1:FORM UPH\r\n");
     button_command(":CALC1:PAR2:SEL\r\n");
-    button_command(":CALC1:PAR2:DEF S21\r\n");
+    button_command(":CALC1:PAR2:DEF S12\r\n");
     button_command(":CALC1:FORM MLOG\r\n");
     button_command(":SENS1:AVER OFF\r\n");
     button_command(":SENS1:AVER:COUN 4\r\n");
@@ -537,11 +537,11 @@ if(test_flag==-1000) {
       data=8191;
       beamcode=b;
       if(NEW_PMAT) {
-        if(b % 512 == 0 ) printf("B: %d data: %d BC: %d\n",b,data,beamcode); 
-        temp=write_data_new(IOBASE,c,beamcode,8191,radar,0);
-        temp=write_attenuators(IOBASE,c,beamcode,63,radar);
+	if(b % 512 == 0 ) printf("B: %d data: %d BC: %d\n",b,data,beamcode); 
+	temp=write_data_new(IOBASE,c,beamcode,8191,radar,0);
+	temp=write_attenuators(IOBASE,c,beamcode,63,radar);
       } else {
-        temp=write_data_old(IOBASE,c,beamcode,8191,radar);
+	temp=write_data_old(IOBASE,c,beamcode,8191,radar);
       }
     }
     printf("Verifying all ones programming phase coding\n");
@@ -552,7 +552,6 @@ if(test_flag==-1000) {
       if(NEW_PMAT) temp=verify_data_new(IOBASE,c,b,8191,radar,0);
       else temp=verify_data_old(IOBASE,c,b,8191,radar,0);
     }
-
 
     printf("Programming 1-to-1 phase coding no attenuation\n");
     for (b=0;b<PHASECODES;b++) {

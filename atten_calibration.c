@@ -46,15 +46,15 @@ int setup_flag=1;
 int test_flag=-1000;
 int sock=-1;
 int verbose=2;
-//char *hostip="192.168.1.2";
+char *hostip="192.168.1.2";
 //char *hostip="209.114.113.119";
-char *hostip="137.229.27.122";
+//char *hostip="137.229.27.122";
 //char *hostip="67.59.83.38";
 char *file_prefix="phasing_cal";
 char *file_ext=".dat";
 char *atten_ext=".att";
 char attenfilename[120];
-char *dir="/data/calibrations/";
+char *dir="/data/cal/";
 FILE *attenfile=NULL;
 int port=23;
 char command[80];
@@ -186,13 +186,13 @@ int button_command(char *command) {
       fflush(stdout);
   return 0;
 }
-void mypause ( void ) 
-{ 
-  fflush ( stdin );
-  printf ( "Press [Enter] to continue . . ." );
-  fflush ( stdout );
-  getchar();
-} 
+//void mypause ( void ) 
+//{ 
+//  fflush ( stdin );
+//  printf ( "Press [Enter] to continue . . ." );
+//  fflush ( stdout );
+//  getchar();
+//} 
 /*-SET WRITE ENABLE BIT-------------------------------------------------------*/
 int set_WE(int base,int onoff,int radar){
         int temp;
@@ -252,6 +252,7 @@ int set_RW(int base,int rw,int radar){
                 temp=in8(base+portC);
                 out8(base+portC,temp | 0x40);
         }
+	usleep(10000);
 }
 /*-SET SWITCHED/ATTEN BIT-------------------------------------------------------*/
 int set_SA(int base,int sa,int radar){
@@ -282,6 +283,8 @@ int set_SA(int base,int sa,int radar){
                 temp=in8(base+portC);
                 out8(base+portC,temp | 0x80);
         }
+
+	usleep(10000);
 }
 
 
@@ -379,6 +382,8 @@ int beam_code(unsigned int base, int code,int radar){
                 fflush(stderr);
 		return -1;
 	}
+
+	usleep(10000);
 #else
   return 0; 
 #endif
@@ -437,6 +442,7 @@ int select_card(unsigned int base, int address,int radar){
 	out8(base+portC,address);
 	nanosleep(&nsleep,NULL);
     // verify the output
+	usleep(10000);
 	temp=in8(base+portC);
 	if (temp==address) return 0;
 	else{
@@ -510,6 +516,7 @@ int write_attenuators(unsigned int base, int card, int code, int data,int radar)
     // disable writing
         set_RW(base,READ,radar);
         delay(3);
+
     // verify written data
     // read PortA and PortB to see if EEPROM output is same as progammed
         temp=in8(base+portB);
@@ -1191,10 +1198,10 @@ if(test_flag==-1000) {
     button_command(command);
     button_command(":CALC1:PAR:COUN 2\r\n");
     button_command(":CALC1:PAR1:SEL\r\n");
-    button_command(":CALC1:PAR1:DEF S21\r\n");
+    button_command(":CALC1:PAR1:DEF S12\r\n");
     button_command(":CALC1:FORM UPH\r\n");
     button_command(":CALC1:PAR2:SEL\r\n");
-    button_command(":CALC1:PAR2:DEF S21\r\n");
+    button_command(":CALC1:PAR2:DEF S12\r\n");
     button_command(":CALC1:FORM MLOG\r\n");
     button_command(":SENS1:AVER OFF\r\n");
     button_command(":SENS1:AVER:COUN 4\r\n");

@@ -44,7 +44,7 @@ int32_t main()
 
   caldir=getenv("MSI_CALDIR");
   if (caldir==NULL) {
-    caldir=strdup("/data/calibrations/");
+    caldir=strdup("/data/cal/");
   }
   fprintf(stdout,"CALDIR: %s\n",caldir);
   printf("\n\nEnter Radar Name: ");
