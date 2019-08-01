@@ -186,8 +186,6 @@ int32_t beam_code(uint32_t base, int32_t code,int32_t radar){
             break;
         }
 #ifdef __QNX__
-        //printf("Selecting Beam Code: %d\n",code);
-
     // check if beam code is reasonable
 	if ( (code>8192) | (code<0) ){
 		fprintf(stderr,"INVALID BEAM CODE - must be between 0 and 8192\n");
@@ -196,7 +194,6 @@ int32_t beam_code(uint32_t base, int32_t code,int32_t radar){
 	}
     // bit reverse the code
 	code=reverse_bits(code);
-        //printf(" Output  : Reversed Code: 0x%x\n",code);
     // set CH0, Port A to lowest 8 bits of beam code and output on PortA
 	temp=code & 0xff;
 	out8(base+portA,temp);
@@ -208,7 +205,6 @@ int32_t beam_code(uint32_t base, int32_t code,int32_t radar){
 	temp=in8(base+portB);
 	temp=(temp & 0x1f) << 8;
 	temp=temp+in8(base+portA);
-        //printf(" Readback: Reversed BeamCode: 0x%x\n",temp);
 	if (temp==code) return 0;
 	else{
 		fprintf(stderr,"BEAM CODE OUTPUT ERROR - requested code not sent\n");

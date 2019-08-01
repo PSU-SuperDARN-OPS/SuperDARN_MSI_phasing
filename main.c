@@ -313,36 +313,14 @@ int main(int argc, char **argv)
 	temp=temp & 0x0f;
 	printf("input on group 1, port c is %x\n", temp);
         select_card(IOBASE,c,radar);
-/*
-        while(1) { 
-        printf("Set Write\n");
-          set_RW(IOBASE,WRITE,radar);
-          sleep(1);
-        printf("Set Read\n");
-          set_RW(IOBASE,READ,radar);
-          sleep(1);
-        printf("Set switches \n");
-          set_SA(IOBASE,SWITCHES,radar);
-          sleep(1);
-        printf("Set atten\n");
-          set_SA(IOBASE,ATTEN,radar);
-          sleep(1);
-        }
-        exit(0);
-*/
 #endif
 if(test_flag==-3) {
   while(1) {
     for(i=0;i<=12;i=i+1) {
-   //     b=0;
-   //     printf("Selecting Beamcode: %d 0x%x\n",b,b);
-   //     beam_code(IOBASE,b,1);
-   //     sleep(1);
         if (i==-1) b=0;
         if (i==0) b=1;
         if(i > 0 ) b=1 << i;
         b=b | 0x200 ;
-//        b= (b |  0x4);
         printf("Selecting Beamcode: %d 0x%x\n",b,b);
         beam_code(IOBASE,b,1);
         sleep(1);
@@ -350,10 +328,7 @@ if(test_flag==-3) {
   }
 }
 if(test_flag>=0) {
-  //stupid_flag=1;
-  //printf("test flag %d radar %d\n",test_flag,radar);
   beam_code(IOBASE,test_flag,radar);
-  //      temp=write_data_new(IOBASE,c,test_flag,test_flag,radar,0);
   if(NEW_PMAT) temp=verify_data_new(IOBASE,c,test_flag,test_flag,radar,1);
   else temp=verify_data_old(IOBASE,c,test_flag,test_flag,radar,1);
   exit(0);
@@ -361,19 +336,12 @@ if(test_flag>=0) {
 if(test_flag==-2) {
   printf("test flag %d radar %d icard %d verify programming\n",test_flag,radar,c);
   for(b=0;b<=8191;b++) {
-//    beam_code(IOBASE,b,radar);
     usleep(10000);
     if(NEW_PMAT) temp=verify_data_new(IOBASE,c,b,b,radar,0);
     else temp=verify_data_old(IOBASE,c,b,b,radar,1);
   }
   exit(0);
 }
-/*
-if(test_flag==1) {
-  beam_code(IOBASE,8191,radar);
-  exit(0);
-}
-*/
   fnum=atoi(freq_steps);
   fstart=atof(freq_start);
   fstop=atof(freq_stop);
@@ -476,7 +444,6 @@ if(test_flag==-1000) {
     while(1) {  //JDS  
       if (b==0) b=8; //JDS
       else b=0;//JDS
-//JDS    for (b=0;b<PHASECODES;b++) {
       data=b;
       beamcode=b;
       if(NEW_PMAT) {
@@ -495,7 +462,6 @@ if(test_flag==-1000) {
       data=0;
       beamcode=b;
       if(NEW_PMAT) {
-        //printf("B: %d data: %d BC: %d\n",b,data,beamcode); 
         temp=write_data_new(IOBASE,c,beamcode,data,radar,0);
         temp=write_attenuators(IOBASE,c,beamcode,data,radar);
       } else {
@@ -516,7 +482,6 @@ if(test_flag==-1000) {
       data=b;
       beamcode=b;
       if(NEW_PMAT) {
-        //printf("B: %d data: %d BC: %d\n",b,data,beamcode); 
         temp=write_data_new(IOBASE,c,beamcode,0,radar,0);
         temp=write_attenuators(IOBASE,c,beamcode,b,radar);
       } else {
@@ -575,14 +540,6 @@ if(test_flag==-1000) {
       else temp=verify_data_old(IOBASE,c,b,b,radar,0);
     }
 
-/*
-    if(verbose> 0 ) {
-      gettimeofday(&t3,NULL);
-      elapsed=(t3.tv_sec-t2.tv_sec)*1E6;
-      elapsed+=(t3.tv_usec-t2.tv_usec);
-      printf("  Program Card Elapsed Seconds: %lf\n",(float)elapsed/1E6);
-    }
-*/
     if(test_flag==-1) {
       exit(0);
     }
@@ -610,17 +567,6 @@ if(test_flag==-1000) {
         last_collect=current_collect;
         current_collect=b; 
       }
-/*
-    for (ii=-1;ii<14;ii++) {
-      if(ii==-1) b=0;
-      else if(ii==13) b=PHASECODES-1;
-      else  {
-        b=pow(2,ii);
-      }
-      beamcode=b;
-      temp=select_card(IOBASE,c,radar);	
-      beam_code(IOBASE,beamcode,radar);
-*/
 #else
     for (b=0;b<PHASECODES;b++) {
       beamcode=b;
@@ -649,19 +595,7 @@ if(test_flag==-1000) {
         printf("Failed Verification for beamcode: %d  %x\n",b,b);
         exit(-1);
       }
-//jds    for (index=-1;index<=13;index++) {
-//      if(index==-1) b=0;
-//      else if(index==13) b=8191;
-//      else b=(int)pow(2,index); 
-// Start of Command Block
-/*
-      if(verbose> 0 ) {
-        printf(":::Card %d::: BEAMCode %d\n",c,beamcode);
-        gettimeofday(&t4,NULL);
-      }
-*/
       gettimeofday(&t10,NULL);
-      //button_command(":SENS1:AVER:CLE\r\n");
       button_command(":INIT1:IMM\r\n");
       if(b==0) sleep(1);
 #ifdef __QNX__
@@ -669,14 +603,6 @@ if(test_flag==-1000) {
 #else
       usleep(wait_delay_ms*1000);
 #endif
-/*
-    if(verbose> 0 ) {
-      gettimeofday(&t11,NULL);
-      elapsed=(t11.tv_sec-t10.tv_sec)*1E6;
-      elapsed+=(t11.tv_usec-t10.tv_usec);
-      printf("  Measure Delay Total Elapsed Seconds: %lf\n",(float)elapsed/1E6);
-    }
-*/
       take_data=1;
       attempt=0;
       while((take_data) && (attempt<max_attempts)) {
@@ -707,35 +633,9 @@ if(test_flag==-1000) {
         printf("FATAL ERROR: Phasecode %d took Max attempts %d last delay %d (ms)\n",b,attempt,wait_delay_ms);
         exit(0);
       }
-//      printf("End\n");
       printf("Phasecode %d: Freq Index: %d Phase: %lf Pd: %lf Wait Delay: %d\n",b,fnum-1,phase[fnum-1][b], pd_new,wait_delay_ms);
-//      exit(0);
-/*
-      if(verbose> 0 ) {
-        gettimeofday(&t5,NULL);
-        elapsed=(t5.tv_sec-t4.tv_sec)*1E6;
-        elapsed+=(t5.tv_usec-t4.tv_usec);
-        printf("  Measure Phasecode: %d Elapsed Seconds: %lf\n",b,(float)elapsed/1E6);
-      }
-*/
-//      for(i=0;i<fnum;i++) {
-//        if (verbose > 1) printf("Freq %lf:  Phase %d:%lf \n",freq[i],b,phase[i][b]);
-//      }
     } // end of phasecode loop
-/*
-    if(verbose> 0 ) {
-      gettimeofday(&t6,NULL);
-      elapsed=(t6.tv_sec-t2.tv_sec)*1E6;
-      elapsed+=(t6.tv_usec-t2.tv_usec);
-      printf("  All Measurements Total Elapsed Seconds: %lf\n",(float)elapsed/1E6);
-    }
-*/
-//    if(verbose> 0 ) {
-//      gettimeofday(&t6,NULL);
-//      elapsed=(t6.tv_sec-t2.tv_sec)*1E6;
-//      elapsed+=(t6.tv_usec-t2.tv_usec);
-//      printf("  Card Calc Total Elapsed Seconds: %lf\n",(float)elapsed/1E6);
-//    }
+
     for(i=0;i<fnum;i++) {
       if (verbose > 1) printf("Freq %lf:  Phase 0:%lf Phase 8191: %lf\n",freq[i],phase[i][0],phase[i][PHASECODES-1]);
       if (verbose > 1) printf("Freq %lf:  Pwr 0:%lf Pwr 8191: %lf\n",freq[i],pwr_mag[i][0],pwr_mag[i][PHASECODES-1]);
@@ -746,18 +646,7 @@ if(test_flag==-1000) {
     }
     printf("Closing File\n");
     fclose(calfile);
-/*
-    if(verbose> 0 ) {
-      gettimeofday(&t1,NULL);
-      elapsed=(t1.tv_sec-t0.tv_sec)*1E6;
-      elapsed+=(t1.tv_usec-t0.tv_usec);
-      printf("%d Cards %d PhaseCodes, Elapsed Seconds: %lf\n",CARDS,PHASECODES,(float)elapsed/1E6);
-    }
-*/
     c=-1;
-//    if (verbose>0) fprintf(stdout,"Asking for another card:\n");
-//    printf("Enter Next Card Number (CTRL-C to exit): ");
-//    scanf("%d", &c);
   } // end of Card loop
 }
 
