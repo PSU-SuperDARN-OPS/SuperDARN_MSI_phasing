@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define MSG_NOSIGNAL 0x4000
+
 void mypause ( void ) 
 { 
   fflush ( stdin );
