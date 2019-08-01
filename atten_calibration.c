@@ -399,6 +399,10 @@ int select_card(unsigned int base, int address,int radar){
 	   programming purposes.
 	*/
         int portA,portB,portC;
+	int temp;
+	struct 	timespec nsleep;
+	nsleep.tv_sec=0;
+	nsleep.tv_nsec=5000;
         switch(radar) {
           case 1:
             portC=PC_GRP_0;
@@ -417,12 +421,6 @@ int select_card(unsigned int base, int address,int radar){
             break;
         }
 #ifdef __QNX__	
-	int temp;
-	struct 	timespec nsleep;
-	nsleep.tv_sec=0;
-	nsleep.tv_nsec=5000;
-
-
     // check if card address is reasonable
 	if ( (address>31) | (address<0) ){
 		fprintf(stderr,"INVALID CARD ADDRESS - must be between 0 and 32\n");
@@ -459,9 +457,9 @@ int write_attenuators(unsigned int base, int card, int code, int data,int radar)
 
         int temp;
         struct  timespec nsleep;
+        int portA,portB,portC,cntrl1;
         nsleep.tv_sec=0;
         nsleep.tv_nsec=5000;
-        int portA,portB,portC,cntrl1;
         switch(radar) {
           case 1:
             portC=PC_GRP_1;
@@ -539,9 +537,9 @@ int verify_attenuators(unsigned int base, int card, int code, int data,int radar
 
         int temp;
         struct  timespec nsleep;
+        int portA,portB,portC,cntrl1;
         nsleep.tv_sec=0;
         nsleep.tv_nsec=5000;
-        int portA,portB,portC,cntrl1;
         switch(radar) {
           case 1:
             portC=PC_GRP_1;
@@ -600,9 +598,9 @@ int verify_data_new(unsigned int base, int card, int code, int data,int radar,in
 
         int temp;
         struct  timespec nsleep;
+        int portA,portB,portC,cntrl1;
         nsleep.tv_sec=0;
         nsleep.tv_nsec=5000;
-        int portA,portB,portC,cntrl1;
         switch(radar) {
           case 1:
             portC=PC_GRP_1;
@@ -664,9 +662,9 @@ int write_data_new(unsigned int base, int card, int code, int data,int radar,int
 
         int temp;
         struct  timespec nsleep;
+        int portA,portB,portC,cntrl1;
         nsleep.tv_sec=0;
         nsleep.tv_nsec=5000;
-        int portA,portB,portC,cntrl1;
         switch(radar) {
           case 1:
             portC=PC_GRP_1;
@@ -754,10 +752,10 @@ int write_data_old(unsigned int base, int card, int code, int data,int radar){
 
         int temp;
         struct  timespec nsleep;
-        nsleep.tv_sec=0;
-        nsleep.tv_nsec=5000;
         int portA0,portB0,portC0,cntrl0;
         int portA1,portB1,portC1,cntrl1;
+        nsleep.tv_sec=0;
+        nsleep.tv_nsec=5000;
         switch(radar) {
           case 1:
             portC0=PC_GRP_0;
@@ -867,10 +865,10 @@ int verify_data_old(unsigned int base, int card, int code, int data,int radar, i
 
         int temp,rdata;
         struct  timespec nsleep;
-        nsleep.tv_sec=0;
-        nsleep.tv_nsec=5000;
         int portA0,portB0,portC0,cntrl0;
         int portA1,portB1,portC1,cntrl1;
+        nsleep.tv_sec=0;
+        nsleep.tv_nsec=5000;
         switch(radar) {
           case 1:
             portC0=PC_GRP_0;

@@ -230,7 +230,15 @@ int32_t select_card(uint32_t base, int32_t address,int32_t radar){
 	   programming purposes.
 	*/
         int32_t portA,portB,portC;
-        switch(radar) {
+
+#ifdef __QNX__	
+	int32_t temp;
+	struct 	timespec nsleep;
+	nsleep.tv_sec=0;
+	nsleep.tv_nsec=5000;
+#endif
+
+	switch(radar) {
           case 1:
             portC=PC_GRP_0;
             portB=PB_GRP_0;
@@ -247,13 +255,8 @@ int32_t select_card(uint32_t base, int32_t address,int32_t radar){
             portA=PA_GRP_4;
             break;
         }
+
 #ifdef __QNX__	
-	int32_t temp;
-	struct 	timespec nsleep;
-	nsleep.tv_sec=0;
-	nsleep.tv_nsec=5000;
-
-
     // check if card address is reasonable
 	if ( (address>31) | (address<0) ){
 		fprintf(stderr,"INVALID CARD ADDRESS - must be between 0 and 32\n");
@@ -837,4 +840,9 @@ int32_t read_data(uint32_t base,int32_t radar){
   return 0;
 #endif	
 }
+
+
+
+
+
 
