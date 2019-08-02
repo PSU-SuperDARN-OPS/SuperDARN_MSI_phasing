@@ -9,7 +9,7 @@
   #include <sys/neutrino.h>
   #include <sys/mman.h>
 #endif
-#include "_prog_conventions.h"
+#include "include/_prog_conventions.h"
 
 #define VENDOR_ID 0x494f
 //#define DEVICE_ID 0x0e60

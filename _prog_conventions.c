@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "_prog_conventions.h"
+#include "include/_prog_conventions.h"
 
 /*-WRITE8------------------------------------------------------------*/
 void write08(unsigned long BASE, unsigned long reg1, signed char val){

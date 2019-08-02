@@ -1,4 +1,4 @@
-#include "_prog_conventions.h"
+#include "include/_prog_conventions.h"
 #define CNTRL_GRP_0 		3
 #define PA_GRP_0		0
 #define PB_GRP_0		1
