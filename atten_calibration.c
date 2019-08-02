@@ -28,6 +28,7 @@
 #endif
 
 #include "registers.h"
+#include "include/common_functions.h"
 
 #define SWITCHES 0
 #define ATTEN    1
@@ -358,7 +359,7 @@ int main(int argc, char **argv) {
         printf("test flag %d radar %d icard %d verify programming\n", test_flag, radar, c);
         for (b = 0; b <= 8191; b++) {
 //    beam_code(IOBASE,b,radar);
-            delay(10);
+            usleep(10000);
             if (NEW_PMAT) temp = verify_data_new(IOBASE, c, b, b, radar, 0);
             else temp = verify_data_old(IOBASE, c, b, b, radar, 1);
         }
@@ -466,7 +467,7 @@ if(test_flag==1) {
                 fprintf(stdout, "Writing beamcodes to phasing card\n");
                 gettimeofday(&t2, NULL);
             }
-            delay(10);
+            usleep(10000);
         } //test flag if
         if (stupid_flag) {
             while (1) {  //JDS
@@ -501,7 +502,7 @@ if(test_flag==1) {
         for (b = 0; b < ATTENCODES; b++) {
             select_card(IOBASE, c, radar);
             beam_code(IOBASE, b, radar);
-            delay(10);
+            usleep(10000);
             if (NEW_PMAT) temp = verify_attenuators(IOBASE, c, b, 0, radar);
             else temp = verify_data_old(IOBASE, c, b, 0, radar, 0);
         }
@@ -522,7 +523,7 @@ if(test_flag==1) {
         for (b = 0; b < ATTENCODES; b++) {
             select_card(IOBASE, c, radar);
             beam_code(IOBASE, b, radar);
-            delay(10);
+            usleep(10000);
             if (NEW_PMAT) temp = verify_attenuators(IOBASE, c, b, b, radar);
             else temp = verify_data_old(IOBASE, c, b, b, radar, 0);
         }

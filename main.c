@@ -28,6 +28,7 @@
 #endif
 
 #include "registers.h"
+#include "include/common_functions.h"
 
 #define SWITCHES 0
 #define ATTEN    1
@@ -453,7 +454,7 @@ int main(int argc, char **argv) {
                     sleep(2); //JDS
                     temp = write_attenuators(IOBASE, c, beamcode, 0, radar);
                 } else {
-                    temp = write_data_old(IOBASE, c, beamcode, b, radar);
+                    temp = write_data_old(IOBASE, c, beamcode, b, radar,0);
                 }
             }
         }
@@ -466,7 +467,7 @@ int main(int argc, char **argv) {
                 temp = write_data_new(IOBASE, c, beamcode, data, radar, 0);
                 temp = write_attenuators(IOBASE, c, beamcode, data, radar);
             } else {
-                temp = write_data_old(IOBASE, c, beamcode, data, radar);
+                temp = write_data_old(IOBASE, c, beamcode, data, radar,0);
             }
         }
 
@@ -486,7 +487,7 @@ int main(int argc, char **argv) {
                 temp = write_data_new(IOBASE, c, beamcode, 0, radar, 0);
                 temp = write_attenuators(IOBASE, c, beamcode, b, radar);
             } else {
-                temp = write_data_old(IOBASE, c, beamcode, 0, radar);
+                temp = write_data_old(IOBASE, c, beamcode, 0, radar,0);
             }
         }
         printf("Verifying 1-to-1 programming attenuation coding\n");
@@ -507,7 +508,7 @@ int main(int argc, char **argv) {
                 temp = write_data_new(IOBASE, c, beamcode, 8191, radar, 0);
                 temp = write_attenuators(IOBASE, c, beamcode, 63, radar);
             } else {
-                temp = write_data_old(IOBASE, c, beamcode, 8191, radar);
+                temp = write_data_old(IOBASE, c, beamcode, 8191, radar,0);
             }
         }
         printf("Verifying all ones programming phase coding\n");
@@ -529,7 +530,7 @@ int main(int argc, char **argv) {
                 temp = write_data_new(IOBASE, c, beamcode, data, radar, 0);
                 temp = write_attenuators(IOBASE, c, beamcode, 0, radar);
             } else {
-                temp = write_data_old(IOBASE, c, beamcode, b, radar);
+                temp = write_data_old(IOBASE, c, beamcode, b, radar,0);
             }
         }
         printf("Verifying 1-to-1 programming phase coding\n");
@@ -586,7 +587,7 @@ int main(int argc, char **argv) {
                     temp = write_data_new(IOBASE, c, beamcode, data, radar, 0);
                     temp = write_attenuators(IOBASE, c, beamcode, 0, radar);
                 } else {
-                    temp = write_data_old(IOBASE, c, beamcode, b, radar);
+                    temp = write_data_old(IOBASE, c, beamcode, b, radar,0);
                 }
                 usleep(10000);
                 if (NEW_PMAT) temp = verify_data_new(IOBASE, c, b, b, radar, 0);
