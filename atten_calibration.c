@@ -29,6 +29,7 @@
 
 #include "registers.h"
 #include "include/common_functions.h"
+#include "include/utils.h"
 
 #define SWITCHES 0
 #define ATTEN    1
@@ -68,11 +69,11 @@ struct timeval t10, t11;
 unsigned long elapsed;
 
 int mlog_data_command(char *command, double *array[FREQS], int b) {
-    int32 count, rval, sample_count;
+    int32_t count, rval, sample_count;
     char output[10] = "";
     char command2[80];
     char cmd_str[80], prompt_str[10], data_str[1000];
-    int32 cr, lf;
+    int32_t cr, lf;
     strcpy(command2, command);
     if (verbose > 2) printf("%d Command: %s\n", strlen(command2), command2);
     write(sock, &command2, sizeof(char) * strlen(command2));
@@ -481,7 +482,7 @@ if(test_flag==1) {
                     sleep(2); //JDS
                     temp = write_attenuators(IOBASE, c, beamcode, 0, radar);
                 } else {
-                    temp = write_data_old(IOBASE, c, beamcode, b, radar);
+                    temp = write_data_old(IOBASE, c, beamcode, b, radar,0);
                 }
             }
         }
@@ -494,7 +495,7 @@ if(test_flag==1) {
                 temp = write_data_new(IOBASE, c, beamcode, data, radar, 0);
                 temp = write_attenuators(IOBASE, c, beamcode, data, radar);
             } else {
-                temp = write_data_old(IOBASE, c, beamcode, data, radar);
+                temp = write_data_old(IOBASE, c, beamcode, data, radar,0);
             }
         }
 
@@ -516,7 +517,7 @@ if(test_flag==1) {
                 temp = write_data_new(IOBASE, c, beamcode, 0, radar, 0);
                 temp = write_attenuators(IOBASE, c, beamcode, b, radar);
             } else {
-                temp = write_data_old(IOBASE, c, beamcode, 0, radar);
+                temp = write_data_old(IOBASE, c, beamcode, 0, radar,0);
             }
         }
         printf("Verifying 1-to-1 programming attenuation coding\n");

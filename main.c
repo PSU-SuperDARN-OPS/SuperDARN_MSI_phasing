@@ -29,6 +29,7 @@
 
 #include "registers.h"
 #include "include/common_functions.h"
+#include "include/utils.h"
 
 #define SWITCHES 0
 #define ATTEN    1
@@ -72,11 +73,11 @@ struct timeval t10, t11;
 unsigned long elapsed;
 
 int mlog_data_command(char *command, double *array[FREQS], int b) {
-    int32 count, rval, sample_count;
+    int32_t count, rval, sample_count;
     char output[10] = "";
     char command2[80];
     char cmd_str[80], prompt_str[10], data_str[1000];
-    int32 cr, lf;
+    int32_t cr, lf;
     strcpy(command2, command);
     if (verbose > 2) printf("%d Command: %s\n", strlen(command2), command2);
     write(sock, &command2, sizeof(char) * strlen(command2));
@@ -168,7 +169,7 @@ int mlog_data_command(char *command, double *array[FREQS], int b) {
 }
 
 int button_command(char *command) {
-    int32 count, rval;
+    int32_t count, rval;
     char output[10] = "";
     char command2[80];
     char prompt_str[80];
@@ -198,8 +199,8 @@ int main(int argc, char **argv) {
     double *phase[FREQS], *pwr_mag[FREQS];
     double freq[FREQS];
     double pd_old, pd_new, phase_diff = 0.0;
-    int32 rval, count, sample_count, fail, cr, lf;
-    int32 ii, i = 0, c = 31, data = 0, index = 0, wait_delay_ms = 30;
+    int32_t rval, count, sample_count, fail, cr, lf;
+    int32_t ii, i = 0, c = 31, data = 0, index = 0, wait_delay_ms = 30;
     unsigned int b = 0;
     int last_collect, current_collect, collect = 0, beamcode = 0, take_data = 0, attempt = 0, max_attempts = 20;
     double fstart;
@@ -429,11 +430,11 @@ int main(int argc, char **argv) {
             gettimeofday(&t0, NULL);
             calfile = fopen(filename, "w");
             count = PHASECODES;
-            fwrite(&count, sizeof(int32), 1, calfile);
+            fwrite(&count, sizeof(int32_t), 1, calfile);
             count = CARDS;
-            fwrite(&count, sizeof(int32), 1, calfile);
+            fwrite(&count, sizeof(int32_t), 1, calfile);
             count = fnum;
-            fwrite(&count, sizeof(int32), 1, calfile);
+            fwrite(&count, sizeof(int32_t), 1, calfile);
             count = 0;
             fwrite(freq, sizeof(double), fnum, calfile);
             if (verbose > 0) {
@@ -644,7 +645,7 @@ int main(int argc, char **argv) {
                 printf("Freq %lf:  Phase 0:%lf Phase 8191: %lf\n", freq[i], phase[i][0], phase[i][PHASECODES - 1]);
             if (verbose > 1)
                 printf("Freq %lf:  Pwr 0:%lf Pwr 8191: %lf\n", freq[i], pwr_mag[i][0], pwr_mag[i][PHASECODES - 1]);
-            fwrite(&i, sizeof(int32), 1, calfile);
+            fwrite(&i, sizeof(int32_t), 1, calfile);
             count = fwrite(phase[i], sizeof(double), PHASECODES, calfile);
             count = fwrite(pwr_mag[i], sizeof(double), PHASECODES, calfile);
             //printf("Freq index: %d Count: %d\n",i,count);
