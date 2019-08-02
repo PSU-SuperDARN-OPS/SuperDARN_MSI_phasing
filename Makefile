@@ -16,10 +16,6 @@ ATTEN_SOURCES=atten_calibration.c  _open_PLX9050.c _prog_conventions.c utils.c
 ATTEN_OBJECTS=$(ATTEN_SOURCES:.c=.o)
 ATTEN_EXECUTABLE=atten_calibration
 
-#RF_SOURCES=rf_cal.c  _open_PLX9050.c _prog_conventions.c utils.c 
-#RF_OBJECTS=$(RF_SOURCES:.c=.o)
-#RF_EXECUTABLE=rf_calibration
-
 CONVERT_SOURCES=time_delay.c 
 CONVERT_OBJECTS=$(CONVERT_SOURCES:.c=.o)
 CONVERT_EXECUTABLE=time_delay
