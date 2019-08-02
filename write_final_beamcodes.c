@@ -24,7 +24,7 @@
   #include <sys/neutrino.h>
   #include <sys/mman.h>
 #endif
-#include "registers.h"
+#include "include/registers.h"
 
 #define NEW_PMAT 1 
 #define write_to_matrix 0 

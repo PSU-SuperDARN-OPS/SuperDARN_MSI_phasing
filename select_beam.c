@@ -25,7 +25,7 @@
   #include <sys/neutrino.h>
   #include <sys/mman.h>
 #endif
-#include "registers.h"
+#include "include/registers.h"
 
 #define SWITCHES 0
 #define ATTEN    1

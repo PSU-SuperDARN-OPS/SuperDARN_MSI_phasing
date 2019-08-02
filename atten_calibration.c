@@ -27,7 +27,7 @@
 #include <sys/mman.h>
 #endif
 
-#include "registers.h"
+#include "include/registers.h"
 #include "include/common_functions.h"
 #include "include/utils.h"
 
