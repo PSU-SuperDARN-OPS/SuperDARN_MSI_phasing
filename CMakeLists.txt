@@ -5,12 +5,12 @@ project(PhasingCalibration  VERSION 1.0
 find_package(GSL REQUIRED)
 
 add_executable(phasing_calibration main.c _open_PLX9050.c
-        common_functions.c
-        _prog_conventions.c utils.c)
+        common_functions.c _prog_conventions.c utils.c)
 target_link_libraries(phasing_calibration m)
 
 add_executable(atten_calibration atten_calibration.c _open_PLX9050.c
-        _prog_conventions.c utils.c)
+        common_functions.c _prog_conventions.c utils.c)
+target_link_libraries(atten_calibration m)
 
 add_executable(time_delay time_delay.c)
 target_link_libraries(time_delay m)
