@@ -151,7 +151,7 @@ float get_delay(int32_t code){
 
 	delay=0;
 	for(i=0;i<13;i++){
-		delay+=( (code & (int32_t)pow(2,i)) >> i)*delaylist[i];
+		delay+=( (code & (int32_t) pow(2,i)) >> i)*delaylist[i];
 	}	
 	return delay;
 }
@@ -730,6 +730,7 @@ int verify_data_old(unsigned int base, int card, int code, int data,int radar,in
         nsleep.tv_nsec=5000;
         int portA0,portB0,portC0,cntrl0;
         int portA1,portB1,portC1,cntrl1;
+#ifdef __QNX__
         switch(radar) {
           case 1:
             portC0=PC_GRP_0;
@@ -797,6 +798,9 @@ int verify_data_old(unsigned int base, int card, int code, int data,int radar,in
           select_card(base,31,radar);
           return -1;
         }
+#else
+        return 0;
+#endif
 }
 
 
