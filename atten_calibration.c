@@ -47,9 +47,6 @@ int test_flag=-1000;
 int sock=-1;
 int verbose=2;
 char *hostip="192.168.1.2";
-//char *hostip="209.114.113.119";
-//char *hostip="137.229.27.122";
-//char *hostip="67.59.83.38";
 char *file_prefix="phasing_cal";
 char *file_ext=".dat";
 char *atten_ext=".att";
@@ -88,7 +85,7 @@ int mlog_data_command(char *command,double *array[FREQS],int b) {
 #else
         if (rval<1) {
           usleep(10);
-  
+
         }
 #endif
         if (output[0]==13) {
@@ -186,13 +183,7 @@ int button_command(char *command) {
       fflush(stdout);
   return 0;
 }
-//void mypause ( void ) 
-//{ 
-//  fflush ( stdin );
-//  printf ( "Press [Enter] to continue . . ." );
-//  fflush ( stdout );
-//  getchar();
-//} 
+
 /*-SET WRITE ENABLE BIT-------------------------------------------------------*/
 int set_WE(int base,int onoff,int radar){
         int temp;
@@ -353,8 +344,6 @@ int beam_code(unsigned int base, int code,int radar){
             break;
         }
 #ifdef __QNX__
-        //printf("Selecting Beam Code: %d\n",code);
-
     // check if beam code is reasonable
 	if ( (code>8192) | (code<0) ){
 		fprintf(stderr,"INVALID BEAM CODE - must be between 0 and 8192\n");
