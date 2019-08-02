@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#include "vna_functions.h"
+#include "include/vna_functions.h"
 
 int32_t VNA_triggers=4;
 int32_t VNA_wait_delay_ms=10;

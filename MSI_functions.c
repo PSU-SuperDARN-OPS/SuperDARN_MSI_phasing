@@ -13,7 +13,7 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <math.h>
-#include "MSI_functions.h"
+#include "include/MSI_functions.h"
 /* settings which I could probably move to an ini file */
 int32_t    MSI_phasecodes=8192;
 int32_t    MSI_num_angles=24;

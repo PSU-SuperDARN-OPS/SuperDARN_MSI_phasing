@@ -23,9 +23,9 @@
 #include <signal.h>
 
 /* helper functions  for vna */
-#include "vna_functions.h"
+#include "include/vna_functions.h"
 /* Useful defines for MSI phasing cards */
-#include "MSI_functions.h"
+#include "include/MSI_functions.h"
 
 /* variables defined elsewhere */
 extern int32_t    MSI_max_angles;
