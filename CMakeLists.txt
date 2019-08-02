@@ -9,3 +9,21 @@ add_executable(phasing_calibration main.c _open_PLX9050.c
         _prog_conventions.c utils.c)
 target_link_libraries(phasing_calibration m)
 
+add_executable(atten_calibration atten_calibration.c _open_PLX9050.c
+        _prog_conventions.c utils.c)
+
+add_executable(time_delay time_delay.c)
+target_link_libraries(time_delay m)
+
+add_executable(summary_generator summary_generator.c)
+
+add_executable(beamcode_generator beamcode_generator.c)
+target_link_libraries(beamcode_generator m)
+
+add_executable(write_final_beamcodes write_final_beamcodes.c common_functions.c
+        _open_PLX9050.c _prog_conventions.c utils.c)
+target_link_libraries(write_final_beamcodes m)
+
+add_executable(optimize_beam_programming optimize_beam_programming.c MSI_functions.c
+        vna_functions.c utils.c)
+target_link_libraries(optimize_beam_programming m)
