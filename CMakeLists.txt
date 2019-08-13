@@ -27,3 +27,7 @@ target_link_libraries(write_final_beamcodes m)
 add_executable(optimize_beam_programming optimize_beam_programming.c MSI_functions.c
         vna_functions.c utils.c)
 target_link_libraries(optimize_beam_programming m)
+
+add_executable(card_path_test rf_test.c _open_PLX9050.c
+        common_functions.c _prog_conventions.c utils.c)
+target_link_libraries(card_path_test m)
