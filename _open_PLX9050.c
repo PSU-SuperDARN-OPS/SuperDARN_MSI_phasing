@@ -10,13 +10,9 @@
   #include <sys/mman.h>
 #endif
 #include "include/_prog_conventions.h"
+#include "include/_open_PLX9050.h"
 
-#define VENDOR_ID 0x494f
-//#define DEVICE_ID 0x0e60
-#define DEVICE_ID 0x0c78
 
-unsigned int 	BASEIO;
-int		vPLX9050_INTCSR=		0x4c;
 
 int _open_PLX9052(int *pci_handle, unsigned int *mmap_io_ptr, int *interrupt_line, int print){
 #ifdef __QNX__
