@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include <unistd.h>
 #include "include/vna_functions.h"
 
 int32_t VNA_triggers=4;
