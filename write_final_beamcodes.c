@@ -25,6 +25,7 @@
   #include <sys/mman.h>
 #endif
 #include "include/registers.h"
+#include "include/_open_PLX9050.h"
 
 #define NEW_PMAT 1 
 #define write_to_matrix 0 
