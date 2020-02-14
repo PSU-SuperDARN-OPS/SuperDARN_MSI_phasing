@@ -10,7 +10,7 @@
 #define DEVICE_ID 0x0c78
 
 unsigned int 	BASEIO;
-int		vPLX9050_INTCSR=		0x4c;
+//int		vPLX9050_INTCSR = 0x4c;
 
 int _open_PLX9052(int *pci_handle, unsigned int *mmap_io_ptr, int *interrupt_line, int print);
 
