@@ -31,6 +31,7 @@
 #include "include/common_functions.h"
 #include "include/utils.h"
 #include "include/_open_PLX9050.h"
+#include "include/vna_functions.h"
 
 #define SWITCHES 0
 #define ATTEN    1
@@ -72,126 +73,6 @@ char freq_steps[10] = "201";
 struct timeval t0, t1, t2, t3, t4, t5, t6;
 struct timeval t10, t11;
 unsigned long elapsed;
-
-int mlog_data_command(char *command, double *array[FREQS], int b) {
-    int32_t count, rval, sample_count;
-    char output[10] = "";
-    char command2[80];
-    char cmd_str[80], prompt_str[10], data_str[1000];
-    int32_t cr, lf;
-    strcpy(command2, command);
-    if (verbose > 2) printf("%d Command: %s\n", strlen(command2), command2);
-    write(sock, &command2, sizeof(char) * strlen(command2));
-    cr = 0;
-    lf = 0;
-    count = 0;
-    if (verbose > 2) fprintf(stdout, "Command Output String::\n");
-    strcpy(cmd_str, "");
-    while ((cr == 0) || (lf == 0)) {
-        rval = read(sock, &output, sizeof(char) * 1);
-#ifdef __QNX__
-        if (rval<1) usleep(1000);
-#else
-        if (rval < 1) {
-            usleep(10);
-
-        }
-#endif
-        if (output[0] == 13) {
-            cr++;
-            continue;
-        }
-        if (output[0] == 10) {
-            lf++;
-            continue;
-        }
-        count += rval;
-        strncat(cmd_str, output, rval);
-        if (verbose > 2) fprintf(stdout, "%c", output[0]);
-    }
-    if (verbose > 2) printf("Processing Data\n");
-
-    cr = 0;
-    lf = 0;
-    count = 0;
-    sample_count = 0;
-    if (verbose > 2) fprintf(stdout, "\nData Output String::\n");
-    strcpy(data_str, "");
-    if (verbose > 2) fprintf(stdout, "%d: ", sample_count);
-    while ((cr == 0) || (lf == 0)) {
-        rval = read(sock, &output, sizeof(char) * 1);
-        if (output[0] == 13) {
-            cr++;
-            continue;
-        }
-        if (output[0] == 10) {
-            lf++;
-            continue;
-        }
-        if (output[0] == ',') {
-            if ((sample_count % 2) == 0) {
-                if (sample_count / 2 >= FREQS) {
-                    printf("ERROR: too many samples... aborting\n");
-                    exit(-1);
-                }
-                array[sample_count / 2][b] = atof(data_str);
-                if (verbose > 2) fprintf(stdout, "%s  ::  %lf", data_str, array[sample_count / 2][b]);
-            }
-            sample_count++;
-            if (verbose > 2) fprintf(stdout, "\n%d: ", sample_count);
-            strcpy(data_str, "");
-        } else {
-            strncat(data_str, output, rval);
-        }
-    }
-    if ((sample_count % 2) == 0) {
-        if (sample_count / 2 >= FREQS) {
-            printf("ERROR: too many samples... aborting\n");
-            exit(-1);
-        }
-        array[sample_count / 2][b] = atof(data_str);
-        if (verbose > 2) fprintf(stdout, "%s  ::  %lf", data_str, array[sample_count / 2][b]);
-    }
-    sample_count++;
-    strcpy(data_str, "");
-    if (verbose > 2) fprintf(stdout, "\nSamples: %d\n", sample_count / 2);
-    if (verbose > 2) fprintf(stdout, "\nPrompt String::\n");
-    while (output[0] != '>') {
-        rval = read(sock, &output, sizeof(char) * 1);
-#ifdef __QNX__
-        if (rval<1) usleep(1000);
-#else
-        if (rval < 1) usleep(10);
-#endif
-        strncat(prompt_str, output, rval);
-        if (verbose > 2) fprintf(stdout, "%c", output[0]);
-    }
-    return 0;
-}
-
-int button_command(char *command) {
-    int32_t count, rval;
-    char output[10] = "";
-    char command2[80];
-    char prompt_str[80];
-/*
-*  Process Command String with No feedback 
-*/
-    strcpy(command2, command);
-    if (verbose > 2) fprintf(stdout, "%d Command: %s\n", strlen(command2), command2);
-    write(sock, &command2, sizeof(char) * strlen(command2));
-    count = 0;
-    if (verbose > 2) fprintf(stdout, "\nPrompt String::\n");
-    while (output[0] != '>') {
-        rval = read(sock, &output, sizeof(char) * 1);
-        strncat(prompt_str, output, rval);
-        if (verbose > 2) fprintf(stdout, "%c", output[0]);
-        count++;
-    }
-    if (verbose > 2) fprintf(stdout, "Command is done\n", command2);
-    fflush(stdout);
-    return 0;
-}
 
 
 int main(int argc, char **argv) {
@@ -369,41 +250,41 @@ int main(int argc, char **argv) {
         if (verbose > 0) fprintf(stdout, "Initial Output String: %s\n", strout);
 
         if (setup_flag != 0) {
-            button_command(":SYST:PRES\r\n");
+            button_command(sock, ":SYST:PRES\r\n", 0, verbose);
             sprintf(command, ":SENS1:FREQ:STAR %s\r\n", freq_start);
-            button_command(command);
+            button_command(sock, command, 0, verbose);
             sprintf(command, ":SENS1:FREQ:STOP %s\r\n", freq_stop);
-            button_command(command);
+            button_command(sock, command, 0, verbose);
             sprintf(command, ":SENS1:SWE:POIN %s\r\n", freq_steps);
-            button_command(command);
-            button_command(":CALC1:PAR:COUN 2\r\n");
-            button_command(":CALC1:PAR1:SEL\r\n");
-            button_command(":CALC1:PAR1:DEF S12\r\n");
-            button_command(":CALC1:FORM UPH\r\n");
-            button_command(":CALC1:PAR2:SEL\r\n");
-            button_command(":CALC1:PAR2:DEF S12\r\n");
-            button_command(":CALC1:FORM MLOG\r\n");
-            button_command(":SENS1:AVER OFF\r\n");
-            button_command(":SENS1:AVER:COUN 4\r\n");
-            button_command(":SENS1:AVER:CLE\r\n");
-            button_command(":INIT1:CONT OFF\r\n");
+            button_command(sock, command, 0, verbose);
+            button_command(sock, ":CALC1:PAR:COUN 2\r\n", 0, verbose);
+            button_command(sock, ":CALC1:PAR1:SEL\r\n", 0, verbose);
+            button_command(sock, ":CALC1:PAR1:DEF S12\r\n", 0, verbose);
+            button_command(sock, ":CALC1:FORM UPH\r\n", 0, verbose);
+            button_command(sock, ":CALC1:PAR2:SEL\r\n", 0, verbose);
+            button_command(sock, ":CALC1:PAR2:DEF S12\r\n", 0, verbose);
+            button_command(sock, ":CALC1:FORM MLOG\r\n", 0, verbose);
+            button_command(sock, ":SENS1:AVER OFF\r\n", 0, verbose);
+            button_command(sock, ":SENS1:AVER:COUN 4\r\n", 0, verbose);
+            button_command(sock, ":SENS1:AVER:CLE\r\n", 0, verbose);
+            button_command(sock, ":INIT1:CONT OFF\r\n", 0, verbose);
 
             printf("\n\n\7\7Calibrate Network Analyzer for S12,S21\n");
             mypause();
-            button_command(":SENS1:CORR:COLL:METH:THRU 1,2\r\n");
+            button_command(sock, ":SENS1:CORR:COLL:METH:THRU 1,2\r\n", 0, verbose);
             sleep(1);
-            button_command(":SENS1:CORR:COLL:THRU 1,2\r\n");
+            button_command(sock, ":SENS1:CORR:COLL:THRU 1,2\r\n", 0, verbose);
             printf("  Doing S1,2 Calibration..wait 4 seconds\n");
             sleep(4);
 
-            button_command(":SENS1:CORR:COLL:METH:THRU 2,1\r\n");
+            button_command(sock, ":SENS1:CORR:COLL:METH:THRU 2,1\r\n", 0, verbose);
             sleep(1);
-            button_command(":SENS1:CORR:COLL:THRU 2,1\r\n");
+            button_command(sock, ":SENS1:CORR:COLL:THRU 2,1\r\n", 0, verbose);
             printf("  Doing S2,1 Calibration..wait 4 seconds\n");
             sleep(4);
-            button_command(":SENS1:CORR:COLL:SAVE\r\n");
+            button_command(sock, ":SENS1:CORR:COLL:SAVE\r\n", 0, verbose);
         }
-        button_command(":INIT1:IMM\r\n");
+        button_command(sock, ":INIT1:IMM\r\n", 0, verbose);
         printf("\n\nCalibration Complete\nReconfigure for Phasing Card Measurements");
         mypause();
         c = -1;
@@ -600,7 +481,7 @@ int main(int argc, char **argv) {
                 exit(-1);
             }
             gettimeofday(&t10, NULL);
-            button_command(":INIT1:IMM\r\n");
+            button_command(sock, ":INIT1:IMM\r\n", 0, verbose);
             if (b == 0) sleep(1);
 #ifdef __QNX__
             usleep(wait_delay_ms*1000); //NO AVERAGE
@@ -612,10 +493,10 @@ int main(int argc, char **argv) {
             while ((take_data) && (attempt < max_attempts)) {
 
                 attempt++;
-                button_command(":CALC1:PAR1:SEL\r\n");
-                mlog_data_command(":CALC1:DATA:FDAT?\r\n", phase, b);
-                button_command(":CALC1:PAR2:SEL\r\n");
-                mlog_data_command(":CALC1:DATA:FDAT?\r\n", pwr_mag, b);
+                button_command(sock, ":CALC1:PAR1:SEL\r\n", 0, verbose);
+                mlog_data_command(sock, ":CALC1:DATA:FDAT?\r\n", phase, b, verbose);
+                button_command(sock, ":CALC1:PAR2:SEL\r\n", 0, verbose);
+                mlog_data_command(sock, ":CALC1:DATA:FDAT?\r\n", pwr_mag, b, verbose);
                 pd_new = phase[fnum - 1][b] - phase[0][b];
                 if (b != 0) {
                     pd_old = phase[fnum - 1][last_collect] - phase[0][last_collect];
