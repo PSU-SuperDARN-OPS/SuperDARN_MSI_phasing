@@ -9,7 +9,7 @@ add_executable(phasing_calibration main.c _open_PLX9050.c
 target_link_libraries(phasing_calibration m)
 
 add_executable(atten_calibration atten_calibration.c _open_PLX9050.c
-        common_functions.c _prog_conventions.c utils.c vna_functions.c)
+        common_functions.c _prog_conventions.c utils.c vna_functions.c MSI_functions.c)
 target_link_libraries(atten_calibration m)
 
 add_executable(time_delay time_delay.c)
