@@ -31,6 +31,7 @@
 #include "include/common_functions.h"
 #include "include/utils.h"
 #include "include/_open_PLX9050.h"
+#include "include/vna_functions.h"
 
 #define SWITCHES 0
 #define ATTEN    1
