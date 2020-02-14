@@ -1,3 +1,15 @@
+
+#ifndef __VNA_FUNCTIONS_H__
+#define __VNA_FUNCTIONS_H__
+
 #define VNA_MIN    5E6
 #define VNA_MAX   25E6
 #define VNA_FREQS  1201
+
+int mlog_data_command(int sock,char *command,double *array[VNA_FREQS],int b,int verbose);
+int button_command(int sock, char *command,int wait_ms,int verbose);
+int take_data(int sock,int b,int rnum,int c, int p,int a,
+              double *pwr_mag[VNA_FREQS],double *phase[VNA_FREQS],double *tdelay[VNA_FREQS],
+              int wait_ms,int ssh_flag,int verbose,double target_tdelay,double target_pwr);
+
+#endif // end __VNA_FUNCTIONS_H__
