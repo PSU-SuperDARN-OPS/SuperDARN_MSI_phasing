@@ -9,7 +9,7 @@ add_executable(phasing_calibration main.c _open_PLX9050.c
 target_link_libraries(phasing_calibration m)
 
 add_executable(atten_calibration atten_calibration.c _open_PLX9050.c
-        common_functions.c _prog_conventions.c utils.c)
+        common_functions.c _prog_conventions.c utils.c vna_functions.c)
 target_link_libraries(atten_calibration m)
 
 add_executable(time_delay time_delay.c)
@@ -28,6 +28,6 @@ add_executable(optimize_beam_programming optimize_beam_programming.c MSI_functio
         vna_functions.c utils.c)
 target_link_libraries(optimize_beam_programming m)
 
-add_executable(card_path_test rf_test.c _open_PLX9050.c
+add_executable(card_path_test _open_PLX9050.c
         common_functions.c _prog_conventions.c utils.c)
 target_link_libraries(card_path_test m)

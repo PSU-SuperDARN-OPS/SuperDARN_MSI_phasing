@@ -115,7 +115,7 @@ int mlog_data_command(int sock,char *command,double *array[VNA_FREQS],int b,int 
   return 0;
 }
 
-int button_command(int sock, char *command,int wait_ms,int verbose) {
+int button_command(int sock, char *command, int delay_ms, int verbose) {
   int32_t count,rval;
   char output[10]="";
   char command2[80];
@@ -123,20 +123,19 @@ int button_command(int sock, char *command,int wait_ms,int verbose) {
 /*
  * *  Process Command String with No feedback 
  * */
-      strcpy(command2,command);
-      if (verbose>2) fprintf(stdout,"%d Command: %s\n",(int) strlen(command2),command2);
-      write(sock, &command2, sizeof(char)*strlen(command2));
-      count=0;
-      if (verbose>2) fprintf(stdout,"\nPrompt String::\n");
-      while(output[0]!='>'){
-        rval=read(sock, &output, sizeof(char)*1);
-        strncat(prompt_str,output,rval);
-        if (verbose>2) fprintf(stdout,"%c",output[0]);
-        count++;
-      }
-      if (verbose>2) fprintf(stdout,"Command is done\n");
-      fflush(stdout);
-  usleep(wait_ms*1000);
+  strcpy(command2,command);
+  if (verbose>2) fprintf(stdout,"%d Command: %s\n",(int) strlen(command2),command2);
+  write(sock, &command2, sizeof(char)*strlen(command2));
+  count=0;
+  if (verbose>2) fprintf(stdout,"\nPrompt String::\n");
+  while(output[0]!='>'){
+    rval=read(sock, &output, sizeof(char)*1);
+    strncat(prompt_str,output,rval);
+    if (verbose>2) fprintf(stdout,"%c",output[0]);
+    count++;
+  }
+  if (verbose>2) fprintf(stdout,"Command is done\n");
+  fflush(stdout);
   return 0;
 }
 
