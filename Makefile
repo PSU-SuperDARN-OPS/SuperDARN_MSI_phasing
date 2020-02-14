@@ -8,11 +8,11 @@ linux_libs=
 qnx_libs=-lsocket
 INCLUDES=-I"/usr/include/" -I"../include/" -I"include/" -I"../tsg/include"   
 
-SOURCES=main.c  _open_PLX9050.c common_functions.c _prog_conventions.c utils.c 
+SOURCES=main.c  _open_PLX9050.c common_functions.c _prog_conventions.c utils.c vna_functions.c MSI_functions.c
 OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=phasing_calibration
 
-ATTEN_SOURCES=atten_calibration.c  _open_PLX9050.c _prog_conventions.c utils.c 
+ATTEN_SOURCES=atten_calibration.c  _open_PLX9050.c _prog_conventions.c utils.c vna_functions.c MSI_functions.c
 ATTEN_OBJECTS=$(ATTEN_SOURCES:.c=.o)
 ATTEN_EXECUTABLE=atten_calibration
 
