@@ -26,6 +26,8 @@
 #include "include/vna_functions.h"
 /* Useful defines for MSI phasing cards */
 #include "include/MSI_functions.h"
+#include "include/common_functions.h"
+#include "include/utils.h"
 
 /* variables defined elsewhere */
 extern int32_t    MSI_max_angles;
