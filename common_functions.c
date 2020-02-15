@@ -19,6 +19,56 @@
 #define ON       1
 #define OFF      0
 
+struct Card_port{
+    uint32_t portA0;
+    uint32_t portA1;
+    uint32_t portB0;
+    uint32_t portB1;
+    uint32_t portC0;
+    uint32_t portC1;
+    uint32_t cntrl0;
+    uint32_t cntrl1;
+};
+
+int32_t set_ports(int32_t radar, struct Card_port * card){
+    switch(radar) {
+        case 1:
+            card->portC0 = PC_GRP_0;
+            card->portC1 = PC_GRP_1;
+            card->portB0 = PB_GRP_0;
+            card->portB1 = PB_GRP_1;
+            card->portA0 = PA_GRP_0;
+            card->portA1 = PA_GRP_1;
+            card->cntrl0 = CNTRL_GRP_0;
+            card->cntrl1 = CNTRL_GRP_1;
+            break;
+        case 2:
+            card->portC0 = PC_GRP_2;
+            card->portC1 = PC_GRP_3;
+            card->portB0 = PB_GRP_2;
+            card->portB1 = PB_GRP_3;
+            card->portA0 = PA_GRP_2;
+            card->portA1 = PA_GRP_3;
+            card->cntrl0 = CNTRL_GRP_2;
+            card->cntrl1 = CNTRL_GRP_3;
+            break;
+        case 3:
+            card->portC0 = PC_GRP_4;
+            card->portC1 = PC_GRP_3;
+            card->portB0 = PB_GRP_4;
+            card->portB1 = PB_GRP_3;
+            card->portA0 = PA_GRP_4;
+            card->portA1 = PA_GRP_3;
+            card->cntrl0 = CNTRL_GRP_4;
+            card->cntrl1 = CNTRL_GRP_3;
+            break;
+        default:
+            fprintf(stderr, "Invalid radar number %d", radar);
+            return -1;
+    }
+    return 0;
+}
+
 /*-SET WRITE ENABLE BIT-------------------------------------------------------*/
 int32_t set_WE(int32_t base,int32_t onoff,int32_t radar){
         int32_t temp;
@@ -142,7 +192,7 @@ int32_t reverse_bits(int32_t data){
 
 	return temp;
 }
-/*-GET_DEALY---------------------------------------------------------*/
+/*-GET_DELAY---------------------------------------------------------*/
 float get_delay(int32_t code){
 	
 	int32_t	i;
