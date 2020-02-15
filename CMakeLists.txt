@@ -25,7 +25,7 @@ add_executable(write_final_beamcodes write_final_beamcodes.c common_functions.c
 target_link_libraries(write_final_beamcodes m)
 
 add_executable(optimize_beam_programming optimize_beam_programming.c MSI_functions.c
-        vna_functions.c utils.c)
+        vna_functions.c utils.c common_functions.c)
 target_link_libraries(optimize_beam_programming m)
 
 add_executable(card_path_test _open_PLX9050.c
