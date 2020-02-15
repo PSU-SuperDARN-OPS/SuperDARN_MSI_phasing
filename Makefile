@@ -56,7 +56,7 @@ SUMMARY_SOURCES=summary_generator.c
 SUMMARY_OBJECTS=$(SUMMARY_SOURCES:.c=.o)
 SUMMARY_EXECUTABLE=summary_generator
 
-OPTBEAM_SOURCES=optimize_beam_programming.c MSI_functions.c vna_functions.c utils.c
+OPTBEAM_SOURCES=optimize_beam_programming.c MSI_functions.c vna_functions.c utils.c common_functions.c
 OPTBEAM_OBJECTS=$(OPTBEAM_SOURCES:.c=.o)
 OPTBEAM_EXECUTABLE=optimize_beam_programming
 
