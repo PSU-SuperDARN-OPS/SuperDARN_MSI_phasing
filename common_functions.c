@@ -33,32 +33,32 @@ struct Card_port{
 int32_t set_ports(int32_t radar, struct Card_port * card){
     switch(radar) {
         case 1:
-            card->portC0 = PC_GRP_0;
-            card->portC1 = PC_GRP_1;
-            card->portB0 = PB_GRP_0;
-            card->portB1 = PB_GRP_1;
             card->portA0 = PA_GRP_0;
             card->portA1 = PA_GRP_1;
+            card->portB0 = PB_GRP_0;
+            card->portB1 = PB_GRP_1;
+            card->portC0 = PC_GRP_0;
+            card->portC1 = PC_GRP_1;
             card->cntrl0 = CNTRL_GRP_0;
             card->cntrl1 = CNTRL_GRP_1;
             break;
         case 2:
-            card->portC0 = PC_GRP_2;
-            card->portC1 = PC_GRP_3;
-            card->portB0 = PB_GRP_2;
-            card->portB1 = PB_GRP_3;
             card->portA0 = PA_GRP_2;
             card->portA1 = PA_GRP_3;
+            card->portB0 = PB_GRP_2;
+            card->portB1 = PB_GRP_3;
+            card->portC0 = PC_GRP_2;
+            card->portC1 = PC_GRP_3;
             card->cntrl0 = CNTRL_GRP_2;
             card->cntrl1 = CNTRL_GRP_3;
             break;
         case 3:
-            card->portC0 = PC_GRP_4;
-            card->portC1 = PC_GRP_3;
-            card->portB0 = PB_GRP_4;
-            card->portB1 = PB_GRP_3;
             card->portA0 = PA_GRP_4;
             card->portA1 = PA_GRP_3;
+            card->portB0 = PB_GRP_4;
+            card->portB1 = PB_GRP_3;
+            card->portC0 = PC_GRP_4;
+            card->portC1 = PC_GRP_3;
             card->cntrl0 = CNTRL_GRP_4;
             card->cntrl1 = CNTRL_GRP_3;
             break;
