@@ -40,8 +40,6 @@
 #define ON       1
 #define OFF      0
 
-#define NEW_PMAT 1
-
 #define CARDS 200
 #define PHASECODES 8192
 #define ATTENCODES 64
@@ -214,16 +212,14 @@ int main(int argc, char **argv) {
     }
     if (test_flag >= 0) {
         beam_code(IOBASE, test_flag, radar);
-        if (NEW_PMAT) temp = verify_data_new(IOBASE, c, test_flag, test_flag, radar, 1);
-        else temp = verify_data_old(IOBASE, c, test_flag, test_flag, radar, 1);
+        temp = verify_data_new(IOBASE, c, test_flag, test_flag, radar, 1);
         exit(0);
     }
     if (test_flag == -2) {
         printf("test flag %d radar %d icard %d verify programming\n", test_flag, radar, c);
         for (b = 0; b <= 8191; b++) {
             usleep(10000);
-            if (NEW_PMAT) temp = verify_data_new(IOBASE, c, b, b, radar, 0);
-            else temp = verify_data_old(IOBASE, c, b, b, radar, 1);
+            temp = verify_data_new(IOBASE, c, b, b, radar, 0);
         }
         exit(0);
     }
@@ -331,14 +327,11 @@ int main(int argc, char **argv) {
                 else b = 0;//JDS
                 data = b;
                 beamcode = b;
-                if (NEW_PMAT) {
-                    printf("B: %d data: %d BC: %d\n", b, data, beamcode);
-                    temp = write_data_new(IOBASE, c, beamcode, data, radar, 0);
-                    sleep(2); //JDS
-                    temp = write_attenuators(IOBASE, c, beamcode, 0, radar);
-                } else {
-                    temp = write_data_old(IOBASE, c, beamcode, b, radar,0);
-                }
+
+                printf("B: %d data: %d BC: %d\n", b, data, beamcode);
+                temp = write_data_new(IOBASE, c, beamcode, data, radar, 0);
+                sleep(2); //JDS
+                temp = write_attenuators(IOBASE, c, beamcode, 0, radar);
             }
         }
 
@@ -346,12 +339,9 @@ int main(int argc, char **argv) {
         for (b = 0; b < ATTENCODES; b++) {
             data = 0;
             beamcode = b;
-            if (NEW_PMAT) {
-                temp = write_data_new(IOBASE, c, beamcode, data, radar, 0);
-                temp = write_attenuators(IOBASE, c, beamcode, data, radar);
-            } else {
-                temp = write_data_old(IOBASE, c, beamcode, data, radar,0);
-            }
+
+            temp = write_data_new(IOBASE, c, beamcode, data, radar, 0);
+            temp = write_attenuators(IOBASE, c, beamcode, data, radar);
         }
 
         printf("Verifying all zero programming attenuation coding\n");
@@ -359,70 +349,57 @@ int main(int argc, char **argv) {
             select_card(IOBASE, c, radar);
             beam_code(IOBASE, b, radar);
             usleep(10000);
-            if (NEW_PMAT) temp = verify_attenuators(IOBASE, c, b, 0, radar);
-            else temp = verify_data_old(IOBASE, c, b, 0, radar, 0);
+            temp = verify_attenuators(IOBASE, c, b, 0, radar);
         }
         printf("Programming 1-to-1 attenuation coding no phase\n");
         for (b = 0; b < ATTENCODES; b++) {
             data = b;
             beamcode = b;
-            if (NEW_PMAT) {
-                temp = write_data_new(IOBASE, c, beamcode, 0, radar, 0);
-                temp = write_attenuators(IOBASE, c, beamcode, b, radar);
-            } else {
-                temp = write_data_old(IOBASE, c, beamcode, 0, radar,0);
-            }
+
+            temp = write_data_new(IOBASE, c, beamcode, 0, radar, 0);
+            temp = write_attenuators(IOBASE, c, beamcode, b, radar);
         }
         printf("Verifying 1-to-1 programming attenuation coding\n");
         for (b = 0; b < ATTENCODES; b++) {
             select_card(IOBASE, c, radar);
             beam_code(IOBASE, b, radar);
             usleep(10000);
-            if (NEW_PMAT) temp = verify_attenuators(IOBASE, c, b, b, radar);
-            else temp = verify_data_old(IOBASE, c, b, b, radar, 0);
+            temp = verify_attenuators(IOBASE, c, b, b, radar);
         }
 
         printf("Programming all ones phase coding\n");
         for (b = 0; b < PHASECODES; b++) {
             data = 8191;
             beamcode = b;
-            if (NEW_PMAT) {
-                if (b % 512 == 0) printf("B: %d data: %d BC: %d\n", b, data, beamcode);
-                temp = write_data_new(IOBASE, c, beamcode, 8191, radar, 0);
-                temp = write_attenuators(IOBASE, c, beamcode, 63, radar);
-            } else {
-                temp = write_data_old(IOBASE, c, beamcode, 8191, radar,0);
-            }
+
+            if (b % 512 == 0) printf("B: %d data: %d BC: %d\n", b, data, beamcode);
+            temp = write_data_new(IOBASE, c, beamcode, 8191, radar, 0);
+            temp = write_attenuators(IOBASE, c, beamcode, 63, radar);
         }
         printf("Verifying all ones programming phase coding\n");
         for (b = 0; b < PHASECODES; b++) {
             select_card(IOBASE, c, radar);
             beam_code(IOBASE, b, radar);
             usleep(10000);
-            if (NEW_PMAT) temp = verify_data_new(IOBASE, c, b, 8191, radar, 0);
-            else temp = verify_data_old(IOBASE, c, b, 8191, radar, 0);
+            temp = verify_data_new(IOBASE, c, b, 8191, radar, 0);
         }
 
         printf("Programming 1-to-1 phase coding no attenuation\n");
         for (b = 0; b < PHASECODES; b++) {
             data = b;
             beamcode = b;
-            if (NEW_PMAT) {
-                if (b % 512 == 0) printf("B: %d data: %d BC: %d\n", b, data, beamcode);
-                temp = write_data_new(IOBASE, c, beamcode, 0, radar, 0);
-                temp = write_data_new(IOBASE, c, beamcode, data, radar, 0);
-                temp = write_attenuators(IOBASE, c, beamcode, 0, radar);
-            } else {
-                temp = write_data_old(IOBASE, c, beamcode, b, radar,0);
-            }
+
+            if (b % 512 == 0) printf("B: %d data: %d BC: %d\n", b, data, beamcode);
+            temp = write_data_new(IOBASE, c, beamcode, 0, radar, 0);
+            temp = write_data_new(IOBASE, c, beamcode, data, radar, 0);
+            temp = write_attenuators(IOBASE, c, beamcode, 0, radar);
         }
         printf("Verifying 1-to-1 programming phase coding\n");
         for (b = 0; b < PHASECODES; b++) {
             select_card(IOBASE, c, radar);
             beam_code(IOBASE, b, radar);
             usleep(10000);
-            if (NEW_PMAT) temp = verify_data_new(IOBASE, c, b, b, radar, 0);
-            else temp = verify_data_old(IOBASE, c, b, b, radar, 0);
+            temp = verify_data_new(IOBASE, c, b, b, radar, 0);
         }
 
         if (test_flag == -1) {
@@ -460,21 +437,18 @@ int main(int argc, char **argv) {
               last_collect=current_collect;
               current_collect=b;
 #endif
-            if (NEW_PMAT) temp = verify_data_new(IOBASE, c, b, b, radar, 0);
-            else temp = verify_data_old(IOBASE, c, b, b, radar, 0);
+            temp = verify_data_new(IOBASE, c, b, b, radar, 0);
+
             if (temp != 0) {
                 data = b;
-                if (NEW_PMAT) {
-                    if (b % 512 == 0) printf("B: %d data: %d BC: %d\n", b, data, beamcode);
-                    temp = write_data_new(IOBASE, c, beamcode, 0, radar, 0);
-                    temp = write_data_new(IOBASE, c, beamcode, data, radar, 0);
-                    temp = write_attenuators(IOBASE, c, beamcode, 0, radar);
-                } else {
-                    temp = write_data_old(IOBASE, c, beamcode, b, radar,0);
-                }
+
+                if (b % 512 == 0) printf("B: %d data: %d BC: %d\n", b, data, beamcode);
+                temp = write_data_new(IOBASE, c, beamcode, 0, radar, 0);
+                temp = write_data_new(IOBASE, c, beamcode, data, radar, 0);
+                temp = write_attenuators(IOBASE, c, beamcode, 0, radar);
+
                 usleep(10000);
-                if (NEW_PMAT) temp = verify_data_new(IOBASE, c, b, b, radar, 0);
-                else temp = verify_data_old(IOBASE, c, b, b, radar, 0);
+                temp = verify_data_new(IOBASE, c, b, b, radar, 0);
             }
             if (temp != 0) {
                 printf("Failed Verification for beamcode: %d  %x\n", b, b);

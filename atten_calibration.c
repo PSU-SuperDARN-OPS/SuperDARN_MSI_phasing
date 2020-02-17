@@ -40,7 +40,6 @@
 #define ON       1
 #define OFF      0
 
-#define NEW_PMAT 1
 
 #define CARDS 200
 #define ATTENCODES 64
@@ -234,8 +233,7 @@ int main(int argc, char **argv) {
         //printf("test flag %d radar %d\n",test_flag,radar);
         beam_code(IOBASE, test_flag, radar);
         //      temp=write_data_new(IOBASE,c,test_flag,test_flag,radar,0);
-        if (NEW_PMAT) temp = verify_data_new(IOBASE, c, test_flag, test_flag, radar, 1);
-        else temp = verify_data_old(IOBASE, c, test_flag, test_flag, radar, 1);
+        verify_data_new(IOBASE, c, test_flag, test_flag, radar, 1);
         exit(0);
     }
     if (test_flag == -2) {
@@ -243,8 +241,7 @@ int main(int argc, char **argv) {
         for (b = 0; b <= 8191; b++) {
 //    beam_code(IOBASE,b,radar);
             usleep(10000);
-            if (NEW_PMAT) temp = verify_data_new(IOBASE, c, b, b, radar, 0);
-            else temp = verify_data_old(IOBASE, c, b, b, radar, 1);
+            temp = verify_data_new(IOBASE, c, b, b, radar, 0);
         }
         exit(0);
     }
@@ -358,27 +355,23 @@ if(test_flag==1) {
                 else b = 0;//JDS
                 data = b;
                 beamcode = b;
-                if (NEW_PMAT) {
-                    printf("B: %d data: %d BC: %d\n", b, data, beamcode);
-                    temp = write_data_new(IOBASE, c, beamcode, data, radar, 0);
-                    sleep(2); //JDS
-                    temp = write_attenuators(IOBASE, c, beamcode, 0, radar);
-                } else {
-                    temp = write_data_old(IOBASE, c, beamcode, b, radar,0);
-                }
+
+                printf("B: %d data: %d BC: %d\n", b, data, beamcode);
+                temp = write_data_new(IOBASE, c, beamcode, data, radar, 0);
+                sleep(2); //JDS
+                temp = write_attenuators(IOBASE, c, beamcode, 0, radar);
+
             }
         }
         printf("Programming all zeros attenuation coding\n");
         for (b = 0; b < ATTENCODES; b++) {
             data = 0;
             beamcode = b;
-            if (NEW_PMAT) {
-                //printf("B: %d data: %d BC: %d\n",b,data,beamcode);
-                temp = write_data_new(IOBASE, c, beamcode, data, radar, 0);
-                temp = write_attenuators(IOBASE, c, beamcode, data, radar);
-            } else {
-                temp = write_data_old(IOBASE, c, beamcode, data, radar,0);
-            }
+
+            //printf("B: %d data: %d BC: %d\n",b,data,beamcode);
+            temp = write_data_new(IOBASE, c, beamcode, data, radar, 0);
+            temp = write_attenuators(IOBASE, c, beamcode, data, radar);
+
         }
 
         printf("Verifying all zero programming attenuation coding\n");
@@ -386,29 +379,24 @@ if(test_flag==1) {
             select_card(IOBASE, c, radar);
             beam_code(IOBASE, b, radar);
             usleep(10000);
-            if (NEW_PMAT) temp = verify_attenuators(IOBASE, c, b, 0, radar);
-            else temp = verify_data_old(IOBASE, c, b, 0, radar, 0);
+            temp = verify_attenuators(IOBASE, c, b, 0, radar);
         }
 
         printf("Programming 1-to-1 attenuation coding no phase\n");
         for (b = 0; b < ATTENCODES; b++) {
             data = b;
             beamcode = b;
-            if (NEW_PMAT) {
-                //printf("B: %d data: %d BC: %d\n",b,data,beamcode);
-                temp = write_data_new(IOBASE, c, beamcode, 0, radar, 0);
-                temp = write_attenuators(IOBASE, c, beamcode, b, radar);
-            } else {
-                temp = write_data_old(IOBASE, c, beamcode, 0, radar,0);
-            }
+
+            //printf("B: %d data: %d BC: %d\n",b,data,beamcode);
+            temp = write_data_new(IOBASE, c, beamcode, 0, radar, 0);
+            temp = write_attenuators(IOBASE, c, beamcode, b, radar);
         }
         printf("Verifying 1-to-1 programming attenuation coding\n");
         for (b = 0; b < ATTENCODES; b++) {
             select_card(IOBASE, c, radar);
             beam_code(IOBASE, b, radar);
             usleep(10000);
-            if (NEW_PMAT) temp = verify_attenuators(IOBASE, c, b, b, radar);
-            else temp = verify_data_old(IOBASE, c, b, b, radar, 0);
+            temp = verify_attenuators(IOBASE, c, b, b, radar);
         }
 
 
