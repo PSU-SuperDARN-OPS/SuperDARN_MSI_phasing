@@ -69,7 +69,6 @@ int32_t set_ports(int32_t radar, struct Port * port){
     return 0;
 }
 
-/*-SET WRITE ENABLE BIT-------------------------------------------------------*/
 int32_t set_WE(int32_t base, int32_t onoff, int32_t radar){
     int32_t temp;
     struct Port port;
@@ -96,7 +95,6 @@ int32_t set_WE(int32_t base, int32_t onoff, int32_t radar){
     return 0;
 }
 
-/*-SET READ/WRITE BIT-------------------------------------------------------*/
 int32_t set_RW(int32_t base, int32_t rw, int32_t radar) {
     int32_t temp;
     struct Port port;
@@ -123,7 +121,6 @@ int32_t set_RW(int32_t base, int32_t rw, int32_t radar) {
     return 0;
 }
 
-/*-SET SWITCHED/ATTEN BIT-------------------------------------------------------*/
 int32_t set_SA(int32_t base,int32_t sa,int32_t radar){
     int32_t temp;
     struct Port port;
@@ -150,7 +147,6 @@ int32_t set_SA(int32_t base,int32_t sa,int32_t radar){
     return 0;
 }
 
-/*-REVERSE_BITS-------------------------------------------------------*/
 int32_t reverse_bits(int32_t data) {
 
     int32_t temp = 0;
@@ -172,7 +168,6 @@ int32_t reverse_bits(int32_t data) {
     return temp;
 }
 
-/*-GET_DELAY---------------------------------------------------------*/
 float get_delay(int32_t code) {
 
     int32_t i;
@@ -186,7 +181,6 @@ float get_delay(int32_t code) {
     return delay;
 }
 
-/*-BEAM_CODE---------------------------------------------------------*/
 int32_t beam_code(uint32_t base, int32_t code, int32_t radar) {
     /* the beam code is 13 bits, pAD0 thru pAD12.  This code
        uses bits 0-7 of CH0, PortA, and bits 0-4 of CH0, PortB
@@ -244,7 +238,6 @@ int32_t beam_code(uint32_t base, int32_t code, int32_t radar) {
 
 }
 
-/*-SELECT_CARD------------------------------------------------------*/
 int32_t select_card(uint32_t base, int32_t address, int32_t radar) {
 
     /* This code selects a card to address.  This can be used for
@@ -409,7 +402,6 @@ int32_t verify_attenuators(uint32_t base, int32_t card, int32_t code, int32_t da
     return 0;
 }
 
-/*-WRITE_CODE--------------------------------------------------------*/
 int32_t write_data(uint32_t base, int32_t card, int32_t code, int32_t data, int32_t radar, int32_t print) {
     int32_t temp;
     struct Port port;
@@ -486,7 +478,6 @@ int32_t write_data(uint32_t base, int32_t card, int32_t code, int32_t data, int3
     return 0;
 }
 
-/*-VERIFY_CODE--------------------------------------------------------*/
 int32_t verify_data(uint32_t base, int32_t card, int32_t code, int32_t data, int32_t radar, int32_t print) {
     int32_t temp;
     struct Port port;
