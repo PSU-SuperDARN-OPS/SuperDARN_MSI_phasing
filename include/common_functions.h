@@ -35,10 +35,10 @@ int32_t write_attenuators(uint32_t base, int32_t card, int32_t code, int32_t dat
 int32_t verify_attenuators(uint32_t base, int32_t card, int32_t code, int32_t data,int32_t radar);
 
 /*-VERIFY_CODE--------------------------------------------------------*/
-int32_t verify_data_new(uint32_t base, int32_t card, int32_t code, int32_t data,int32_t radar,int32_t print);
+int32_t verify_data(uint32_t base, int32_t card, int32_t code, int32_t data, int32_t radar, int32_t print);
 
 /*-WRITE_CODE--------------------------------------------------------*/
-int32_t write_data_new(uint32_t base, int32_t card, int32_t code, int32_t data,int32_t radar,int32_t print);
+int32_t write_data(uint32_t base, int32_t card, int32_t code, int32_t data, int32_t radar, int32_t print);
 
 /*-WRITE_CODE--------------------------------------------------------*/
 int32_t write_data_old(uint32_t base, int32_t card, int32_t code, int32_t data,int32_t radar,int32_t print);

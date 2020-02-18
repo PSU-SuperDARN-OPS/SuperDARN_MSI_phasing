@@ -232,8 +232,8 @@ int main(int argc, char **argv) {
         //stupid_flag=1;
         //printf("test flag %d radar %d\n",test_flag,radar);
         beam_code(IOBASE, test_flag, radar);
-        //      temp=write_data_new(IOBASE,c,test_flag,test_flag,radar,0);
-        verify_data_new(IOBASE, c, test_flag, test_flag, radar, 1);
+        //      temp=write_data(IOBASE,c,test_flag,test_flag,radar,0);
+        verify_data(IOBASE, c, test_flag, test_flag, radar, 1);
         exit(0);
     }
     if (test_flag == -2) {
@@ -241,7 +241,7 @@ int main(int argc, char **argv) {
         for (b = 0; b <= 8191; b++) {
 //    beam_code(IOBASE,b,radar);
             usleep(10000);
-            temp = verify_data_new(IOBASE, c, b, b, radar, 0);
+            temp = verify_data(IOBASE, c, b, b, radar, 0);
         }
         exit(0);
     }
@@ -357,7 +357,7 @@ if(test_flag==1) {
                 beamcode = b;
 
                 printf("B: %d data: %d BC: %d\n", b, data, beamcode);
-                temp = write_data_new(IOBASE, c, beamcode, data, radar, 0);
+                temp = write_data(IOBASE, c, beamcode, data, radar, 0);
                 sleep(2); //JDS
                 temp = write_attenuators(IOBASE, c, beamcode, 0, radar);
 
@@ -369,7 +369,7 @@ if(test_flag==1) {
             beamcode = b;
 
             //printf("B: %d data: %d BC: %d\n",b,data,beamcode);
-            temp = write_data_new(IOBASE, c, beamcode, data, radar, 0);
+            temp = write_data(IOBASE, c, beamcode, data, radar, 0);
             temp = write_attenuators(IOBASE, c, beamcode, data, radar);
 
         }
@@ -388,7 +388,7 @@ if(test_flag==1) {
             beamcode = b;
 
             //printf("B: %d data: %d BC: %d\n",b,data,beamcode);
-            temp = write_data_new(IOBASE, c, beamcode, 0, radar, 0);
+            temp = write_data(IOBASE, c, beamcode, 0, radar, 0);
             temp = write_attenuators(IOBASE, c, beamcode, b, radar);
         }
         printf("Verifying 1-to-1 programming attenuation coding\n");

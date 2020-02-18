@@ -212,14 +212,14 @@ int main(int argc, char **argv) {
     }
     if (test_flag >= 0) {
         beam_code(IOBASE, test_flag, radar);
-        temp = verify_data_new(IOBASE, c, test_flag, test_flag, radar, 1);
+        temp = verify_data(IOBASE, c, test_flag, test_flag, radar, 1);
         exit(0);
     }
     if (test_flag == -2) {
         printf("test flag %d radar %d icard %d verify programming\n", test_flag, radar, c);
         for (b = 0; b <= 8191; b++) {
             usleep(10000);
-            temp = verify_data_new(IOBASE, c, b, b, radar, 0);
+            temp = verify_data(IOBASE, c, b, b, radar, 0);
         }
         exit(0);
     }
@@ -329,7 +329,7 @@ int main(int argc, char **argv) {
                 beamcode = b;
 
                 printf("B: %d data: %d BC: %d\n", b, data, beamcode);
-                temp = write_data_new(IOBASE, c, beamcode, data, radar, 0);
+                temp = write_data(IOBASE, c, beamcode, data, radar, 0);
                 sleep(2); //JDS
                 temp = write_attenuators(IOBASE, c, beamcode, 0, radar);
             }
@@ -340,7 +340,7 @@ int main(int argc, char **argv) {
             data = 0;
             beamcode = b;
 
-            temp = write_data_new(IOBASE, c, beamcode, data, radar, 0);
+            temp = write_data(IOBASE, c, beamcode, data, radar, 0);
             temp = write_attenuators(IOBASE, c, beamcode, data, radar);
         }
 
@@ -356,7 +356,7 @@ int main(int argc, char **argv) {
             data = b;
             beamcode = b;
 
-            temp = write_data_new(IOBASE, c, beamcode, 0, radar, 0);
+            temp = write_data(IOBASE, c, beamcode, 0, radar, 0);
             temp = write_attenuators(IOBASE, c, beamcode, b, radar);
         }
         printf("Verifying 1-to-1 programming attenuation coding\n");
@@ -373,7 +373,7 @@ int main(int argc, char **argv) {
             beamcode = b;
 
             if (b % 512 == 0) printf("B: %d data: %d BC: %d\n", b, data, beamcode);
-            temp = write_data_new(IOBASE, c, beamcode, 8191, radar, 0);
+            temp = write_data(IOBASE, c, beamcode, 8191, radar, 0);
             temp = write_attenuators(IOBASE, c, beamcode, 63, radar);
         }
         printf("Verifying all ones programming phase coding\n");
@@ -381,7 +381,7 @@ int main(int argc, char **argv) {
             select_card(IOBASE, c, radar);
             beam_code(IOBASE, b, radar);
             usleep(10000);
-            temp = verify_data_new(IOBASE, c, b, 8191, radar, 0);
+            temp = verify_data(IOBASE, c, b, 8191, radar, 0);
         }
 
         printf("Programming 1-to-1 phase coding no attenuation\n");
@@ -390,8 +390,8 @@ int main(int argc, char **argv) {
             beamcode = b;
 
             if (b % 512 == 0) printf("B: %d data: %d BC: %d\n", b, data, beamcode);
-            temp = write_data_new(IOBASE, c, beamcode, 0, radar, 0);
-            temp = write_data_new(IOBASE, c, beamcode, data, radar, 0);
+            temp = write_data(IOBASE, c, beamcode, 0, radar, 0);
+            temp = write_data(IOBASE, c, beamcode, data, radar, 0);
             temp = write_attenuators(IOBASE, c, beamcode, 0, radar);
         }
         printf("Verifying 1-to-1 programming phase coding\n");
@@ -399,7 +399,7 @@ int main(int argc, char **argv) {
             select_card(IOBASE, c, radar);
             beam_code(IOBASE, b, radar);
             usleep(10000);
-            temp = verify_data_new(IOBASE, c, b, b, radar, 0);
+            temp = verify_data(IOBASE, c, b, b, radar, 0);
         }
 
         if (test_flag == -1) {
@@ -437,18 +437,18 @@ int main(int argc, char **argv) {
               last_collect=current_collect;
               current_collect=b;
 #endif
-            temp = verify_data_new(IOBASE, c, b, b, radar, 0);
+            temp = verify_data(IOBASE, c, b, b, radar, 0);
 
             if (temp != 0) {
                 data = b;
 
                 if (b % 512 == 0) printf("B: %d data: %d BC: %d\n", b, data, beamcode);
-                temp = write_data_new(IOBASE, c, beamcode, 0, radar, 0);
-                temp = write_data_new(IOBASE, c, beamcode, data, radar, 0);
+                temp = write_data(IOBASE, c, beamcode, 0, radar, 0);
+                temp = write_data(IOBASE, c, beamcode, data, radar, 0);
                 temp = write_attenuators(IOBASE, c, beamcode, 0, radar);
 
                 usleep(10000);
-                temp = verify_data_new(IOBASE, c, b, b, radar, 0);
+                temp = verify_data(IOBASE, c, b, b, radar, 0);
             }
             if (temp != 0) {
                 printf("Failed Verification for beamcode: %d  %x\n", b, b);

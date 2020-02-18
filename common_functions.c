@@ -150,7 +150,6 @@ int32_t set_SA(int32_t base,int32_t sa,int32_t radar){
     return 0;
 }
 
-
 /*-REVERSE_BITS-------------------------------------------------------*/
 int32_t reverse_bits(int32_t data) {
 
@@ -172,6 +171,7 @@ int32_t reverse_bits(int32_t data) {
 
     return temp;
 }
+
 /*-GET_DELAY---------------------------------------------------------*/
 float get_delay(int32_t code) {
 
@@ -185,6 +185,7 @@ float get_delay(int32_t code) {
     }
     return delay;
 }
+
 /*-BEAM_CODE---------------------------------------------------------*/
 int32_t beam_code(uint32_t base, int32_t code, int32_t radar) {
     /* the beam code is 13 bits, pAD0 thru pAD12.  This code
@@ -242,6 +243,7 @@ int32_t beam_code(uint32_t base, int32_t code, int32_t radar) {
 
 
 }
+
 /*-SELECT_CARD------------------------------------------------------*/
 int32_t select_card(uint32_t base, int32_t address, int32_t radar) {
 
@@ -407,61 +409,8 @@ int32_t verify_attenuators(uint32_t base, int32_t card, int32_t code, int32_t da
     return 0;
 }
 
-/*-VERIFY_CODE--------------------------------------------------------*/
-int32_t verify_data_new(uint32_t base, int32_t card, int32_t code, int32_t data, int32_t radar, int32_t print) {
-    int32_t temp;
-    struct Port port;
-
-    temp = set_ports(radar, &port);
-
-    // check that the data to write is valid
-    if ((data > 8192) | (data < 0)) {
-        fprintf(stderr, "INVALID DATA TO VERIFY - must be between 0 and 8192\n");
-        return -1;
-    }
-    data = data ^ 0x1fff;
-    // select card to write
-    temp = select_card(base, card, radar);
-    // choose the beam code to write (output appropriate EEPROM address
-    temp = beam_code(base, code, radar);
-    set_SA(base, SWITCHES, radar);
-    // bit reverse the data
-    data = reverse_bits(data);
-    if (print) printf("    Code to write is %d\n", data);
-    // reset CH1, PortA and PortB to inputs
-#ifdef __QNX__
-    out8(base + port.cntrl1, 0x93);
-    out8(base + port.cntrl1, 0x13);
-#endif
-    // disable writing
-    set_RW(base, READ, radar);
-    usleep(10000);
-    // verify written data
-    // read PortA and PortB to see if EEPROM output is same as progammed
-#ifdef __QNX__
-    temp = in8(base + port.B1);
-    temp = temp & 0x1f;
-    temp = temp << 8;
-    temp = temp + in8(base + port.A1);
-    temp = temp & 0x1fff;
-#else
-    temp = data;
-#endif
-
-    if (print) {
-        printf("    data expected: %d data read: %d\n", data, temp);
-    }
-
-    if ((temp != data)) {
-        printf(" ERROR - New Card DATA NOT VERIFIED: data: %x != readback: %x :: Code: %d Card: %d\n",
-               reverse_bits(data), reverse_bits(temp), code, card);
-        return -1;
-    }
-    return 0;
-}
-
 /*-WRITE_CODE--------------------------------------------------------*/
-int32_t write_data_new(uint32_t base, int32_t card, int32_t code, int32_t data, int32_t radar, int32_t print) {
+int32_t write_data(uint32_t base, int32_t card, int32_t code, int32_t data, int32_t radar, int32_t print) {
     int32_t temp;
     struct Port port;
 
@@ -534,5 +483,58 @@ int32_t write_data_new(uint32_t base, int32_t card, int32_t code, int32_t data, 
         return -1;
     }
 
+    return 0;
+}
+
+/*-VERIFY_CODE--------------------------------------------------------*/
+int32_t verify_data(uint32_t base, int32_t card, int32_t code, int32_t data, int32_t radar, int32_t print) {
+    int32_t temp;
+    struct Port port;
+
+    temp = set_ports(radar, &port);
+
+    // check that the data to write is valid
+    if ((data > 8192) | (data < 0)) {
+        fprintf(stderr, "INVALID DATA TO VERIFY - must be between 0 and 8192\n");
+        return -1;
+    }
+    data = data ^ 0x1fff;
+    // select card to write
+    temp = select_card(base, card, radar);
+    // choose the beam code to write (output appropriate EEPROM address
+    temp = beam_code(base, code, radar);
+    set_SA(base, SWITCHES, radar);
+    // bit reverse the data
+    data = reverse_bits(data);
+    if (print) printf("    Code to write is %d\n", data);
+    // reset CH1, PortA and PortB to inputs
+#ifdef __QNX__
+    out8(base + port.cntrl1, 0x93);
+    out8(base + port.cntrl1, 0x13);
+#endif
+    // disable writing
+    set_RW(base, READ, radar);
+    usleep(10000);
+    // verify written data
+    // read PortA and PortB to see if EEPROM output is same as progammed
+#ifdef __QNX__
+    temp = in8(base + port.B1);
+    temp = temp & 0x1f;
+    temp = temp << 8;
+    temp = temp + in8(base + port.A1);
+    temp = temp & 0x1fff;
+#else
+    temp = data;
+#endif
+
+    if (print) {
+        printf("    data expected: %d data read: %d\n", data, temp);
+    }
+
+    if ((temp != data)) {
+        printf(" ERROR - New Card DATA NOT VERIFIED: data: %x != readback: %x :: Code: %d Card: %d\n",
+               reverse_bits(data), reverse_bits(temp), code, card);
+        return -1;
+    }
     return 0;
 }
