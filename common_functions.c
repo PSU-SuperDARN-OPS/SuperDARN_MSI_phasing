@@ -69,11 +69,19 @@ int32_t set_ports(int32_t radar, struct Port * port){
     return 0;
 }
 
-int32_t set_WE(int32_t base, int32_t onoff, int32_t radar){
+int32_t set_WE(uint32_t base, int32_t onoff, int32_t radar){
     int32_t temp;
     struct Port port;
 
     temp = set_ports(radar, & port);
+
+    if(temp < 0) {
+        printf("Invalid radar number");
+    }
+
+#ifndef __QNX__
+    printf("Debug linux, base: %d", base);
+#endif
 
     if(onoff == OFF) {
 #ifdef __QNX__
@@ -95,11 +103,18 @@ int32_t set_WE(int32_t base, int32_t onoff, int32_t radar){
     return 0;
 }
 
-int32_t set_RW(int32_t base, int32_t rw, int32_t radar) {
+int32_t set_RW(uint32_t base, int32_t rw, int32_t radar) {
     int32_t temp;
     struct Port port;
 
     temp = set_ports(radar, &port);
+    if(temp < 0) {
+        printf("Invalid radar number");
+    }
+
+#ifndef __QNX__
+    printf("Debug linux, base: %d", base);
+#endif
 
     if (rw == READ) {
 #ifdef __QNX__
@@ -121,11 +136,18 @@ int32_t set_RW(int32_t base, int32_t rw, int32_t radar) {
     return 0;
 }
 
-int32_t set_SA(int32_t base,int32_t sa,int32_t radar){
+int32_t set_SA(uint32_t base, int32_t sa, int32_t radar){
     int32_t temp;
     struct Port port;
 
     temp = set_ports(radar, & port);
+    if(temp < 0) {
+        printf("Invalid radar number");
+    }
+
+#ifndef __QNX__
+    printf("Debug linux, base: %d", base);
+#endif
 
     if(sa == SWITCHES) {
 #ifdef __QNX__
@@ -172,7 +194,7 @@ float get_delay(int32_t code) {
 
     int32_t i;
     float delay;
-    float delaylist[] = {0.25, 0.45, 0.8, 1.5, 2.75, 5, 8, 15, 25, 45, 80, 140, 250};
+    float delaylist[] = {0.25, 0.45f, 0.8f, 1.5, 2.75, 5, 8, 15, 25, 45, 80, 140, 250};
 
     delay = 0;
     for (i = 0; i < 13; i++) {
@@ -194,6 +216,13 @@ int32_t beam_code(uint32_t base, int32_t code, int32_t radar) {
     struct Port port;
 
     temp = set_ports(radar, &port);
+    if(temp < 0) {
+        printf("Invalid radar number");
+    }
+
+#ifndef __QNX__
+    printf("Debug linux, base: %d", base);
+#endif
 
     // check if beam code is reasonable
     if ((code > 8192) | (code < 0)) {
@@ -256,6 +285,13 @@ int32_t select_card(uint32_t base, int32_t address, int32_t radar) {
 
 
     temp = set_ports(radar, &port);
+    if(temp < 0) {
+        printf("Invalid radar number");
+    }
+
+#ifndef __QNX__
+    printf("Debug linux, base: %d", base);
+#endif
 
     // check if card address is reasonable
     if ((address > 31) | (address < 0)) {
@@ -294,6 +330,9 @@ int32_t write_attenuators(uint32_t base, int32_t card, int32_t code, int32_t dat
     struct Port port;
 
     temp = set_ports(radar, &port);
+    if(temp < 0) {
+        printf("Invalid radar number");
+    }
 
     // check that the data to write is valid
     if ((data > 63) | (data < 0)) {
@@ -365,6 +404,9 @@ int32_t verify_attenuators(uint32_t base, int32_t card, int32_t code, int32_t da
     struct Port port;
 
     temp = set_ports(radar, &port);
+    if(temp < 0) {
+        printf("Invalid radar number");
+    }
 
     // check that the data to write is valid
     if ((data > 63) | (data < 0)) {
@@ -407,6 +449,9 @@ int32_t write_data(uint32_t base, int32_t card, int32_t code, int32_t data, int3
     struct Port port;
 
     temp = set_ports(radar, &port);
+    if(temp < 0) {
+        printf("Invalid radar number");
+    }
 
     // check that the data to write is valid
     if ((data > 8192) | (data < 0)) {
@@ -483,6 +528,9 @@ int32_t verify_data(uint32_t base, int32_t card, int32_t code, int32_t data, int
     struct Port port;
 
     temp = set_ports(radar, &port);
+    if(temp < 0) {
+        printf("Invalid radar number");
+    }
 
     // check that the data to write is valid
     if ((data > 8192) | (data < 0)) {

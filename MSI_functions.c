@@ -78,7 +78,7 @@ int32_t MSI_attencode(double target_dB) {
     }
   }
   return attencode;
-};
+}
 
 int32_t MSI_phasecode(double target_nsec) {
   int32_t phasecode;
@@ -93,7 +93,7 @@ int32_t MSI_phasecode(double target_nsec) {
     }
   }
   return phasecode;
-};
+}
 
 double MSI_timedelay_needed(double angle_degrees,double spacing_meters,int32_t card) {
 

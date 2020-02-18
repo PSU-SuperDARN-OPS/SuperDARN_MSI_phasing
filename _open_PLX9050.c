@@ -9,7 +9,7 @@
   #include <sys/neutrino.h>
   #include <sys/mman.h>
 #endif
-#include "include/_prog_conventions.h"
+
 #include "include/_open_PLX9050.h"
 
 

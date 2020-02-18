@@ -14,12 +14,12 @@
 #define OFF      0
 
 /*-SET WRITE ENABLE BIT-------------------------------------------------------*/
-int32_t set_WE(int32_t base,int32_t onoff,int32_t radar);
+int32_t set_WE(uint32_t base, int32_t onoff, int32_t radar);
 /*-SET READ/WRITE BIT-------------------------------------------------------*/
-int32_t set_RW(int32_t base,int32_t rw,int32_t radar);
+int32_t set_RW(uint32_t base, int32_t rw, int32_t radar);
 
 /*-SET SWITCHED/ATTEN BIT-------------------------------------------------------*/
-int32_t set_SA(int32_t base,int32_t sa,int32_t radar);
+int32_t set_SA(uint32_t base, int32_t sa, int32_t radar);
 
 
 /*-REVERSE_BITS-------------------------------------------------------*/
