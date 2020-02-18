@@ -298,10 +298,6 @@ int32_t write_attenuators(uint32_t base, int32_t card, int32_t code, int32_t dat
     int32_t temp;
     struct Port port;
 
-    struct timespec nsleep;
-    nsleep.tv_sec = 0;
-    nsleep.tv_nsec = 5000;
-
     temp = set_ports(radar, &port);
 
     // check that the data to write is valid
@@ -373,10 +369,6 @@ int32_t verify_attenuators(uint32_t base, int32_t card, int32_t code, int32_t da
     int32_t temp;
     struct Port port;
 
-    struct timespec nsleep;
-    nsleep.tv_sec = 0;
-    nsleep.tv_nsec = 5000;
-
     temp = set_ports(radar, &port);
 
     // check that the data to write is valid
@@ -419,10 +411,6 @@ int32_t verify_attenuators(uint32_t base, int32_t card, int32_t code, int32_t da
 int32_t verify_data_new(uint32_t base, int32_t card, int32_t code, int32_t data, int32_t radar, int32_t print) {
     int32_t temp;
     struct Port port;
-
-    struct timespec nsleep;
-    nsleep.tv_sec = 0;
-    nsleep.tv_nsec = 5000;
 
     temp = set_ports(radar, &port);
 
@@ -476,10 +464,6 @@ int32_t verify_data_new(uint32_t base, int32_t card, int32_t code, int32_t data,
 int32_t write_data_new(uint32_t base, int32_t card, int32_t code, int32_t data, int32_t radar, int32_t print) {
     int32_t temp;
     struct Port port;
-
-    struct timespec nsleep;
-    nsleep.tv_sec = 0;
-    nsleep.tv_nsec = 5000;
 
     temp = set_ports(radar, &port);
 
