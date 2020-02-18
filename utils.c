@@ -9,7 +9,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-//#define MSG_NOSIGNAL 0x4000
+#ifdef __QNX__
+    #define MSG_NOSIGNAL 0x4000
+#endif
 
 void mypause ( void ) 
 { 
