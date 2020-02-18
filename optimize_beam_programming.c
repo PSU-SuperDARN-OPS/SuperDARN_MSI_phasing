@@ -149,6 +149,8 @@ int main(int argc, char **argv ) {
      double     *opt_gain_min=NULL;
      double     *opt_gain_max=NULL;
 
+    struct stat s;
+    int err;
 
      while ((rval = getopt (argc, argv, "+r:n:c:a:p:v:s:ih")) != -1) {
          switch (rval) {
@@ -210,8 +212,8 @@ int main(int argc, char **argv ) {
      sprintf(dirstub,"/%s/%s/",caldir,radar_name);
      fprintf(stdout,"RADARDIR: %s\n",dirstub);
      fflush(stdout);
-     struct stat s;
-     int err = stat(dirstub, &s);
+
+     err = stat(dirstub, &s);
      if(-1 == err) {
         perror("stat");
         exit(1);

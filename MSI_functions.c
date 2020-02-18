@@ -66,53 +66,60 @@ double MSI_atten_bits_dB[6]={
 
 
 int32_t MSI_attencode(double target_dB) {
-  int32_t attencode;
-  double remain;
-  int i;
-  attencode=0;
-  remain=target_dB;
-  for (i=5;i>=0;i--) {
-    if ((remain - MSI_atten_bits_dB[i]) > 0.0) {
-      attencode+=pow(2,i);
-      remain-=MSI_atten_bits_dB[i];
+    int32_t attencode;
+    double remain;
+    int i;
+
+    attencode = 0;
+    remain = target_dB;
+
+    for (i = 5; i >= 0; i--) {
+        if ((remain - MSI_atten_bits_dB[i]) > 0.0) {
+            attencode += pow(2, i);
+            remain -= MSI_atten_bits_dB[i];
+        }
     }
-  }
-  return attencode;
+    return attencode;
 }
 
 int32_t MSI_phasecode(double target_nsec) {
-  int32_t phasecode;
-  phasecode=0;
-  double remain;
-  int i;
-  remain=target_nsec;
-  for (i=12;i>=0;i--) {
-    if ((remain - MSI_timedelay_bits_nsecs[i]) > 0.0) {
-      phasecode+=pow(2,i);
-      remain-=MSI_timedelay_bits_nsecs[i];
+    int32_t phasecode;
+    double remain;
+    int i;
+
+    phasecode = 0;
+    remain = target_nsec;
+
+    for (i = 12; i >= 0; i--) {
+        if ((remain - MSI_timedelay_bits_nsecs[i]) > 0.0) {
+            phasecode += pow(2, i);
+            remain -= MSI_timedelay_bits_nsecs[i];
+        }
     }
-  }
-  return phasecode;
+    return phasecode;
 }
 
 double MSI_timedelay_needed(double angle_degrees,double spacing_meters,int32_t card) {
-
 /*
  *  * *  angle from broadside (degrees)  spacing in meters
  *   * */
-  double deltat=0;
-  double needed=0;
-  double c=0.299792458; // meters per nanosecond
-  int32_t antenna=-1;
-  if (card > 15) antenna=card-10;
-  else antenna=card;
-  deltat=(spacing_meters/c)*sin((fabs(angle_degrees)*3.14159)/180.0); //nanoseconds
-  if (angle_degrees > 0) needed=antenna*deltat;
-  if (angle_degrees < 0) needed=(15-antenna)*deltat;
-  if (needed < 0) {
-    fprintf(stderr,"Error in Time Needed Calc: %lf %lf\n",needed,deltat);
-  }
-  return needed;
+    double deltat = 0;
+    double needed = 0;
+    double c = 0.299792458; // meters per nanosecond
+    int32_t antenna = -1;
+
+    if (card > 15) {
+        antenna = card - 10;
+    } else {
+        antenna = card;
+    }
+    deltat = (spacing_meters / c) * sin((fabs(angle_degrees) * 3.14159) / 180.0); //nanoseconds
+    if (angle_degrees > 0) needed = antenna * deltat;
+    if (angle_degrees < 0) needed = (15 - antenna) * deltat;
+    if (needed < 0) {
+        fprintf(stderr, "Error in Time Needed Calc: %lf %lf\n", needed, deltat);
+    }
+    return needed;
 }
 
 int MSI_dio_write_memory(int code, int rnum, int card, int phasecode, int attencode, int verbose) {
