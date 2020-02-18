@@ -314,7 +314,7 @@ if(test_flag==1) {
         c = -1;
         printf("\n\nEnter Radar Name: ");
         fflush(stdin);
-        scanf("%s", &radar_name);
+        scanf("%s", radar_name);
         fflush(stdout);
         fflush(stdin);
         printf("\n\nEnter Phasing Card Number: ");
@@ -324,7 +324,7 @@ if(test_flag==1) {
         printf("\n\nEnter Serial Number: ");
         fflush(stdin);
         fflush(stdout);
-        scanf("%s", &serial_number);
+        scanf("%s", serial_number);
         printf("Radar: <%s>  Card: %d Serial: %s\n", radar_name, c, serial_number);
         fflush(stdout);
     }
