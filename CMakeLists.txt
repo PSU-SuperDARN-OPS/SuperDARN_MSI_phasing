@@ -4,7 +4,7 @@ project(PhasingCalibration  VERSION 1.0
 
 find_package(GSL REQUIRED)
 
-add_executable(phasing_calibration main.c _open_PLX9050.c
+add_executable(phasing_calibration phasing_calibration.c _open_PLX9050.c
         common_functions.c _prog_conventions.c utils.c vna_functions.c MSI_functions.c)
 target_link_libraries(phasing_calibration m)
 

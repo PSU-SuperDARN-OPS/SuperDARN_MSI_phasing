@@ -8,7 +8,7 @@ linux_libs=
 qnx_libs=-lsocket
 INCLUDES=-I"/usr/include/" -I"../include/" -I"include/" -I"../tsg/include"   
 
-SOURCES=main.c  _open_PLX9050.c common_functions.c _prog_conventions.c utils.c vna_functions.c MSI_functions.c
+SOURCES=phasing_calibration.c  _open_PLX9050.c common_functions.c _prog_conventions.c utils.c vna_functions.c MSI_functions.c
 OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=phasing_calibration
 
