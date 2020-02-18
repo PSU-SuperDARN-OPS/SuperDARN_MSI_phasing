@@ -13,7 +13,10 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <math.h>
+
 #include "include/MSI_functions.h"
+#include "include/common_functions.h"
+#include "include/_open_PLX9050.h"
 /* settings which I could probably move to an ini file */
 int32_t    MSI_phasecodes=8192;
 int32_t    MSI_num_angles=24;
@@ -112,83 +115,116 @@ double MSI_timedelay_needed(double angle_degrees,double spacing_meters,int32_t c
   return needed;
 }
 
-int MSI_dio_write_memory(int b,int rnum,int c, int p,int a,int ssh_flag,int verbose){
-  char diocmd[512]="";
-  char fullcmd[512]="";
-  char diopost[512]="2>/dev/null 1>/dev/null";
-  //char diopost[512]="";
-  int rval;
-  int try=3;
-  int uwait=10;
-  verbose=2; 
-  if( verbose > 2 ) fprintf(stdout,"Take Data: c:%d b:%d p:%d a:%d\n",c,b,p,a);
+int MSI_dio_write_memory(int b, int rnum, int c, int p, int a, int ssh_flag, int verbose) {
+    int temp, pci_handle, IRQ;
+    unsigned int mmap_io_ptr, IOBASE;
+    int rval_d, rval_a;
+    int try = 3;
+    int uwait = 10;
 
-  if (b>=MSI_phasecodes) {
-                     fprintf(stderr,"Bad memory address: %d\n",b);
-                      return 1;
-  }
-  while (try>0) {
-    sprintf(diocmd,"write_card_memory -m %d -r %d -c %d -p %d -a %d",
-                            b,rnum,c,p,a);
-    if(ssh_flag!=0) sprintf(fullcmd,"ssh %s '%s' %s",ssh_userhost,diocmd,diopost);
-    else sprintf(fullcmd,"%s %s",diocmd,diopost);
-    if( verbose > 1 ) fprintf(stdout,"Command: %s\n",fullcmd);
-    rval=system(fullcmd);
-    rval=system(fullcmd);
-  
-    if(rval!=0) {
-                      fprintf(stderr,"Dio memory write error, exiting\n");
-                      return rval;
+    verbose = 2;
+
+    if (verbose > 2) fprintf(stdout, "Take Data: c:%d b:%d p:%d a:%d\n", c, b, p, a);
+
+    if (b >= MSI_phasecodes) {
+        fprintf(stderr, "Bad memory address: %d\n", b);
+        return 1;
     }
-    usleep(uwait); 
-    sprintf(diocmd,"verify_card_memory -m %d -r %d -c %d -p %d -a %d",
-                            b,rnum,c,p,a);
-    if(ssh_flag!=0) sprintf(fullcmd,"ssh %s '%s' %s",ssh_userhost,diocmd,diopost);
-    else sprintf(fullcmd,"%s %s",diocmd,diopost);
-    if( verbose > 1 ) fprintf(stdout,"Command: %s\n",fullcmd);
-    rval=system(fullcmd);
-    if(rval!=0) {
-      fprintf(stderr,"Dio memory verify error, try again: %d\n",rval);
-      fprintf(stderr,"  Command: %s\n",fullcmd);
-      sprintf(diopost," ");
-      fflush(stderr);
-      fflush(stdout);
-      uwait+=500;
-      verbose=2;
-      try--;
+
+    /* OPEN THE PLX9656 AND GET LOCAL BASE ADDRESSES */
+    fprintf(stderr, "PLX9052 CONFIGURATION ********************\n");
+    temp = _open_PLX9052(&pci_handle, &mmap_io_ptr, &IRQ, 1);
+    IOBASE = mmap_io_ptr;
+    if (temp == -1) {
+        fprintf(stderr, "	PLX9052 configuration failed");
     } else {
-      break;
+        fprintf(stderr, "	PLX9052 configuration successful!\n");
     }
-  }    
-  if (try<=0) {
-     fprintf(stderr,"Dio memory verify error, exiting: %d\n",rval);
-     return rval;
-  }                   
-  fflush(stdout);
-  return 0;
+    printf("IOBASE=%x\n", IOBASE);
+
+    while (try > 0) {
+        rval_d = write_data(IOBASE, c, b, p, rnum, verbose);
+
+        if (rval_d != 0) {
+            fprintf(stderr, "Dio memory write data error, exiting\n");
+            return rval_d;
+        }
+
+        rval_a = write_attenuators(IOBASE, c, b, a, rnum);
+
+        if (rval_a != 0) {
+            fprintf(stderr, "Dio memory write attenuator error, exiting\n");
+            return rval_a;
+        }
+
+        usleep(uwait);
+
+        rval_a = verify_attenuators(IOBASE, c, b, a, rnum);
+        rval_d = verify_data(IOBASE, c, b, p, rnum, verbose);
+
+        if (rval_a != 0 || rval_d != 0) {
+            fprintf(stderr, "Dio memory verify error, try again: %d, %d\n", rval_d, rval_a);
+
+            uwait += 500;
+            verbose = 2;
+            try--;
+        } else {
+            break;
+        }
+    }
+    if (try <= 0) {
+        fprintf(stderr, "Dio memory verify error, try again: %d, %d\n", rval_d, rval_a);
+        return -1;
+    }
+    fflush(stdout);
+    return 0;
 }
 
 int MSI_dio_verify_memory(int memloc,int rnum,int c, int p,int a,int ssh_flag,int verbose){
-  char diocmd[512]="";
-  char fullcmd[512]="";
-  char diopost[512]="2>/dev/null 1>/dev/null";
-  int rval;
-  if( verbose > 2 ) fprintf(stdout,"Input : c:%d memloc:%d p:%d a:%d\n",c,memloc,p,a);
+    int temp, pci_handle, IRQ;
+    unsigned int mmap_io_ptr, IOBASE;
+    int rval_d, rval_a;
+    int try = 3;
+    int uwait = 10;
 
-  if (memloc>=MSI_phasecodes) {
-                     fprintf(stderr,"Bad memory address: %d\n",memloc);
-                      return 1;
-  }
-  sprintf(diocmd,"verify_card_memory -m %d -r %d -c %d -p %d -a %d",
-                            memloc,rnum,c,p,a);
-  if(ssh_flag!=0) sprintf(fullcmd,"ssh %s '%s' %s",ssh_userhost,diocmd,diopost);
-  else sprintf(fullcmd,"%s %s",diocmd,diopost);
-  if( verbose > 1 ) fprintf(stdout,"Command: %s\n",fullcmd);
-  rval=system(fullcmd);
-  if(rval!=0) {
-                      fprintf(stderr,"Dio memory verify error, exiting\n");
-                      return rval;
-  }
-  fflush(stdout);
-  return 0;
+    verbose = 2;
+
+    if (verbose > 2) fprintf(stdout, "Take Data: c:%d b:%d p:%d a:%d\n", c, memloc, p, a);
+
+    if (memloc >= MSI_phasecodes) {
+        fprintf(stderr, "Bad memory address: %d\n", memloc);
+        return 1;
+    }
+
+    /* OPEN THE PLX9656 AND GET LOCAL BASE ADDRESSES */
+    fprintf(stderr, "PLX9052 CONFIGURATION ********************\n");
+    temp = _open_PLX9052(&pci_handle, &mmap_io_ptr, &IRQ, 1);
+    IOBASE = mmap_io_ptr;
+    if (temp == -1) {
+        fprintf(stderr, "	PLX9052 configuration failed");
+    } else {
+        fprintf(stderr, "	PLX9052 configuration successful!\n");
+    }
+    printf("IOBASE=%x\n", IOBASE);
+
+    while (try > 0) {
+        rval_a = verify_attenuators(IOBASE, c, memloc, a, rnum);
+        rval_d = verify_data(IOBASE, c, memloc, p, rnum, verbose);
+
+        if (rval_a != 0 || rval_d != 0) {
+            fprintf(stderr, "Dio memory verify error, try again: %d, %d\n", rval_d, rval_a);
+
+            uwait += 500;
+            verbose = 2;
+            try--;
+        } else {
+            break;
+        }
+    }
+    if (try <= 0) {
+        fprintf(stderr, "Dio memory verify error, try again: %d, %d\n", rval_d, rval_a);
+        return -1;
+    }
+    fflush(stdout);
+    return 0;
 }
