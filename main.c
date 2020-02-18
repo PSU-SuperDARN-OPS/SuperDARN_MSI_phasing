@@ -43,8 +43,7 @@
 #define CARDS 200
 #define PHASECODES 8192
 #define ATTENCODES 64
-//##define PHASECODES  64 
-#define FREQS 1500
+//##define PHASECODES  64
 #define _QUICK_
 
 int stupid_flag = 0;
@@ -76,8 +75,8 @@ unsigned long elapsed;
 int main(int argc, char **argv) {
     char output[40], strout[40];
     char cmd_str[80], prompt_str[10], data_str[1000];
-    double *phase[FREQS], *pwr_mag[FREQS];
-    double freq[FREQS];
+    double *phase[VNA_FREQS], *pwr_mag[VNA_FREQS];
+    double freq[VNA_FREQS];
     double pd_old, pd_new, phase_diff = 0.0;
     int32_t rval, count, sample_count, fail, cr, lf;
     int32_t ii, i = 0, c = 31, data = 0, index = 0, wait_delay_ms = 30;
