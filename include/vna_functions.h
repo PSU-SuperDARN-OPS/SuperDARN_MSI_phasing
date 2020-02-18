@@ -4,7 +4,7 @@
 
 #define VNA_MIN    5E6
 #define VNA_MAX   25E6
-#define VNA_FREQS  1201
+#define VNA_FREQS  1500
 
 int mlog_data_command(int sock,char *command,double *array[VNA_FREQS],int b,int verbose);
 int button_command(int sock, char *command, int delay_ms, int verbose);
