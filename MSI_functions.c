@@ -115,7 +115,7 @@ double MSI_timedelay_needed(double angle_degrees,double spacing_meters,int32_t c
   return needed;
 }
 
-int MSI_dio_write_memory(int code, int rnum, int card, int phasecode, int attencode, int ssh_flag, int verbose) {
+int MSI_dio_write_memory(int code, int rnum, int card, int phasecode, int attencode, int verbose) {
     int temp, pci_handle, IRQ;
     unsigned int mmap_io_ptr, IOBASE;
     int rval_d, rval_a;

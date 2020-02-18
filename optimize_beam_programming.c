@@ -1075,7 +1075,7 @@ int main(int argc, char **argv ) {
                       fprintf(stdout,"             acode: %5d :: gain   [dB]:: Min: %-8.5e Max: %-8.5e Ave: %-8.5e Target: %-8.5e Delta %-8.5e\n",
                         opt_acode[b],opt_gain_min[b],opt_gain_max[b],opt_gain_ave[b],opt_gain_target[b],fabs(opt_gain_ave[b]-opt_gain_target[b]));
               }
-              rval=MSI_dio_write_memory(b,rnum,c,opt_pcode[b],opt_acode[b],sshflag,verbose);
+              rval=MSI_dio_write_memory(b,rnum,c,opt_pcode[b],opt_acode[b],verbose);
               if (WIFSIGNALED(rval) && (WTERMSIG(rval) == SIGINT || WTERMSIG(rval) == SIGQUIT)) return rval;
 
             }

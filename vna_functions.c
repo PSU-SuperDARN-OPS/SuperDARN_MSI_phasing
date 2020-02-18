@@ -145,7 +145,7 @@ int take_data(int sock,int b,int rnum,int c, int p,int a, double *pwr_mag[VNA_FR
   char command[128]="";
  
   for(takeidx=0; takeidx < 5; takeidx++) {
-  	rval=MSI_dio_write_memory(b,rnum,c,p,a,ssh_flag,verbose);
+  	rval=MSI_dio_write_memory(b,rnum,c,p,a,verbose);
 	if(rval == 0) {
 		break;
 	}
