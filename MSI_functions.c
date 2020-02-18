@@ -115,7 +115,7 @@ double MSI_timedelay_needed(double angle_degrees,double spacing_meters,int32_t c
   return needed;
 }
 
-int MSI_dio_write_memory(int b, int rnum, int c, int p, int a, int ssh_flag, int verbose) {
+int MSI_dio_write_memory(int code, int rnum, int card, int phasecode, int attencode, int ssh_flag, int verbose) {
     int temp, pci_handle, IRQ;
     unsigned int mmap_io_ptr, IOBASE;
     int rval_d, rval_a;
@@ -124,10 +124,10 @@ int MSI_dio_write_memory(int b, int rnum, int c, int p, int a, int ssh_flag, int
 
     verbose = 2;
 
-    if (verbose > 2) fprintf(stdout, "Take Data: c:%d b:%d p:%d a:%d\n", c, b, p, a);
+    if (verbose > 2) fprintf(stdout, "Take Data: card:%d code:%d phasecode:%d attencode:%d\n", card, code, phasecode, attencode);
 
-    if (b >= MSI_phasecodes) {
-        fprintf(stderr, "Bad memory address: %d\n", b);
+    if (code >= MSI_phasecodes) {
+        fprintf(stderr, "Bad memory address: %d\n", code);
         return 1;
     }
 
@@ -143,14 +143,14 @@ int MSI_dio_write_memory(int b, int rnum, int c, int p, int a, int ssh_flag, int
     printf("IOBASE=%x\n", IOBASE);
 
     while (try > 0) {
-        rval_d = write_data(IOBASE, c, b, p, rnum, verbose);
+        rval_d = write_data(IOBASE, card, code, phasecode, rnum, verbose);
 
         if (rval_d != 0) {
             fprintf(stderr, "Dio memory write data error, exiting\n");
             return rval_d;
         }
 
-        rval_a = write_attenuators(IOBASE, c, b, a, rnum);
+        rval_a = write_attenuators(IOBASE, card, code, attencode, rnum);
 
         if (rval_a != 0) {
             fprintf(stderr, "Dio memory write attenuator error, exiting\n");
@@ -159,8 +159,8 @@ int MSI_dio_write_memory(int b, int rnum, int c, int p, int a, int ssh_flag, int
 
         usleep(uwait);
 
-        rval_a = verify_attenuators(IOBASE, c, b, a, rnum);
-        rval_d = verify_data(IOBASE, c, b, p, rnum, verbose);
+        rval_a = verify_attenuators(IOBASE, card, code, attencode, rnum);
+        rval_d = verify_data(IOBASE, card, code, phasecode, rnum, verbose);
 
         if (rval_a != 0 || rval_d != 0) {
             fprintf(stderr, "Dio memory verify error, try again: %d, %d\n", rval_d, rval_a);
@@ -180,7 +180,7 @@ int MSI_dio_write_memory(int b, int rnum, int c, int p, int a, int ssh_flag, int
     return 0;
 }
 
-int MSI_dio_verify_memory(int memloc,int rnum,int c, int p,int a,int ssh_flag,int verbose){
+int MSI_dio_verify_memory(int code,int rnum,int card, int phasecode,int attencode,int ssh_flag,int verbose){
     int temp, pci_handle, IRQ;
     unsigned int mmap_io_ptr, IOBASE;
     int rval_d, rval_a;
@@ -189,10 +189,10 @@ int MSI_dio_verify_memory(int memloc,int rnum,int c, int p,int a,int ssh_flag,in
 
     verbose = 2;
 
-    if (verbose > 2) fprintf(stdout, "Take Data: c:%d b:%d p:%d a:%d\n", c, memloc, p, a);
+    if (verbose > 2) fprintf(stdout, "Take Data: card:%d b:%d phasecode:%d attencode:%d\n", card, code, phasecode, attencode);
 
-    if (memloc >= MSI_phasecodes) {
-        fprintf(stderr, "Bad memory address: %d\n", memloc);
+    if (code >= MSI_phasecodes) {
+        fprintf(stderr, "Bad memory address: %d\n", code);
         return 1;
     }
 
@@ -208,8 +208,8 @@ int MSI_dio_verify_memory(int memloc,int rnum,int c, int p,int a,int ssh_flag,in
     printf("IOBASE=%x\n", IOBASE);
 
     while (try > 0) {
-        rval_a = verify_attenuators(IOBASE, c, memloc, a, rnum);
-        rval_d = verify_data(IOBASE, c, memloc, p, rnum, verbose);
+        rval_a = verify_attenuators(IOBASE, card, code, attencode, rnum);
+        rval_d = verify_data(IOBASE, card, code, phasecode, rnum, verbose);
 
         if (rval_a != 0 || rval_d != 0) {
             fprintf(stderr, "Dio memory verify error, try again: %d, %d\n", rval_d, rval_a);
