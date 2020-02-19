@@ -128,6 +128,7 @@ int MSI_dio_write_memory(int code, int rnum, int card, int phasecode, int attenc
     int rval_d, rval_a;
     int try = 3;
     int uwait = 10;
+    struct Port port;
 
     verbose = 2;
 
@@ -136,6 +137,11 @@ int MSI_dio_write_memory(int code, int rnum, int card, int phasecode, int attenc
     if (code >= MSI_phasecodes) {
         fprintf(stderr, "Bad memory address: %d\n", code);
         return 1;
+    }
+
+    temp = set_ports(rnum, &port);
+    if(temp < 0) {
+        printf("Invalid radar number");
     }
 
     /* OPEN THE PLX9656 AND GET LOCAL BASE ADDRESSES */
@@ -148,6 +154,24 @@ int MSI_dio_write_memory(int code, int rnum, int card, int phasecode, int attenc
         fprintf(stderr, "	PLX9052 configuration successful!\n");
     }
     printf("IOBASE=%x\n", IOBASE);
+
+    /* INITIALIZE THE CARD FOR PROPER IO */
+#ifdef __QNX__
+    // GROUP 0 - PortA=output, PortB=output, PortClo=output, PortChi=output
+    out8(IOBASE + port.cntrl0, 0x80);
+    // GROUP 1 - PortAinput, PortB=input, PortClo=input, PortChi=output
+    out8(IOBASE + port.cntrl1, 0x93);
+    out8(IOBASE + port.A0, 0x00);
+    out8(IOBASE + port.B0, 0x00);
+    out8(IOBASE + port.C0, 0x00);
+    out8(IOBASE + port.A1, 0x00);
+    out8(IOBASE + port.B1, 0x00);
+    out8(IOBASE + port.cntrl0, 0x00);
+    out8(IOBASE + port.cntrl1, 0x13);
+    temp = in8(IOBASE + port.C1);
+    temp = temp & 0x0f;
+    printf("input on group 1, port c is %x\n", temp);
+#endif
 
     while (try > 0) {
         rval_d = write_data(IOBASE, card, code, phasecode, rnum, verbose);
