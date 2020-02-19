@@ -11,6 +11,7 @@
 #endif
 
 #include "include/registers.h"
+#include "include/common_functions.h"
 
 #define SWITCHES 0
 #define ATTEN    1
