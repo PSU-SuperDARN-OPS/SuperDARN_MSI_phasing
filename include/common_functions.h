@@ -13,6 +13,19 @@
 #define ON       1
 #define OFF      0
 
+struct Port{
+    uint32_t A0;
+    uint32_t A1;
+    uint32_t B0;
+    uint32_t B1;
+    uint32_t C0;
+    uint32_t C1;
+    uint32_t cntrl0;
+    uint32_t cntrl1;
+};
+
+int32_t set_ports(int32_t radar, struct Port * port);
+
 /*-SET WRITE ENABLE BIT-------------------------------------------------------*/
 int32_t set_WE(uint32_t base, int32_t onoff, int32_t radar);
 /*-SET READ/WRITE BIT-------------------------------------------------------*/
@@ -39,14 +52,6 @@ int32_t verify_data(uint32_t base, int32_t card, int32_t code, int32_t data, int
 
 /*-WRITE_CODE--------------------------------------------------------*/
 int32_t write_data(uint32_t base, int32_t card, int32_t code, int32_t data, int32_t radar, int32_t print);
-
-/*-WRITE_CODE--------------------------------------------------------*/
-int32_t write_data_old(uint32_t base, int32_t card, int32_t code, int32_t data,int32_t radar,int32_t print);
-
-/*-VERITY_CODE--------------------------------------------------------*/
-
-int verify_data_old(unsigned int base, int card, int code, int data,int radar,int print);
-
 
 /*-READ_DATA---------------------------------------------------------*/
 int32_t read_data(uint32_t base,int32_t radar);

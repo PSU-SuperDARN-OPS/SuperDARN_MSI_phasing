@@ -19,16 +19,7 @@
 #define ON       1
 #define OFF      0
 
-struct Port{
-    uint32_t A0;
-    uint32_t A1;
-    uint32_t B0;
-    uint32_t B1;
-    uint32_t C0;
-    uint32_t C1;
-    uint32_t cntrl0;
-    uint32_t cntrl1;
-};
+
 
 int32_t set_ports(int32_t radar, struct Port * port){
     switch(radar) {
