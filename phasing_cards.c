@@ -58,14 +58,14 @@ void disable_write(struct DIO const *phasing_matrix) {
     uint8_t temp;
 
     temp = in8(phasing_matrix->base_address + phasing_matrix->port.C0);
-    out8(phasing_matrix->base_address + phasing_matrix->port.C0, temp & 0xfe);
+    out8(phasing_matrix->base_address + phasing_matrix->port.C0, temp & ~WRITE_ENABLE_BIT);
 }
 
 void enable_write(struct DIO const *phasing_matrix) {
     uint8_t temp;
 
     temp=in8(phasing_matrix->base_address + phasing_matrix->port.C0);
-    out8(phasing_matrix->base_address + phasing_matrix->port.C0, temp | 0x01);
+    out8(phasing_matrix->base_address + phasing_matrix->port.C0, temp | WRITE_ENABLE_BIT);
 }
 
 int32_t set_RW(uint32_t base, int32_t rw, int32_t radar) {
