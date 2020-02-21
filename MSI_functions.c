@@ -15,7 +15,7 @@
 #include <math.h>
 
 #include "include/MSI_functions.h"
-#include "include/common_functions.h"
+#include "include/phasing_cards.h"
 #include "include/_open_PLX9050.h"
 /* settings which I could probably move to an ini file */
 int32_t    MSI_phasecodes=8192;

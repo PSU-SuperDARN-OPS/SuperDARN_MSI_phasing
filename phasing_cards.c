@@ -11,7 +11,7 @@
 #endif
 
 #include "include/registers.h"
-#include "include/common_functions.h"
+#include "include/phasing_cards.h"
 
 #define SWITCHES 0
 #define ATTEN    1
