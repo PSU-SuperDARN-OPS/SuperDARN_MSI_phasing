@@ -139,7 +139,7 @@ int MSI_dio_write_memory(int code, int rnum, int card, int phasecode, int attenc
         return 1;
     }
 
-    temp = set_ports(rnum, &port);
+    temp = set_ports(&port);
     if(temp < 0) {
         printf("Invalid radar number");
     }

@@ -8,90 +8,71 @@
   #include <hw/inout.h>
   #include <sys/neutrino.h>
   #include <sys/mman.h>
+#else
+#include "include/qnx_functions_mock.h"
 #endif
 
 #include "include/registers.h"
 #include "include/phasing_cards.h"
 
 
-int32_t set_ports(int32_t radar, struct Port * port){
-    switch(radar) {
+void enable_write(const struct DIO *phasing_matrix);
+
+int32_t set_ports(struct DIO *phasing_matrix) {
+    switch(phasing_matrix->radar_number) {
         case 1:
-            port->A0 = PA_GRP_0;
-            port->A1 = PA_GRP_1;
-            port->B0 = PB_GRP_0;
-            port->B1 = PB_GRP_1;
-            port->C0 = PC_GRP_0;
-            port->C1 = PC_GRP_1;
-            port->cntrl0 = CNTRL_GRP_0;
-            port->cntrl1 = CNTRL_GRP_1;
+            phasing_matrix->port.A0 = PA_GRP_0;
+            phasing_matrix->port.A1 = PA_GRP_1;
+            phasing_matrix->port.B0 = PB_GRP_0;
+            phasing_matrix->port.B1 = PB_GRP_1;
+            phasing_matrix->port.C0 = PC_GRP_0;
+            phasing_matrix->port.C1 = PC_GRP_1;
+            phasing_matrix->port.cntrl0 = CNTRL_GRP_0;
+            phasing_matrix->port.cntrl1 = CNTRL_GRP_1;
             break;
         case 2:
-            port->A0 = PA_GRP_2;
-            port->A1 = PA_GRP_3;
-            port->B0 = PB_GRP_2;
-            port->B1 = PB_GRP_3;
-            port->C0 = PC_GRP_2;
-            port->C1 = PC_GRP_3;
-            port->cntrl0 = CNTRL_GRP_2;
-            port->cntrl1 = CNTRL_GRP_3;
+            phasing_matrix->port.A0 = PA_GRP_2;
+            phasing_matrix->port.A1 = PA_GRP_3;
+            phasing_matrix->port.B0 = PB_GRP_2;
+            phasing_matrix->port.B1 = PB_GRP_3;
+            phasing_matrix->port.C0 = PC_GRP_2;
+            phasing_matrix->port.C1 = PC_GRP_3;
+            phasing_matrix->port.cntrl0 = CNTRL_GRP_2;
+            phasing_matrix->port.cntrl1 = CNTRL_GRP_3;
             break;
         case 3:
-            port->A0 = PA_GRP_4;
-            port->A1 = PA_GRP_3;
-            port->B0 = PB_GRP_4;
-            port->B1 = PB_GRP_3;
-            port->C0 = PC_GRP_4;
-            port->C1 = PC_GRP_3;
-            port->cntrl0 = CNTRL_GRP_4;
-            port->cntrl1 = CNTRL_GRP_3;
+            phasing_matrix->port.A0 = PA_GRP_4;
+            phasing_matrix->port.A1 = PA_GRP_3;
+            phasing_matrix->port.B0 = PB_GRP_4;
+            phasing_matrix->port.B1 = PB_GRP_3;
+            phasing_matrix->port.C0 = PC_GRP_4;
+            phasing_matrix->port.C1 = PC_GRP_3;
+            phasing_matrix->port.cntrl0 = CNTRL_GRP_4;
+            phasing_matrix->port.cntrl1 = CNTRL_GRP_3;
             break;
-        default:
-            fprintf(stderr, "Invalid radar number %d", radar);
-            return -1;
     }
     return 0;
 }
 
-int32_t set_WE(uint32_t base, int32_t onoff, int32_t radar){
-    int32_t temp;
-    struct Port port;
+void disable_write(struct DIO const *phasing_matrix) {
+    uint8_t temp;
 
-    temp = set_ports(radar, & port);
+    temp = in8(phasing_matrix->base_address + phasing_matrix->port.C0);
+    out8(phasing_matrix->base_address + phasing_matrix->port.C0, temp & 0xfe);
+}
 
-    if(temp < 0) {
-        printf("Invalid radar number");
-    }
+void enable_write(struct DIO const *phasing_matrix) {
+    uint8_t temp;
 
-#ifndef __QNX__
-    printf("Debug linux, base: %d", base);
-#endif
-
-    if(onoff == WRITE_DISABLE_BIT) {
-#ifdef __QNX__
-        temp = in8(base + port.C0);
-        out8(base + port.C0, temp & 0xfe);
-#else
-        printf("Reset Write Enable Bit");
-#endif
-    }
-    if(onoff == WRITE_ENABLE_BIT) {
-#ifdef __QNX__
-        temp=in8(base + port.C0);
-        out8(base + port.C0, temp | 0x01);
-#else
-        printf("Set Write Enable Bit");
-#endif
-    }
-
-    return 0;
+    temp=in8(phasing_matrix->base_address + phasing_matrix->port.C0);
+    out8(phasing_matrix->base_address + phasing_matrix->port.C0, temp | 0x01);
 }
 
 int32_t set_RW(uint32_t base, int32_t rw, int32_t radar) {
     int32_t temp;
     struct Port port;
 
-    temp = set_ports(radar, &port);
+    temp = set_ports(&port);
     if(temp < 0) {
         printf("Invalid radar number");
     }
@@ -124,7 +105,7 @@ int32_t set_SA(uint32_t base, int32_t sa, int32_t radar){
     int32_t temp;
     struct Port port;
 
-    temp = set_ports(radar, & port);
+    temp = set_ports(&port);
     if(temp < 0) {
         printf("Invalid radar number");
     }
@@ -199,7 +180,7 @@ int32_t beam_code(uint32_t base, int32_t code, int32_t radar) {
     int32_t temp;
     struct Port port;
 
-    temp = set_ports(radar, &port);
+    temp = set_ports(&port);
     if(temp < 0) {
         printf("Invalid radar number");
     }
@@ -268,7 +249,7 @@ int32_t select_card(uint32_t base, int32_t address, int32_t radar) {
     nsleep.tv_nsec=5000;
 
 
-    temp = set_ports(radar, &port);
+    temp = set_ports(&port);
     if(temp < 0) {
         printf("Invalid radar number");
     }
@@ -313,7 +294,7 @@ int32_t write_attenuators(uint32_t base, int32_t card, int32_t code, int32_t dat
     int32_t temp;
     struct Port port;
 
-    temp = set_ports(radar, &port);
+    temp = set_ports(&port);
     if(temp < 0) {
         printf("Invalid radar number");
     }
@@ -352,8 +333,8 @@ int32_t write_attenuators(uint32_t base, int32_t card, int32_t code, int32_t dat
     out8(base + port.cntrl1, 0x01);
 #endif
     // toggle write enable bit
-    set_WE(base, WRITE_ENABLE_BIT, radar);
-    set_WE(base, WRITE_DISABLE_BIT, radar);
+    enable_write(NULL);
+    disable_write(NULL);
     // reset CH1, PortA and PortB to inputs
 #ifdef __QNX__
     out8(base + port.cntrl1, 0x93);
@@ -387,7 +368,7 @@ int32_t verify_attenuators(uint32_t base, int32_t card, int32_t code, int32_t da
     int32_t temp;
     struct Port port;
 
-    temp = set_ports(radar, &port);
+    temp = set_ports(&port);
     if(temp < 0) {
         printf("Invalid radar number");
     }
@@ -432,7 +413,7 @@ int32_t write_data(uint32_t base, int32_t card, int32_t code, int32_t data, int3
     int32_t temp;
     struct Port port;
 
-    temp = set_ports(radar, &port);
+    temp = set_ports(&port);
     if(temp < 0) {
         printf("Invalid radar number");
     }
@@ -472,8 +453,8 @@ int32_t write_data(uint32_t base, int32_t card, int32_t code, int32_t data, int3
 #endif
 
     // toggle write enable bit
-    set_WE(base, WRITE_ENABLE_BIT, radar);
-    set_WE(base, WRITE_DISABLE_BIT, radar);
+    enable_write(NULL);
+    disable_write(NULL);
     // reset CH1, PortA and PortB to inputs
 #ifdef __QNX__
     out8(base + port.cntrl1, 0x93);
@@ -511,7 +492,7 @@ int32_t verify_data(uint32_t base, int32_t card, int32_t code, int32_t data, int
     int32_t temp;
     struct Port port;
 
-    temp = set_ports(radar, &port);
+    temp = set_ports(&port);
     if(temp < 0) {
         printf("Invalid radar number");
     }

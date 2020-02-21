@@ -30,10 +30,11 @@ struct DIO{
     struct Port port;
 };
 
-int32_t set_ports(int32_t radar, struct Port * port);
+int32_t set_ports(struct DIO *phasing_matrix);
 
 /*-SET WRITE ENABLE BIT-------------------------------------------------------*/
-int32_t set_WE(uint32_t base, int32_t onoff, int32_t radar);
+void disable_write(struct DIO const *phasing_matrix);
+void enable_write(struct DIO const *phasing_matrix);
 /*-SET READ/WRITE BIT-------------------------------------------------------*/
 int32_t set_RW(uint32_t base, int32_t rw, int32_t radar);
 
