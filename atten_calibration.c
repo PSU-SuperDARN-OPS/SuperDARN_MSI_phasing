@@ -198,7 +198,7 @@ int main(int argc, char **argv) {
           set_RW(IOBASE,WRITE,radar);
           sleep(1);
         printf("Set Read\n");
-          set_RW(IOBASE,READ,radar);
+          select_read(IOBASE,READ,radar);
           sleep(1);
         printf("Set switches \n");
           set_SA(IOBASE,SWITCHES,radar);

@@ -38,8 +38,10 @@ int32_t set_ports(struct DIO *phasing_matrix);
 /*-SET WRITE ENABLE BIT-------------------------------------------------------*/
 void disable_write(struct DIO const *phasing_matrix);
 void enable_write(struct DIO const *phasing_matrix);
+
 /*-SET READ/WRITE BIT-------------------------------------------------------*/
-int32_t set_RW(uint32_t base, int32_t rw, int32_t radar);
+void select_read(struct DIO const *phasing_matrix);
+void select_write(struct DIO const *phasing_matrix);
 
 /*-SET SWITCHED/ATTEN BIT-------------------------------------------------------*/
 int32_t set_SA(uint32_t base, int32_t sa, int32_t radar);
