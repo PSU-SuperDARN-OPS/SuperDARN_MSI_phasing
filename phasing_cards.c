@@ -58,14 +58,14 @@ void disable_write(struct DIO const *phasing_matrix) {
     uint8_t temp;
 
     temp = in8(phasing_matrix->base_address + phasing_matrix->port.C0);
-    out8(phasing_matrix->base_address + phasing_matrix->port.C0, temp & ~WRITE_ENABLE_BIT);
+    out8(phasing_matrix->base_address + phasing_matrix->port.C0, temp & WRITE_DISABLE_MASK);
 }
 
 void enable_write(struct DIO const *phasing_matrix) {
     uint8_t temp;
 
-    temp=in8(phasing_matrix->base_address + phasing_matrix->port.C0);
-    out8(phasing_matrix->base_address + phasing_matrix->port.C0, temp | WRITE_ENABLE_BIT);
+    temp = in8(phasing_matrix->base_address + phasing_matrix->port.C0);
+    out8(phasing_matrix->base_address + phasing_matrix->port.C0, temp | WRITE_ENABLE_MASK);
 }
 
 int32_t set_RW(uint32_t base, int32_t rw, int32_t radar) {
@@ -77,25 +77,23 @@ int32_t set_RW(uint32_t base, int32_t rw, int32_t radar) {
         printf("Invalid radar number");
     }
 
-#ifndef __QNX__
     printf("Debug linux, base: %d", base);
-#endif
+
 
     if (rw == READ_SELECT_BIT) {
-#ifdef __QNX__
+
         temp = in8(base + port.C0);
         out8(base + port.C0, temp & 0xbf);
-#else
+
         printf("Reset Read Bit");
-#endif
+
     }
     if (rw == WRITE_SELECT_BIT) {
-#ifdef __QNX__
+
         temp = in8(base + port.C0);
         out8(base + port.C0, temp | 0x40);
-#else
+
         printf("Set Write Bit");
-#endif
     }
 
     return 0;

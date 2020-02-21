@@ -13,6 +13,9 @@ const uint_fast8_t WRITE_SELECT_BIT = 1;
 const uint_fast8_t WRITE_ENABLE_BIT = 1;
 const uint_fast8_t WRITE_DISABLE_BIT = 0;
 
+const uint_fast8_t WRITE_ENABLE_MASK = 1 << 0;
+const uint_fast8_t WRITE_DISABLE_MASK = ~(1 << 0);
+
 struct Port{
     uintptr_t A0;
     uintptr_t A1;
