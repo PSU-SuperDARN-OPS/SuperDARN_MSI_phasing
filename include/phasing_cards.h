@@ -14,14 +14,20 @@ const uint_fast8_t WRITE_ENABLE_BIT = 1;
 const uint_fast8_t WRITE_DISABLE_BIT = 0;
 
 struct Port{
-    uint32_t A0;
-    uint32_t A1;
-    uint32_t B0;
-    uint32_t B1;
-    uint32_t C0;
-    uint32_t C1;
-    uint32_t cntrl0;
-    uint32_t cntrl1;
+    uintptr_t A0;
+    uintptr_t A1;
+    uintptr_t B0;
+    uintptr_t B1;
+    uintptr_t C0;
+    uintptr_t C1;
+    uintptr_t cntrl0;
+    uintptr_t cntrl1;
+};
+
+struct DIO{
+    uint_fast8_t radar_number;
+    uintptr_t base_address;
+    struct Port port;
 };
 
 int32_t set_ports(int32_t radar, struct Port * port);
