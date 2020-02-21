@@ -2,16 +2,16 @@
 // Created by bgklug on 8/2/19.
 //
 
-#ifndef PHASINGCALIBRATION_COMMON_FUNCTIONS_H
-#define PHASINGCALIBRATION_COMMON_FUNCTIONS_H
+#ifndef PHASING_CARDS_H
+#define PHASING_CARDS_H
 #include <stdint.h>
 
-#define SWITCHES 0
-#define ATTEN    1
-#define READ     0
-#define WRITE    1
-#define ON       1
-#define OFF      0
+const uint_fast8_t PHASE_DELAY_SELECT_BIT = 0;
+const uint_fast8_t ATTENUATOR_SELECT_BIT = 1;
+const uint_fast8_t READ_SELECT_BIT = 0;
+const uint_fast8_t WRITE_SELECT_BIT = 1;
+const uint_fast8_t WRITE_ENABLE_BIT = 1;
+const uint_fast8_t WRITE_DISABLE_BIT = 0;
 
 struct Port{
     uint32_t A0;
@@ -62,4 +62,4 @@ int32_t read_data(uint32_t base,int32_t radar);
 
 
 
-#endif //PHASINGCALIBRATION_COMMON_FUNCTIONS_H
+#endif //PHASING_CARDS_H

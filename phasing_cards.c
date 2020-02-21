@@ -13,14 +13,6 @@
 #include "include/registers.h"
 #include "include/phasing_cards.h"
 
-#define SWITCHES 0
-#define ATTEN    1
-#define READ     0
-#define WRITE    1
-#define ON       1
-#define OFF      0
-
-
 
 int32_t set_ports(int32_t radar, struct Port * port){
     switch(radar) {
@@ -75,7 +67,7 @@ int32_t set_WE(uint32_t base, int32_t onoff, int32_t radar){
     printf("Debug linux, base: %d", base);
 #endif
 
-    if(onoff == OFF) {
+    if(onoff == WRITE_DISABLE_BIT) {
 #ifdef __QNX__
         temp = in8(base + port.C0);
         out8(base + port.C0, temp & 0xfe);
@@ -83,7 +75,7 @@ int32_t set_WE(uint32_t base, int32_t onoff, int32_t radar){
         printf("Reset Write Enable Bit");
 #endif
     }
-    if(onoff == ON) {
+    if(onoff == WRITE_ENABLE_BIT) {
 #ifdef __QNX__
         temp=in8(base + port.C0);
         out8(base + port.C0, temp | 0x01);
@@ -108,7 +100,7 @@ int32_t set_RW(uint32_t base, int32_t rw, int32_t radar) {
     printf("Debug linux, base: %d", base);
 #endif
 
-    if (rw == READ) {
+    if (rw == READ_SELECT_BIT) {
 #ifdef __QNX__
         temp = in8(base + port.C0);
         out8(base + port.C0, temp & 0xbf);
@@ -116,7 +108,7 @@ int32_t set_RW(uint32_t base, int32_t rw, int32_t radar) {
         printf("Reset Read Bit");
 #endif
     }
-    if (rw == WRITE) {
+    if (rw == WRITE_SELECT_BIT) {
 #ifdef __QNX__
         temp = in8(base + port.C0);
         out8(base + port.C0, temp | 0x40);
@@ -141,7 +133,7 @@ int32_t set_SA(uint32_t base, int32_t sa, int32_t radar){
     printf("Debug linux, base: %d", base);
 #endif
 
-    if(sa == SWITCHES) {
+    if(sa == PHASE_DELAY_SELECT_BIT) {
 #ifdef __QNX__
         temp = in8(base + port.C0);
         out8(base + port.C0, temp & 0x7f);
@@ -149,7 +141,7 @@ int32_t set_SA(uint32_t base, int32_t sa, int32_t radar){
         printf("Reset Write Enable Bit");
 #endif
     }
-    if(sa == ATTEN) {
+    if(sa == ATTENUATOR_SELECT_BIT) {
 #ifdef __QNX__
         temp = in8(base + port.C0);
         out8(base + port.C0, temp | 0x80);
@@ -337,9 +329,9 @@ int32_t write_attenuators(uint32_t base, int32_t card, int32_t code, int32_t dat
     temp = select_card(base, card, radar);
     // choose the beam code to write (output appropriate EEPROM address
     temp = beam_code(base, code, radar);
-    set_SA(base, ATTEN, radar);
+    set_SA(base, ATTENUATOR_SELECT_BIT, radar);
     // enable writing
-    set_RW(base, WRITE, radar);
+    set_RW(base, WRITE_SELECT_BIT, radar);
     // set CH1, PortA and Port B to output for writing
 #ifdef __QNX__
     out8(base + port.cntrl1, 0x81);
@@ -360,15 +352,15 @@ int32_t write_attenuators(uint32_t base, int32_t card, int32_t code, int32_t dat
     out8(base + port.cntrl1, 0x01);
 #endif
     // toggle write enable bit
-    set_WE(base, ON, radar);
-    set_WE(base, OFF, radar);
+    set_WE(base, WRITE_ENABLE_BIT, radar);
+    set_WE(base, WRITE_DISABLE_BIT, radar);
     // reset CH1, PortA and PortB to inputs
 #ifdef __QNX__
     out8(base + port.cntrl1, 0x93);
     out8(base + port.cntrl1, 0x13);
 #endif
     // disable writing
-    set_RW(base, READ, radar);
+    set_RW(base, READ_SELECT_BIT, radar);
     usleep(3000);
     // verify written data
     // read PortA and PortB to see if EEPROM output is same as progammed
@@ -412,9 +404,9 @@ int32_t verify_attenuators(uint32_t base, int32_t card, int32_t code, int32_t da
     temp = select_card(base, card, radar);
     // choose the beam code to write (output appropriate EEPROM address
     temp = beam_code(base, code, radar);
-    set_SA(base, ATTEN, radar);
+    set_SA(base, ATTENUATOR_SELECT_BIT, radar);
     // disable writing
-    set_RW(base, READ, radar);
+    set_RW(base, READ_SELECT_BIT, radar);
     usleep(10000);
     // verify written data
     // read PortA and PortB to see if EEPROM output is same as progammed
@@ -456,9 +448,9 @@ int32_t write_data(uint32_t base, int32_t card, int32_t code, int32_t data, int3
     temp = select_card(base, card, radar);
     // choose the beam code to write (output appropriate EEPROM address
     temp = beam_code(base, code, radar);
-    set_SA(base, SWITCHES, radar);
+    set_SA(base, PHASE_DELAY_SELECT_BIT, radar);
     // enable writing
-    set_RW(base, WRITE, radar);
+    set_RW(base, WRITE_SELECT_BIT, radar);
     // set CH1, PortA and Port B to output for writing
 #ifdef __QNX__
     out8(base + port.cntrl1, 0x81);
@@ -480,15 +472,15 @@ int32_t write_data(uint32_t base, int32_t card, int32_t code, int32_t data, int3
 #endif
 
     // toggle write enable bit
-    set_WE(base, ON, radar);
-    set_WE(base, OFF, radar);
+    set_WE(base, WRITE_ENABLE_BIT, radar);
+    set_WE(base, WRITE_DISABLE_BIT, radar);
     // reset CH1, PortA and PortB to inputs
 #ifdef __QNX__
     out8(base + port.cntrl1, 0x93);
     out8(base + port.cntrl1, 0x13);
 #endif
     // disable writing
-    set_RW(base, READ, radar);
+    set_RW(base, READ_SELECT_BIT, radar);
     usleep(10000);
     // verify written data
     // read PortA and PortB to see if EEPROM output is same as progammed
@@ -534,7 +526,7 @@ int32_t verify_data(uint32_t base, int32_t card, int32_t code, int32_t data, int
     temp = select_card(base, card, radar);
     // choose the beam code to write (output appropriate EEPROM address
     temp = beam_code(base, code, radar);
-    set_SA(base, SWITCHES, radar);
+    set_SA(base, PHASE_DELAY_SELECT_BIT, radar);
     // bit reverse the data
     data = reverse_bits(data);
     if (print) printf("    Code to write is %d\n", data);
@@ -544,7 +536,7 @@ int32_t verify_data(uint32_t base, int32_t card, int32_t code, int32_t data, int
     out8(base + port.cntrl1, 0x13);
 #endif
     // disable writing
-    set_RW(base, READ, radar);
+    set_RW(base, READ_SELECT_BIT, radar);
     usleep(10000);
     // verify written data
     // read PortA and PortB to see if EEPROM output is same as progammed
