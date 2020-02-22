@@ -44,7 +44,8 @@ void select_read(struct DIO const *phasing_matrix);
 void select_write(struct DIO const *phasing_matrix);
 
 /*-SET SWITCHED/ATTEN BIT-------------------------------------------------------*/
-int32_t set_SA(uint32_t base, int32_t sa, int32_t radar);
+void select_phase(struct DIO const *phasing_matrix);
+void select_attenuator(struct DIO const *phasing_matrix)
 
 
 /*-REVERSE_BITS-------------------------------------------------------*/
