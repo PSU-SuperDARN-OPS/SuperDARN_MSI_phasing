@@ -45,7 +45,7 @@ void select_write(struct DIO const *phasing_matrix);
 
 /*-SET SWITCHED/ATTEN BIT-------------------------------------------------------*/
 void select_phase(struct DIO const *phasing_matrix);
-void select_attenuator(struct DIO const *phasing_matrix)
+void select_attenuator(struct DIO const *phasing_matrix);
 
 
 /*-REVERSE_BITS-------------------------------------------------------*/
