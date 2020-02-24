@@ -15,6 +15,10 @@ const uint_fast8_t WRITE_DISABLE_BIT = 0;
 
 const uint_fast8_t WRITE_ENABLE_MASK = 1 << 0;
 const uint_fast8_t WRITE_DISABLE_MASK = ~(1 << 0);
+const uint_fast8_t READ_SELECT_MASK = 0xbf;
+const uint_fast8_t WRITE_SELECT_MASK = 0x40;
+const uint_fast8_t PHASE_SELECT_MASK = 0x7f;
+const uint_fast8_t ATTENUATOR_SELECT_MASK = 0x80;
 
 struct Port{
     uintptr_t A0;

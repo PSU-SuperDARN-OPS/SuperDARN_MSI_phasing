@@ -15,13 +15,6 @@
 #include "include/registers.h"
 #include "include/phasing_cards.h"
 
-
-void enable_write(const struct DIO *phasing_matrix);
-
-void select_write(struct DIO const *phasing_matrix);
-
-void select_attenuator(struct DIO const *phasing_matrix);
-
 int32_t set_ports(struct DIO *phasing_matrix) {
     switch(phasing_matrix->radar_number) {
         case 1:
@@ -76,21 +69,21 @@ void select_read(struct DIO const *phasing_matrix) {
     uint8_t temp;
 
     temp = in8(phasing_matrix->base_address + phasing_matrix->port.C0);
-    out8(phasing_matrix->base_address + phasing_matrix->port.C0, temp & 0xbf);
+    out8(phasing_matrix->base_address + phasing_matrix->port.C0, temp & READ_SELECT_MASK);
 }
 
 void select_write(struct DIO const *phasing_matrix) {
     uint8_t temp;
 
     temp = in8(phasing_matrix->base_address + phasing_matrix->port.C0);
-    out8(phasing_matrix->base_address + phasing_matrix->port.C0, temp | 0x40);
+    out8(phasing_matrix->base_address + phasing_matrix->port.C0, temp | WRITE_SELECT_MASK);
 }
 
 void select_phase(struct DIO const *phasing_matrix) {
     uint8_t temp;
 
     temp = in8(phasing_matrix->base_address + phasing_matrix->port.C0);
-    out8(phasing_matrix->base_address + phasing_matrix->port.C0, temp & 0x7f);
+    out8(phasing_matrix->base_address + phasing_matrix->port.C0, temp & PHASE_SELECT_MASK);
 
 }
 
@@ -98,7 +91,7 @@ void select_attenuator(struct DIO const *phasing_matrix) {
     uint8_t temp;
 
     temp = in8(phasing_matrix->base_address + phasing_matrix->port.C0);
-    out8(phasing_matrix->base_address + phasing_matrix->port.C0, temp | 0x80);
+    out8(phasing_matrix->base_address + phasing_matrix->port.C0, temp | ATTENUATOR_SELECT_MASK);
 }
 
 int32_t reverse_bits(int32_t data) {
