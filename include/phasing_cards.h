@@ -6,19 +6,19 @@
 #define PHASING_CARDS_H
 #include <stdint.h>
 
-const uint_fast8_t PHASE_DELAY_SELECT_BIT = 0;
-const uint_fast8_t ATTENUATOR_SELECT_BIT = 1;
-const uint_fast8_t READ_SELECT_BIT = 0;
-const uint_fast8_t WRITE_SELECT_BIT = 1;
-const uint_fast8_t WRITE_ENABLE_BIT = 1;
-const uint_fast8_t WRITE_DISABLE_BIT = 0;
+static const uint_fast8_t PHASE_DELAY_SELECT_BIT = 0;
+static const uint_fast8_t ATTENUATOR_SELECT_BIT = 1;
+static const uint_fast8_t READ_SELECT_BIT = 0;
+static const uint_fast8_t WRITE_SELECT_BIT = 1;
+static const uint_fast8_t WRITE_ENABLE_BIT = 1;
+static const uint_fast8_t WRITE_DISABLE_BIT = 0;
 
-const uint_fast8_t WRITE_ENABLE_MASK = 1 << 0;
-const uint_fast8_t WRITE_DISABLE_MASK = ~(1 << 0);
-const uint_fast8_t READ_SELECT_MASK = 0xbf;
-const uint_fast8_t WRITE_SELECT_MASK = 0x40;
-const uint_fast8_t PHASE_SELECT_MASK = 0x7f;
-const uint_fast8_t ATTENUATOR_SELECT_MASK = 0x80;
+static const uint_fast8_t WRITE_ENABLE_MASK = 0x01;
+static const uint_fast8_t WRITE_DISABLE_MASK = 0xfe;
+static const uint_fast8_t READ_SELECT_MASK = 0xbf;
+static const uint_fast8_t WRITE_SELECT_MASK = 0x40;
+static const uint_fast8_t PHASE_SELECT_MASK = 0x7f;
+static const uint_fast8_t ATTENUATOR_SELECT_MASK = 0x80;
 
 struct Port{
     uintptr_t A0;
@@ -51,7 +51,6 @@ void select_write(struct DIO const *phasing_matrix);
 void select_phase(struct DIO const *phasing_matrix);
 void select_attenuator(struct DIO const *phasing_matrix);
 
-
 /*-REVERSE_BITS-------------------------------------------------------*/
 int32_t reverse_bits(int32_t data);
 /*-GET_DEALY---------------------------------------------------------*/
@@ -72,11 +71,6 @@ int32_t write_data(struct DIO const *phasing_matrix, int32_t card, int32_t code,
 
 /*-READ_DATA---------------------------------------------------------*/
 int32_t read_data(uint32_t base,int32_t radar);
-
-
-
-
-
 
 
 #endif //PHASING_CARDS_H

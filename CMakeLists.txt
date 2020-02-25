@@ -25,8 +25,9 @@ add_executable(write_final_beamcodes write_final_beamcodes.c phasing_cards.c
         _open_PLX9050.c _prog_conventions.c utils.c)
 target_link_libraries(write_final_beamcodes m)
 
-add_executable(optimize_beam_programming optimize_beam_programming.c MSI_functions.c
-        vna_functions.c utils.c phasing_cards.c _open_PLX9050.c qnx_functions_mock.c include/qnx_functions_mock.h)
+add_executable(optimize_beam_programming optimize_beam_programming.c MSI_functions.c include/MSI_functions.h
+        vna_functions.c include/vna_functions.h utils.c include/utils.h phasing_cards.c include/phasing_cards.h
+        _open_PLX9050.c include/_open_PLX9050.h qnx_functions_mock.c include/qnx_functions_mock.h)
 target_link_libraries(optimize_beam_programming m)
 target_compile_options(optimize_beam_programming PRIVATE -Wall -Wextra -Wpedantic -Wconversion)
 
