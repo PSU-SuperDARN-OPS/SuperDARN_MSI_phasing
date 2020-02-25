@@ -40,7 +40,7 @@
 
 /* variables defined elsewhere */
 extern int32_t MSI_max_angles;
-extern int32_t MSI_phasecodes;
+extern uint32_t MSI_phasecodes;
 extern int32_t MSI_num_angles;
 extern int32_t MSI_num_cards;
 extern double MSI_bm_sep_degrees;
@@ -164,7 +164,7 @@ int main(int argc, char **argv) {
 
     struct DIO phasing_matrix;
     int temp, pci_handle, IRQ;
-    unsigned int mmap_io_ptr, CLOCK_RES;
+    unsigned int mmap_io_ptr;
 
     /***************************************************************
      * COMMAND LINE ARGUMENTS
@@ -223,6 +223,7 @@ int main(int argc, char **argv) {
                 "Required arguments -r radarname, -n dio radar number and -c card number\n Consult the help using the -h option\n");
         return 1;
     }
+
     caldir = getenv("MSI_CALDIR");
     if (caldir == NULL) {
         caldir = strdup("/data/cal/");
@@ -643,13 +644,13 @@ int main(int argc, char **argv) {
 
                 /* Take a measurement at best phasecode and acode */
                 while (wflag > 0) {
-                    rval = take_data(sock, b, rnum, c, best_phasecode, best_attencode, opwr_mag, ophase, otdelay,
+                    rval = take_data(sock, b, &phasing_matrix, c, best_phasecode, best_attencode, opwr_mag, ophase, otdelay,
                                      wait_ms, sshflag, verbose, needed_tdelay, MSI_target_pwr_dB);
                     if (rval != 0) {
                         fprintf(stderr, "Error: Take data failed!\n");
                         exit(rval);
                     }
-                    rval = take_data(sock, b, rnum, c, best_phasecode, best_attencode, pwr_mag, phase, tdelay, wait_ms,
+                    rval = take_data(sock, b, &phasing_matrix, c, best_phasecode, best_attencode, pwr_mag, phase, tdelay, wait_ms,
                                      sshflag, verbose, needed_tdelay, MSI_target_pwr_dB);
                     if (rval != 0) {
                         fprintf(stderr, "Error: Take data failed!\n");
@@ -713,7 +714,7 @@ int main(int argc, char **argv) {
                             ac = ac - acode_step;
                             if (ac < 0) ac = 0;
                             if (ac > 63) ac = 63;
-                            rval = take_data(sock, b, rnum, c, best_phasecode, ac, pwr_mag, phase, tdelay, wait_ms,
+                            rval = take_data(sock, b, &phasing_matrix, c, best_phasecode, ac, pwr_mag, phase, tdelay, wait_ms,
                                              sshflag, verbose, needed_tdelay, MSI_target_pwr_dB);
                             if (rval != 0) {
                                 fprintf(stderr, "Error: Take data failed!\n");
@@ -767,7 +768,7 @@ int main(int argc, char **argv) {
                         if (acode_min < 0) acode_min = 0;
                         if (acode_max > 63) acode_max = 63;
                         for (ac = acode_min; ac <= acode_max; ac++) {
-                            rval = take_data(sock, b, rnum, c, best_phasecode, ac, pwr_mag, phase, tdelay, wait_ms,
+                            rval = take_data(sock, b, &phasing_matrix, c, best_phasecode, ac, pwr_mag, phase, tdelay, wait_ms,
                                              sshflag, verbose, needed_tdelay, MSI_target_pwr_dB);
                             if (rval != 0) {
                                 fprintf(stderr, "Error: Take data failed!\n");
@@ -798,7 +799,7 @@ int main(int argc, char **argv) {
                                 MSI_target_pwr_dB);
                     }
 
-                    rval = take_data(sock, b, rnum, c, best_phasecode, best_attencode, pwr_mag, phase, tdelay, wait_ms,
+                    rval = take_data(sock, b, &phasing_matrix, c, best_phasecode, best_attencode, pwr_mag, phase, tdelay, wait_ms,
                                      sshflag, verbose, needed_tdelay, MSI_target_pwr_dB);
                     if (rval != 0) {
                         fprintf(stderr, "Error: Take data failed!\n");
@@ -851,7 +852,7 @@ int main(int argc, char **argv) {
                             pc = pc + pcode_step;
                             if (pc < 0) pc = 0;
                             if (pc >= MSI_phasecodes) pc = MSI_phasecodes - 1;
-                            rval = take_data(sock, b, rnum, c, pc, best_attencode, pwr_mag, phase, tdelay, wait_ms,
+                            rval = take_data(sock, b, &phasing_matrix, c, pc, best_attencode, pwr_mag, phase, tdelay, wait_ms,
                                              sshflag, verbose, needed_tdelay, MSI_target_pwr_dB);
                             if (rval != 0) {
                                 fprintf(stderr, "Error: Take data failed!\n");
@@ -938,7 +939,7 @@ int main(int argc, char **argv) {
                     fprintf(stdout, "        Optimizing phasecode.... %d measurements needed\n", pcode_range);
 
                     for (pc = pcode_min; pc <= pcode_max; pc++) {
-                        rval = take_data(sock, b, rnum, c, pc, best_attencode, pwr_mag, phase, tdelay, wait_ms, sshflag,
+                        rval = take_data(sock, b, &phasing_matrix, c, pc, best_attencode, pwr_mag, phase, tdelay, wait_ms, sshflag,
                                          verbose, needed_tdelay, MSI_target_pwr_dB);
                         if (rval != 0) {
                             fprintf(stderr, "Error: Take data failed!\n");
@@ -964,7 +965,7 @@ int main(int argc, char **argv) {
                         }
                     }
                 }
-                rval = take_data(sock, b, rnum, c, best_phasecode, best_attencode, pwr_mag, phase, tdelay, wait_ms,
+                rval = take_data(sock, b, &phasing_matrix, c, best_phasecode, best_attencode, pwr_mag, phase, tdelay, wait_ms,
                                  sshflag, verbose, needed_tdelay, MSI_target_pwr_dB);
                 if (rval != 0) {
                     fprintf(stderr, "Error: Take data failed!\n");
@@ -1212,7 +1213,7 @@ int main(int argc, char **argv) {
                             opt_acode[b], opt_gain_min[b], opt_gain_max[b], opt_gain_ave[b], opt_gain_target[b],
                             fabs(opt_gain_ave[b] - opt_gain_target[b]));
                 }
-                rval = MSI_dio_write_memory(rnum, b, c, opt_pcode[b], opt_acode[b]);
+                rval = MSI_dio_write_memory(&phasing_matrix, b, c, opt_pcode[b], opt_acode[b]);
                 if (WIFSIGNALED(rval) && (WTERMSIG(rval) == SIGINT || WTERMSIG(rval) == SIGQUIT)) return rval;
 
             }

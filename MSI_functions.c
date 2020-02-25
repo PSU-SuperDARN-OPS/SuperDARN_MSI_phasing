@@ -18,7 +18,7 @@
 #include "include/phasing_cards.h"
 #include "include/_open_PLX9050.h"
 /* settings which I could probably move to an ini file */
-int32_t    MSI_phasecodes=8192;
+uint32_t    MSI_phasecodes=8192;
 int32_t    MSI_num_angles=24;
 int32_t    MSI_max_angles=32;
 int32_t    MSI_num_cards=20;
@@ -75,7 +75,7 @@ int32_t MSI_attencode(double target_dB) {
 
     for (i = 5; i >= 0; i--) {
         if ((remain - MSI_atten_bits_dB[i]) > 0.0) {
-            attencode += pow(2, i);
+            attencode += (int32_t)pow(2, i);
             remain -= MSI_atten_bits_dB[i];
         }
     }
@@ -92,7 +92,7 @@ int32_t MSI_phasecode(double target_nsec) {
 
     for (i = 12; i >= 0; i--) {
         if ((remain - MSI_timedelay_bits_nsecs[i]) > 0.0) {
-            phasecode += pow(2, i);
+            phasecode += (int32_t)pow(2, i);
             remain -= MSI_timedelay_bits_nsecs[i];
         }
     }

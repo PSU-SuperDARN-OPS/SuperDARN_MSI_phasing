@@ -139,13 +139,14 @@ int button_command(int sock, char *command, int delay_ms, int verbose) {
   return 0;
 }
 
-int take_data(int sock,int b,int rnum,int c, int p,int a, double *pwr_mag[VNA_FREQS],double *phase[VNA_FREQS],double *tdelay[VNA_FREQS],
-              int wait_ms,int ssh_flag,int verbose,double target_tdelay,double target_pwr){
+int take_data(int sock, int b, const struct DIO *phasing_matrix, int c, int p, int a, double **pwr_mag, double **phase,
+              double **tdelay,
+              int wait_ms, int ssh_flag, int verbose, double target_tdelay, double target_pwr){
   int t,rval,takeidx;
   char command[128]="";
  
   for(takeidx=0; takeidx < 5; takeidx++) {
-  	rval= MSI_dio_write_memory(rnum, b, c, p, a);
+  	rval= MSI_dio_write_memory(phasing_matrix, b, c, p, a);
 	if(rval == 0) {
 		break;
 	}
