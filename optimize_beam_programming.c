@@ -1212,7 +1212,7 @@ int main(int argc, char **argv) {
                             opt_acode[b], opt_gain_min[b], opt_gain_max[b], opt_gain_ave[b], opt_gain_target[b],
                             fabs(opt_gain_ave[b] - opt_gain_target[b]));
                 }
-                rval = MSI_dio_write_memory(b, rnum, c, opt_pcode[b], opt_acode[b], verbose);
+                rval = MSI_dio_write_memory(rnum, b, c, opt_pcode[b], opt_acode[b]);
                 if (WIFSIGNALED(rval) && (WTERMSIG(rval) == SIGINT || WTERMSIG(rval) == SIGQUIT)) return rval;
 
             }

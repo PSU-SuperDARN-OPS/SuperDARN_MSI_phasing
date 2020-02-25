@@ -122,66 +122,26 @@ double MSI_timedelay_needed(double angle_degrees,double spacing_meters,int32_t c
     return needed;
 }
 
-int MSI_dio_write_memory(int code, int rnum, int card, int phasecode, int attencode, int verbose) {
-    int temp, pci_handle, IRQ;
-    unsigned int mmap_io_ptr, IOBASE;
+int MSI_dio_write_memory(struct DIO const *phasing_matrix, int code, int card, int phasecode, int attencode) {
+
     int rval_d, rval_a;
     int try = 3;
     int uwait = 10;
-    struct Port port;
-
-    verbose = 2;
-
-    if (verbose > 2) fprintf(stdout, "Take Data: card:%d code:%d phasecode:%d attencode:%d\n", card, code, phasecode, attencode);
 
     if (code >= MSI_phasecodes) {
         fprintf(stderr, "Bad memory address: %d\n", code);
         return 1;
     }
 
-    temp = set_ports(&port);
-    if(temp < 0) {
-        printf("Invalid radar number");
-    }
-
-    /* OPEN THE PLX9656 AND GET LOCAL BASE ADDRESSES */
-    fprintf(stderr, "PLX9052 CONFIGURATION ********************\n");
-    temp = _open_PLX9052(&pci_handle, &mmap_io_ptr, &IRQ, 1);
-    IOBASE = mmap_io_ptr;
-    if (temp == -1) {
-        fprintf(stderr, "	PLX9052 configuration failed");
-    } else {
-        fprintf(stderr, "	PLX9052 configuration successful!\n");
-    }
-    printf("IOBASE=%x\n", IOBASE);
-
-    /* INITIALIZE THE CARD FOR PROPER IO */
-#ifdef __QNX__
-    // GROUP 0 - PortA=output, PortB=output, PortClo=output, PortChi=output
-    out8(IOBASE + port.cntrl0, 0x80);
-    // GROUP 1 - PortAinput, PortB=input, PortClo=input, PortChi=output
-    out8(IOBASE + port.cntrl1, 0x93);
-    out8(IOBASE + port.A0, 0x00);
-    out8(IOBASE + port.B0, 0x00);
-    out8(IOBASE + port.C0, 0x00);
-    out8(IOBASE + port.A1, 0x00);
-    out8(IOBASE + port.B1, 0x00);
-    out8(IOBASE + port.cntrl0, 0x00);
-    out8(IOBASE + port.cntrl1, 0x13);
-    temp = in8(IOBASE + port.C1);
-    temp = temp & 0x0f;
-    printf("input on group 1, port c is %x\n", temp);
-#endif
-
     while (try > 0) {
-        rval_d = write_data(IOBASE, card, code, phasecode);
+        rval_d = write_data(phasing_matrix, card, code, phasecode);
 
         if (rval_d != 0) {
             fprintf(stderr, "Dio memory write data error, exiting\n");
             return rval_d;
         }
 
-        rval_a = write_attenuators(IOBASE, card, code, attencode);
+        rval_a = write_attenuators(phasing_matrix, card, code, attencode);
 
         if (rval_a != 0) {
             fprintf(stderr, "Dio memory write attenuator error, exiting\n");
@@ -190,14 +150,13 @@ int MSI_dio_write_memory(int code, int rnum, int card, int phasecode, int attenc
 
         usleep(uwait);
 
-        rval_a = verify_attenuators(IOBASE, card, code, attencode);
-        rval_d = verify_data(IOBASE, card, code, phasecode);
+        rval_d = verify_data(phasing_matrix, card, code, phasecode);
+        rval_a = verify_attenuators(phasing_matrix, card, code, attencode);
 
         if (rval_a != 0 || rval_d != 0) {
             fprintf(stderr, "Dio memory verify error, try again: %d, %d\n", rval_d, rval_a);
 
             uwait += 500;
-            verbose = 2;
             try--;
         } else {
             break;
