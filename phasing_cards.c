@@ -47,6 +47,8 @@ int32_t set_ports(struct DIO *phasing_matrix) {
             phasing_matrix->port.cntrl0 = CNTRL_GRP_4;
             phasing_matrix->port.cntrl1 = CNTRL_GRP_3;
             break;
+        default:
+            return -1;
     }
     return 0;
 }
@@ -128,7 +130,7 @@ float get_delay(int32_t code) {
     return delay;
 }
 
-int32_t beam_code(uint32_t base, int32_t code, int32_t radar) {
+int32_t beam_code(struct DIO const *phasing_matrix, int32_t code) {
     /* the beam code is 13 bits, pAD0 thru pAD12.  This code
        uses bits 0-7 of CH0, PortA, and bits 0-4 of CH0, PortB
        to output the beam code. Note: The beam code is an address
@@ -136,18 +138,7 @@ int32_t beam_code(uint32_t base, int32_t code, int32_t radar) {
        to ALL phasing cards.  If you are witing the EEPROM, then this
        be the beam code you are writing
     */
-
-    int32_t temp;
-    struct Port port;
-
-    temp = set_ports(&port);
-    if(temp < 0) {
-        printf("Invalid radar number");
-    }
-
-#ifndef __QNX__
-    printf("Debug linux, base: %d", base);
-#endif
+    uint16_t temp;
 
     // check if beam code is reasonable
     if ((code > 8192) | (code < 0)) {
@@ -159,41 +150,32 @@ int32_t beam_code(uint32_t base, int32_t code, int32_t radar) {
     code = reverse_bits(code);
     // set CH0, Port A to lowest 8 bits of beam code and output on PortA
     temp = code & 0xff;
-#ifdef __QNX__
-    out8(base + port.A0, temp);
-#else
-    printf("Set output on Port A to %d", temp);
-#endif
+
+    out8(phasing_matrix->base_address + phasing_matrix->port.A0, temp);
+
+
     // set CH0, Port B to upper 5 bits of beam code and output on PortB
     temp = code & 0x1f00;
     temp = temp >> 8;
-#ifdef __QNX__
-    out8(base + port.B0, temp);
-#else
-    printf("Set output on Port B to %d", temp);
-#endif
-    // verify that proper beam code was sent out
-#ifdef __QNX__
-    temp = in8(base + port.B0);
-    temp = (temp & 0x1f) << 8;
-    temp = temp + in8(base + port.A0);
-#else
-    temp = code;
-#endif
 
-    if (temp == code) {
-        return 0;
-    } else {
+    out8(phasing_matrix->base_address + phasing_matrix->port.B0, temp);
+
+    // verify that proper beam code was sent out
+
+    temp = in8(phasing_matrix->base_address + phasing_matrix->port.B0);
+    temp = (temp & 0x1f) << 8;
+    temp = temp + in8(phasing_matrix->base_address + phasing_matrix->port.A0);
+
+
+    if (temp != code) {
         fprintf(stderr, "BEAM CODE OUTPUT ERROR - requested code not sent\n");
         fflush(stderr);
         return -1;
     }
-
-
+    return 0;
 }
 
-int32_t select_card(uint32_t base, int32_t address, int32_t radar) {
-
+int32_t select_card(struct DIO const *phasing_matrix, int32_t address) {
     /* This code selects a card to address.  This can be used for
        writing data to the EEPROM, or to verify the output of the
        EEPROM. There are 20 cards in the phasing matrix, addresses
@@ -202,21 +184,6 @@ int32_t select_card(uint32_t base, int32_t address, int32_t radar) {
        programming purposes.
     */
     int32_t temp;
-    struct Port port;
-
-    struct 	timespec nsleep;
-    nsleep.tv_sec=0;
-    nsleep.tv_nsec=5000;
-
-
-    temp = set_ports(&port);
-    if(temp < 0) {
-        printf("Invalid radar number");
-    }
-
-#ifndef __QNX__
-    printf("Debug linux, base: %d", base);
-#endif
 
     // check if card address is reasonable
     if ((address > 31) | (address < 0)) {
@@ -228,20 +195,18 @@ int32_t select_card(uint32_t base, int32_t address, int32_t radar) {
     address = address << 1;
     // mask out bits not used for addressing the cards
     address = address & 0x3e;
-#ifdef __QNX__
+
     // check for other bits in CH0, PortC that may be on
-    temp = in8(base + port.C0);
+    temp = in8(phasing_matrix->base_address + phasing_matrix->port.C0);
     temp = temp & 0xc1;
     // add other bit of PortC to the address bits
     address = address + temp;
     // output the address and original other bits to PortC
-    out8(base + port.C0, address);
-    nanosleep(&nsleep, NULL); //TODO: see if this is necessary or if usleep would work
+    out8(phasing_matrix->base_address + phasing_matrix->port.C0, address);
+    usleep(3000);
     // verify the output
-    temp = in8(base + port.C0);
-#else
-    temp = address;
-#endif
+    temp = in8(phasing_matrix->base_address + phasing_matrix->port.C0);
+
     if (temp != address) {
         fprintf(stderr, "CARD SELECT OUTPUT ERROR - requested code not sent\n");
         fprintf(stderr, " code=%d\n", temp);
@@ -250,14 +215,8 @@ int32_t select_card(uint32_t base, int32_t address, int32_t radar) {
     return 0;
 }
 
-int32_t write_attenuators(uint32_t base, int32_t card, int32_t code, int32_t data, int32_t radar) {
+int32_t write_attenuators(const struct DIO *phasing_matrix, int32_t card, int32_t code, int32_t data) {
     int32_t temp;
-    struct Port port;
-
-    temp = set_ports(&port);
-    if(temp < 0) {
-        printf("Invalid radar number");
-    }
 
     // check that the data to write is valid
     if ((data > 63) | (data < 0)) {
@@ -267,53 +226,51 @@ int32_t write_attenuators(uint32_t base, int32_t card, int32_t code, int32_t dat
 
     data = data ^ 0x3f;
     // select card to write
-    temp = select_card(base, card, radar);
+    temp = select_card(phasing_matrix, card);
     // choose the beam code to write (output appropriate EEPROM address
-    temp = beam_code(base, code, radar);
-    select_attenuator(radar);
+    temp = beam_code(phasing_matrix, code);
+    select_attenuator(phasing_matrix);
     // enable writing
-    select_write(radar);
+    select_write(phasing_matrix);
     // set CH1, PortA and Port B to output for writing
-#ifdef __QNX__
-    out8(base + port.cntrl1, 0x81);
-#endif
+
+    out8(phasing_matrix->base_address + phasing_matrix->port.cntrl1, 0x81);
+
     // bit reverse the data
     data = reverse_bits(data);
     // apply the data to be written to PortA and PortB on CH1
     // set CH1, Port A to lowest 8 bits of data and output on PortA
     temp = data & 0xff;
-#ifdef __QNX__
-    out8(base + port.A1, temp);
-#endif
+
+    out8(phasing_matrix->base_address + phasing_matrix->port.A1, temp);
+
     // set CH0, Port B to upper 5 bits of data and output on PortB
     temp = data & 0x1f00;
     temp = (temp >> 8);
-#ifdef __QNX__
-    out8(base + port.B1, temp);
-    out8(base + port.cntrl1, 0x01);
-#endif
+
+    out8(phasing_matrix->base_address + phasing_matrix->port.B1, temp);
+    out8(phasing_matrix->base_address + phasing_matrix->port.cntrl1, 0x01);
+
     // toggle write enable bit
-    enable_write(NULL);
-    disable_write(NULL);
+    enable_write(phasing_matrix);
+    disable_write(phasing_matrix);
     // reset CH1, PortA and PortB to inputs
-#ifdef __QNX__
-    out8(base + port.cntrl1, 0x93);
-    out8(base + port.cntrl1, 0x13);
-#endif
+
+    out8(phasing_matrix->base_address + phasing_matrix->port.cntrl1, 0x93);
+    out8(phasing_matrix->base_address + phasing_matrix->port.cntrl1, 0x13);
+
     // disable writing
-    select_read(radar);
+    select_read(phasing_matrix);
     usleep(3000);
     // verify written data
     // read PortA and PortB to see if EEPROM output is same as progammed
-#ifdef __QNX__
-    temp = in8(base + port.B1);
+
+    temp = in8(phasing_matrix->base_address + phasing_matrix->port.B1);
     temp = temp & 0x1f;
     temp = temp << 8;
-    temp = temp + in8(base + port.A1);
+    temp = temp + in8(phasing_matrix->base_address + phasing_matrix->port.A1);
     temp = temp & 0x1f80;
-#else
-    temp = data;
-#endif
+
 
     if (temp != data) {
         printf(" ERROR - ATTEN DATA NOT WRITTEN: data: %x != readback: %x :: Code: %d Card: %d\n", reverse_bits(data),
@@ -324,14 +281,8 @@ int32_t write_attenuators(uint32_t base, int32_t card, int32_t code, int32_t dat
     return 0;
 }
 
-int32_t verify_attenuators(uint32_t base, int32_t card, int32_t code, int32_t data, int32_t radar) {
+int32_t verify_attenuators(const struct DIO *phasing_matrix, int32_t card, int32_t code, int32_t data) {
     int32_t temp;
-    struct Port port;
-
-    temp = set_ports(&port);
-    if(temp < 0) {
-        printf("Invalid radar number");
-    }
 
     // check that the data to write is valid
     if ((data > 63) | (data < 0)) {
@@ -342,24 +293,21 @@ int32_t verify_attenuators(uint32_t base, int32_t card, int32_t code, int32_t da
     // bit reverse the data
     data = reverse_bits(data);
     // select card to write
-    temp = select_card(base, card, radar);
+    temp = select_card(phasing_matrix, card);
     // choose the beam code to write (output appropriate EEPROM address
-    temp = beam_code(base, code, radar);
-    select_attenuator(radar);
+    temp = beam_code(phasing_matrix, code);
+    select_attenuator(phasing_matrix);
     // disable writing
-    select_write(radar);
+    select_write(phasing_matrix);
     usleep(10000);
     // verify written data
     // read PortA and PortB to see if EEPROM output is same as progammed
-#ifdef __QNX__
-    temp = in8(base + port.B1);
+
+    temp = in8(phasing_matrix->base_address + phasing_matrix->port.B1);
     temp = temp & 0x1f;
     temp = temp << 8;
-    temp = temp + in8(base + port.A1);
+    temp = temp + in8(phasing_matrix->base_address + phasing_matrix->port.A1);
     temp = temp & 0x1f80;
-#else
-    temp = data;
-#endif
 
     if (temp != data) {
         printf(" ERROR - ATTEN DATA NOT VERIFIED: data: %x != readback: %x :: Code: %d Card: %d\n", reverse_bits(data),
@@ -369,14 +317,8 @@ int32_t verify_attenuators(uint32_t base, int32_t card, int32_t code, int32_t da
     return 0;
 }
 
-int32_t write_data(uint32_t base, int32_t card, int32_t code, int32_t data, int32_t radar, int32_t print) {
+int32_t write_data(struct DIO const *phasing_matrix, int32_t card, int32_t code, int32_t data) {
     int32_t temp;
-    struct Port port;
-
-    temp = set_ports(&port);
-    if(temp < 0) {
-        printf("Invalid radar number");
-    }
 
     // check that the data to write is valid
     if ((data > 8192) | (data < 0)) {
@@ -384,60 +326,52 @@ int32_t write_data(uint32_t base, int32_t card, int32_t code, int32_t data, int3
         return -1;
     }
     data = data ^ 0x1fff;
-    if (print) printf("    Code to write is %d\n", data);
     // select card to write
-    temp = select_card(base, card, radar);
+    temp = select_card(phasing_matrix, card);
     // choose the beam code to write (output appropriate EEPROM address
-    temp = beam_code(base, code, radar);
-    select_phase(NULL);
+    temp = beam_code(phasing_matrix, code);
+    select_phase(phasing_matrix);
     // enable writing
-    select_write(radar);
+    select_write(phasing_matrix);
     // set CH1, PortA and Port B to output for writing
-#ifdef __QNX__
-    out8(base + port.cntrl1, 0x81);
-#endif
+
+    out8(phasing_matrix->base_address + phasing_matrix->port.cntrl1, 0x81);
+
     // bit reverse the data
     data = reverse_bits(data);
     // apply the data to be written to PortA and PortB on CH1
     // set CH1, Port A to lowest 8 bits of data and output on PortA
     temp = data & 0xff;
-#ifdef __QNX__
-    out8(base + port.A1, temp);
-#endif
+
+    out8(phasing_matrix->base_address + phasing_matrix->port.A1, temp);
+
     // set CH0, Port B to upper 5 bits of data and output on PortB
     temp = data & 0x1f00;
     temp = (temp >> 8);
-#ifdef __QNX__
-    out8(base + port.B1, temp);
-    out8(base + port.cntrl1, 0x01);
-#endif
+
+    out8(phasing_matrix->base_address + phasing_matrix->port.B1, temp);
+    out8(phasing_matrix->base_address + phasing_matrix->port.cntrl1, 0x01);
+
 
     // toggle write enable bit
-    enable_write(NULL);
-    disable_write(NULL);
+    enable_write(phasing_matrix);
+    disable_write(phasing_matrix);
     // reset CH1, PortA and PortB to inputs
-#ifdef __QNX__
-    out8(base + port.cntrl1, 0x93);
-    out8(base + port.cntrl1, 0x13);
-#endif
+
+    out8(phasing_matrix->base_address + phasing_matrix->port.cntrl1, 0x93);
+    out8(phasing_matrix->base_address + phasing_matrix->port.cntrl1, 0x13);
+
     // disable writing
-    select_read(radar);
+    select_read(phasing_matrix);
     usleep(10000);
     // verify written data
     // read PortA and PortB to see if EEPROM output is same as progammed
-#ifdef __QNX__
-    temp = in8(base + port.B1);
+
+    temp = in8(phasing_matrix->base_address + phasing_matrix->port.B1);
     temp = temp & 0x1f;
     temp = temp << 8;
-    temp = temp + in8(base + port.A1);
+    temp = temp + in8(phasing_matrix->base_address + phasing_matrix->port.A1);
     temp = temp & 0x1fff;
-#else
-    temp = data;
-#endif
-
-    if (print) {
-        printf("    Code read after writing is %d\n", reverse_bits(temp));
-    }
 
     if (temp != data) {
         printf(" ERROR - New Card DATA NOT WRITTEN: data: %x != readback: %x :: Code: %d Card: %d\n",
@@ -448,14 +382,8 @@ int32_t write_data(uint32_t base, int32_t card, int32_t code, int32_t data, int3
     return 0;
 }
 
-int32_t verify_data(uint32_t base, int32_t card, int32_t code, int32_t data, int32_t radar, int32_t print) {
+int32_t verify_data(const struct DIO *phasing_matrix, int32_t card, int32_t code, int32_t data) {
     int32_t temp;
-    struct Port port;
-
-    temp = set_ports(&port);
-    if(temp < 0) {
-        printf("Invalid radar number");
-    }
 
     // check that the data to write is valid
     if ((data > 8192) | (data < 0)) {
@@ -464,36 +392,29 @@ int32_t verify_data(uint32_t base, int32_t card, int32_t code, int32_t data, int
     }
     data = data ^ 0x1fff;
     // select card to write
-    temp = select_card(base, card, radar);
+    temp = select_card(phasing_matrix, card);
     // choose the beam code to write (output appropriate EEPROM address
-    temp = beam_code(base, code, radar);
-    select_phase(NULL);
+    temp = beam_code(phasing_matrix, code);
+    select_phase(phasing_matrix);
     // bit reverse the data
     data = reverse_bits(data);
-    if (print) printf("    Code to write is %d\n", data);
+
     // reset CH1, PortA and PortB to inputs
-#ifdef __QNX__
-    out8(base + port.cntrl1, 0x93);
-    out8(base + port.cntrl1, 0x13);
-#endif
+
+    out8(phasing_matrix->base_address + phasing_matrix->port.cntrl1, 0x93);
+    out8(phasing_matrix->base_address + phasing_matrix->port.cntrl1, 0x13);
+
     // disable writing
-    select_write(radar);
+    select_write(phasing_matrix);
     usleep(10000);
     // verify written data
     // read PortA and PortB to see if EEPROM output is same as progammed
-#ifdef __QNX__
-    temp = in8(base + port.B1);
+
+    temp = in8(phasing_matrix->base_address + phasing_matrix->port.B1);
     temp = temp & 0x1f;
     temp = temp << 8;
-    temp = temp + in8(base + port.A1);
+    temp = temp + in8(phasing_matrix->base_address + phasing_matrix->port.A1);
     temp = temp & 0x1fff;
-#else
-    temp = data;
-#endif
-
-    if (print) {
-        printf("    data expected: %d data read: %d\n", data, temp);
-    }
 
     if ((temp != data)) {
         printf(" ERROR - New Card DATA NOT VERIFIED: data: %x != readback: %x :: Code: %d Card: %d\n",

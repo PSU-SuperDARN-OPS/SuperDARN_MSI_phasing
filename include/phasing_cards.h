@@ -57,18 +57,18 @@ int32_t reverse_bits(int32_t data);
 /*-GET_DEALY---------------------------------------------------------*/
 float get_delay(int32_t code);
 /*-BEAM_CODE---------------------------------------------------------*/
-int32_t beam_code(uint32_t base, int32_t code,int32_t radar);
+int32_t beam_code(struct DIO const *phasing_matrix, int32_t code);
 /*-SELECT_CARD------------------------------------------------------*/
-int32_t select_card(uint32_t base, int32_t address,int32_t radar);
-int32_t write_attenuators(uint32_t base, int32_t card, int32_t code, int32_t data,int32_t radar);
+int32_t select_card(struct DIO const *phasing_matrix, int32_t address);
+int32_t write_attenuators(const struct DIO *phasing_matrix, int32_t card, int32_t code, int32_t data);
 
-int32_t verify_attenuators(uint32_t base, int32_t card, int32_t code, int32_t data,int32_t radar);
+int32_t verify_attenuators(const struct DIO *phasing_matrix, int32_t card, int32_t code, int32_t data);
 
 /*-VERIFY_CODE--------------------------------------------------------*/
-int32_t verify_data(uint32_t base, int32_t card, int32_t code, int32_t data, int32_t radar, int32_t print);
+int32_t verify_data(const struct DIO *phasing_matrix, int32_t card, int32_t code, int32_t data);
 
 /*-WRITE_CODE--------------------------------------------------------*/
-int32_t write_data(uint32_t base, int32_t card, int32_t code, int32_t data, int32_t radar, int32_t print);
+int32_t write_data(struct DIO const *phasing_matrix, int32_t card, int32_t code, int32_t data);
 
 /*-READ_DATA---------------------------------------------------------*/
 int32_t read_data(uint32_t base,int32_t radar);

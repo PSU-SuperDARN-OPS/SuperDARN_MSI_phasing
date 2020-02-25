@@ -174,14 +174,14 @@ int MSI_dio_write_memory(int code, int rnum, int card, int phasecode, int attenc
 #endif
 
     while (try > 0) {
-        rval_d = write_data(IOBASE, card, code, phasecode, rnum, verbose);
+        rval_d = write_data(IOBASE, card, code, phasecode);
 
         if (rval_d != 0) {
             fprintf(stderr, "Dio memory write data error, exiting\n");
             return rval_d;
         }
 
-        rval_a = write_attenuators(IOBASE, card, code, attencode, rnum);
+        rval_a = write_attenuators(IOBASE, card, code, attencode);
 
         if (rval_a != 0) {
             fprintf(stderr, "Dio memory write attenuator error, exiting\n");
@@ -190,8 +190,8 @@ int MSI_dio_write_memory(int code, int rnum, int card, int phasecode, int attenc
 
         usleep(uwait);
 
-        rval_a = verify_attenuators(IOBASE, card, code, attencode, rnum);
-        rval_d = verify_data(IOBASE, card, code, phasecode, rnum, verbose);
+        rval_a = verify_attenuators(IOBASE, card, code, attencode);
+        rval_d = verify_data(IOBASE, card, code, phasecode);
 
         if (rval_a != 0 || rval_d != 0) {
             fprintf(stderr, "Dio memory verify error, try again: %d, %d\n", rval_d, rval_a);
@@ -239,8 +239,8 @@ int MSI_dio_verify_memory(int code,int rnum,int card, int phasecode,int attencod
     printf("IOBASE=%x\n", IOBASE);
 
     while (try > 0) {
-        rval_a = verify_attenuators(IOBASE, card, code, attencode, rnum);
-        rval_d = verify_data(IOBASE, card, code, phasecode, rnum, verbose);
+        rval_a = verify_attenuators(IOBASE, card, code, attencode);
+        rval_d = verify_data(IOBASE, card, code, phasecode);
 
         if (rval_a != 0 || rval_d != 0) {
             fprintf(stderr, "Dio memory verify error, try again: %d, %d\n", rval_d, rval_a);

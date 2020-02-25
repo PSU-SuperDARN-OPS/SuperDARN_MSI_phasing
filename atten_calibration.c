@@ -223,7 +223,7 @@ int main(int argc, char **argv) {
                 b = b | 0x200;
 //        b= (b |  0x4);
                 printf("Selecting Beamcode: %d 0x%x\n", b, b);
-                beam_code(IOBASE, b, 1);
+                beam_code(IOBASE, b);
                 sleep(1);
             }
         }
@@ -231,9 +231,9 @@ int main(int argc, char **argv) {
     if (test_flag >= 0) {
         //stupid_flag=1;
         //printf("test flag %d radar %d\n",test_flag,radar);
-        beam_code(IOBASE, test_flag, radar);
+        beam_code(IOBASE, test_flag);
         //      temp=write_data(IOBASE,c,test_flag,test_flag,radar,0);
-        verify_data(IOBASE, c, test_flag, test_flag, radar, 1);
+        verify_data(IOBASE, c, test_flag, test_flag);
         exit(0);
     }
     if (test_flag == -2) {
@@ -241,7 +241,7 @@ int main(int argc, char **argv) {
         for (b = 0; b <= 8191; b++) {
 //    beam_code(IOBASE,b,radar);
             usleep(10000);
-            temp = verify_data(IOBASE, c, b, b, radar, 0);
+            temp = verify_data(IOBASE, c, b, b);
         }
         exit(0);
     }
@@ -357,9 +357,9 @@ if(test_flag==1) {
                 beamcode = b;
 
                 printf("B: %d data: %d BC: %d\n", b, data, beamcode);
-                temp = write_data(IOBASE, c, beamcode, data, radar, 0);
+                temp = write_data(IOBASE, c, beamcode, data);
                 sleep(2); //JDS
-                temp = write_attenuators(IOBASE, c, beamcode, 0, radar);
+                temp = write_attenuators(IOBASE, c, beamcode, 0);
 
             }
         }
@@ -369,17 +369,17 @@ if(test_flag==1) {
             beamcode = b;
 
             //printf("B: %d data: %d BC: %d\n",b,data,beamcode);
-            temp = write_data(IOBASE, c, beamcode, data, radar, 0);
-            temp = write_attenuators(IOBASE, c, beamcode, data, radar);
+            temp = write_data(IOBASE, c, beamcode, data);
+            temp = write_attenuators(IOBASE, c, beamcode, data);
 
         }
 
         printf("Verifying all zero programming attenuation coding\n");
         for (b = 0; b < ATTENCODES; b++) {
-            select_card(IOBASE, c, radar);
-            beam_code(IOBASE, b, radar);
+            select_card(IOBASE, c);
+            beam_code(IOBASE, b);
             usleep(10000);
-            temp = verify_attenuators(IOBASE, c, b, 0, radar);
+            temp = verify_attenuators(IOBASE, c, b, 0);
         }
 
         printf("Programming 1-to-1 attenuation coding no phase\n");
@@ -388,15 +388,15 @@ if(test_flag==1) {
             beamcode = b;
 
             //printf("B: %d data: %d BC: %d\n",b,data,beamcode);
-            temp = write_data(IOBASE, c, beamcode, 0, radar, 0);
-            temp = write_attenuators(IOBASE, c, beamcode, b, radar);
+            temp = write_data(IOBASE, c, beamcode, 0);
+            temp = write_attenuators(IOBASE, c, beamcode, b);
         }
         printf("Verifying 1-to-1 programming attenuation coding\n");
         for (b = 0; b < ATTENCODES; b++) {
-            select_card(IOBASE, c, radar);
-            beam_code(IOBASE, b, radar);
+            select_card(IOBASE, c);
+            beam_code(IOBASE, b);
             usleep(10000);
-            temp = verify_attenuators(IOBASE, c, b, b, radar);
+            temp = verify_attenuators(IOBASE, c, b, b);
         }
 
 
@@ -412,8 +412,8 @@ if(test_flag==1) {
         current_collect = 0;
         for (b = 0; b < ATTENCODES; b++) {
             beamcode = b;
-            temp = select_card(IOBASE, c, radar);
-            beam_code(IOBASE, beamcode, radar);
+            temp = select_card(IOBASE, c);
+            beam_code(IOBASE, beamcode);
             button_command(sock, ":INIT1:IMM\r\n", 0, verbose);
             if (b == 0) sleep(1);
 #ifdef __QNX__
