@@ -96,14 +96,14 @@ int main(int argc, char **argv) {
     double td_sum, td_ave, pwr_sum, pwr_ave;
     double td_min, td_max, td_pp;
     double pwr_min, pwr_max, pwr_pp;
-    double adelta, tdelta;
+    double adelta = 0, tdelta = 0;
     double test_adelta, test_tdelta;
     double asign, tsign;
-    int32_t fast_loop, count, wflag, acode_step, pcode_step;
+    int32_t fast_loop, count, wflag = 1, acode_step, pcode_step;
     double fdiff, tdiff;
 
     int32_t nave, pcode_range, pcode_min, pcode_max;
-    int32_t acode_range, acode_min, acode_max;
+    int32_t acode_range = 0, acode_min, acode_max;
 
 
     FILE *beamcodefile = NULL;
@@ -384,7 +384,8 @@ int main(int argc, char **argv) {
     strcpy(strout, "");
     strncat(strout, output, rval);
     if (verbose > 0) fprintf(stdout, "Initial Output String: %s\n", strout);
-    /* Calibrate the VNA */
+
+    /************* Calibrate the VNA ********************/
     if (iflag) {
         button_command(sock, ":SYST:PRES\r\n", 10, verbose);
         button_command(sock, ":INIT1:CONT ON\r\n", 10, verbose);
@@ -443,13 +444,13 @@ int main(int argc, char **argv) {
         button_command(sock, command, 10, verbose);
         button_command(sock, ":TRIG:SOUR BUS\r\n", 10, verbose);
         button_command(sock, ":SENS1:AVER:CLE\r\n", 10, verbose);
+
         for (t = 0; t < VNA_triggers; t++) {
             button_command(sock, ":TRIG:SING\r\n", 0, verbose);
             button_command(sock, "*OPC?\r\n", 0, verbose);
         }
-
-
     }
+
     /* Make sure Markers are setup for span viewing */
     button_command(sock, ":CALC1:MARK1 ON\r\n", 10, verbose);
     button_command(sock, ":CALC1:MARK2 ON\r\n", 10, verbose);
@@ -499,6 +500,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Info:: Adjusting wait time to let dio card settle: %d ms\n", wait_ms);
         fflush(stderr);
         //mypause();
+
         /* Inside the card loop */
         if (verbose > 0) fprintf(stdout, "  Starting optimization for Card: %d\n", c);
         clock_gettime(CLOCK_MONOTONIC, &begin_card);
@@ -666,6 +668,7 @@ int main(int argc, char **argv) {
                         }
                     }
                 }
+
                 if (wait_ms > 1000) wait_ms = 1000;
                 td_sum = 0.0;
                 pwr_sum = 0.0;
@@ -693,11 +696,13 @@ int main(int argc, char **argv) {
                     fprintf(stdout, "        Target Gain: %13.4lf (dB)   Ave Gain: %13.4lf (dB)\n", MSI_target_pwr_dB,
                             pwr_ave);
                 }
+
                 fast_loop = 0;
                 while (fast_loop < 3) {
                     adelta = fabs(MSI_target_pwr_dB - pwr_ave);
                     if (adelta > 0) asign = (MSI_target_pwr_dB - pwr_ave) / adelta;
                     else asign = 1;
+
                     /* First lets do an attempt at quick optimization */
                     if (adelta <= MSI_pwr_tolerance_dB) {
                         fprintf(stdout, "        Optimizing attencode skipped\n");

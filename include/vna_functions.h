@@ -8,7 +8,7 @@
 
 int mlog_data_command(int sock,char *command,double *array[VNA_FREQS],int b,int verbose);
 int button_command(int sock, char *command, int delay_ms, int verbose);
-int take_data(int sock, int b, const struct DIO *phasing_matrix, int c, int p, int a,
+int take_data(int sock, int b, struct DIO const *phasing_matrix, int c, int p, int a,
               double **pwr_mag, double **phase, double **tdelay,
               int wait_ms, int ssh_flag, int verbose, double target_tdelay, double target_pwr);
 
