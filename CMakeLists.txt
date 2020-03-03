@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.4)
 project(PhasingCalibration  VERSION 1.0
                             LANGUAGES C)
 
-find_package(GSL REQUIRED)
-
-# include_directories(/usr/src/linux-headers-4.15.0-88/include /usr/src/linux-headers-4.15.0-88/arch/x86/include)
 
 add_executable(phasing_calibration phasing_calibration.c _open_PLX9050.c
         phasing_cards.c utils.c vna_functions.c MSI_functions.c qnx_functions_mock.c include/qnx_functions_mock.h)
