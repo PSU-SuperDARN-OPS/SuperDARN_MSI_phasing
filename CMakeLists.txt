@@ -4,6 +4,8 @@ project(PhasingCalibration  VERSION 1.0
 
 find_package(GSL REQUIRED)
 
+# include_directories(/usr/src/linux-headers-4.15.0-88/include /usr/src/linux-headers-4.15.0-88/arch/x86/include)
+
 add_executable(phasing_calibration phasing_calibration.c _open_PLX9050.c
         phasing_cards.c utils.c vna_functions.c MSI_functions.c qnx_functions_mock.c include/qnx_functions_mock.h)
 target_link_libraries(phasing_calibration m)
@@ -31,6 +33,6 @@ add_executable(optimize_beam_programming optimize_beam_programming.c MSI_functio
 target_link_libraries(optimize_beam_programming m)
 target_compile_options(optimize_beam_programming PRIVATE -Wall -Wextra -Wpedantic -Wconversion)
 
-add_executable(card_path_test _open_PLX9050.c
-        phasing_cards.c _prog_conventions.c utils.c)
-target_link_libraries(card_path_test m)
+add_executable(dio_test dio_output_test.c _open_PLX9050.c )
+target_link_libraries(dio_test m)
+target_compile_options(dio_test PRIVATE -Wall -Wextra -Wpedantic -Wconversion)

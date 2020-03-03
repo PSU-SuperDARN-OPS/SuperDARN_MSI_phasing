@@ -6,7 +6,7 @@ common_libs=-lm
 #linux_libs=-lgsl -lgslcblas
 linux_libs=
 qnx_libs=-lsocket
-INCLUDES=-I"/usr/include/" -I"../include/" -I"include/" -I"../tsg/include"   
+INCLUDES=-I"/usr/include/" -I"../include/" -I"include/" -I"../tsg/include" -I"/usr/src/linux-headers-4.15.0-88/include" -I"/usr/src/linux-headers-4.15.0-88/arch/x86/include"
 
 SOURCES=phasing_calibration.c  _open_PLX9050.c common_functions.c utils.c vna_functions.c MSI_functions.c
 OBJECTS=$(SOURCES:.c=.o)

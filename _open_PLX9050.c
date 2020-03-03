@@ -1,47 +1,38 @@
-#include <stdlib.h>
+
+//#define __KERNEL__
+//#define CONFIG_PCI
+
 #include <stdio.h>
-#include <math.h>
-#include <fcntl.h>
-#include <errno.h>
-#ifdef __QNX__
-  #include <hw/pci.h>
-  #include <hw/inout.h>
-  #include <sys/neutrino.h>
-  #include <sys/mman.h>
-#endif
+#include <stdint.h>
+//#include <linux/types.h>
+//#include <linux/pci.h>
+#include <sys/io.h>
+
 
 #include "include/_open_PLX9050.h"
 
+const uint32_t BASE_ADDRESS = 0x4000;
+const uint32_t BUS_LENGTH = 128 * 8;
 
 
-int _open_PLX9052(int *pci_handle, unsigned int *mmap_io_ptr, int *interrupt_line, int print){
-#ifdef __QNX__
-    volatile unsigned char *BASE0, *BASE1;
-    unsigned flags, lastbus, version, hardware, bus, device;
+int _open_PLX9052(int *pci_handle, unsigned int *mmap_io_ptr, int *interrupt_line, int print) {
     int temp;
-    unsigned pci_index = 0;
-    struct _pci_config_regs pci_reg;
+    //struct pci_dev * device= NULL;
 
-    /* CONNECT TO PCI SERVER */
-    *pci_handle = pci_attach(flags);
-    if (*pci_handle == -1) {
-        perror("Cannot attach to PCI system");
-        return -1;
-    }
-
-    /* CHECK FOR PCI BUS */
-    temp = pci_present(&lastbus, &version, &hardware);
-    if (temp != PCI_SUCCESS) {
-        perror("Cannot find PCI BIOS");
-        return -1;
-    }
 
     /* FIND DEVICE */
-    temp = pci_find_device(DEVICE_ID, VENDOR_ID, pci_index, &bus, &device);
-    if (temp != PCI_SUCCESS) {
-        perror("Cannot find GC314-PCI/FS Digital Receiver Card");
-        return -1;
-    }
+    //device = pci_get_device(DEVICE_ID, VENDOR_ID, device);
+    //temp = pci_enable_device(device);
+    //if (temp != 0) {
+    //    printf("Error enabling PCI device: %d", temp);
+    //    return -1;
+    //}
+
+    *mmap_io_ptr = BASE_ADDRESS; //pci_resource_start(device, (unsigned long) 0);
+
+    ioperm(*mmap_io_ptr, BUS_LENGTH, 3);
+
+#ifdef __not_defined__
 
     /* READ THE DEVICE PCI CONFIGURATION */
     temp = pci_read_config32(bus, device, 0, 16, (char *) &pci_reg);
@@ -83,14 +74,8 @@ int _open_PLX9052(int *pci_handle, unsigned int *mmap_io_ptr, int *interrupt_lin
     }
 
     *mmap_io_ptr = pci_reg.Base_Address_Regs[2] - 1;
-
-    return 1;
-#else
-    if(print) {
-        printf("Debug on linux, pci_handle: %d, mmap: %d, interrupt: %d", *pci_handle, *mmap_io_ptr, *interrupt_line);
-    }
-    return 1;
 #endif
+    return 1;
 }
 
 
