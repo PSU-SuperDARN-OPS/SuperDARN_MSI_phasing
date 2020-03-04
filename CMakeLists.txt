@@ -2,6 +2,26 @@ cmake_minimum_required(VERSION 3.4)
 project(PhasingCalibration  VERSION 1.0
                             LANGUAGES C)
 
+#find_package(Git QUIET)
+#if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
+#    # Update submodules as needed
+#    option(GIT_SUBMODULE "Check submodules during build" ON)
+#    if(GIT_SUBMODULE)
+#        message(STATUS "Submodule update")
+#        execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+#                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+#                RESULT_VARIABLE GIT_SUBMOD_RESULT)
+#        if(NOT GIT_SUBMOD_RESULT EQUAL "0")
+#            message(FATAL_ERROR "git submodule update --init failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
+#        endif()
+#    endif()
+#endif()
+#
+#if(NOT EXISTS "${PROJECT_SOURCE_DIR}/external/APCI/Makefile")
+#    message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
+#endif()
+
+link_directories(${CMAKE_HOME_DIRECTORY}/external/APCI/apcilib)
 
 add_executable(phasing_calibration phasing_calibration.c _open_PLX9050.c
         phasing_cards.c utils.c vna_functions.c MSI_functions.c qnx_functions_mock.c include/qnx_functions_mock.h)
@@ -31,5 +51,7 @@ target_link_libraries(optimize_beam_programming m)
 target_compile_options(optimize_beam_programming PRIVATE -Wall -Wextra -Wpedantic -Wconversion)
 
 add_executable(dio_test dio_output_test.c _open_PLX9050.c )
+message(STATUS "${CMAKE_HOME_DIRECTORY}")
 target_link_libraries(dio_test m)
 target_compile_options(dio_test PRIVATE -Wall -Wextra -Wpedantic -Wconversion)
+target_sources(dio_test PRIVATE external/APCI/apcilib/apcilib.c)

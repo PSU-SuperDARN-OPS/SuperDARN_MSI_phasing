@@ -344,7 +344,7 @@ int main(int argc, char **argv) {
 
     /* OPEN THE PLX9656 AND GET LOCAL BASE ADDRESSES */
     fprintf(stderr, "PLX9052 CONFIGURATION ********************\n");
-    temp = _open_PLX9052(&pci_handle, &mmap_io_ptr, &IRQ, 1);
+    temp = _open_PLX9052(&mmap_io_ptr);
     phasing_matrix.base_address = mmap_io_ptr;
     if (temp == -1) {
         fprintf(stderr, "	PLX9052 configuration failed");

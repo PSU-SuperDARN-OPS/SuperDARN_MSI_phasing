@@ -12,6 +12,6 @@
 unsigned int 	BASEIO;
 //int		vPLX9050_INTCSR = 0x4c;
 
-int _open_PLX9052(int *pci_handle, unsigned int *mmap_io_ptr, int *interrupt_line, int print);
+int _open_PLX9052(int *mmap_io_ptr);
 
 #endif //PHASINGCALIBRATION_OPEN_PLX9050_H

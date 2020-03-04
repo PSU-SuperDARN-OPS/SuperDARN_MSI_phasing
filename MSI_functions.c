@@ -188,7 +188,7 @@ int MSI_dio_verify_memory(int code,int rnum,int card, int phasecode,int attencod
 
     /* OPEN THE PLX9656 AND GET LOCAL BASE ADDRESSES */
     fprintf(stderr, "PLX9052 CONFIGURATION ********************\n");
-    temp = _open_PLX9052(&pci_handle, &mmap_io_ptr, &IRQ, 1);
+    temp = _open_PLX9052(&mmap_io_ptr);
     IOBASE = mmap_io_ptr;
     if (temp == -1) {
         fprintf(stderr, "	PLX9052 configuration failed");
