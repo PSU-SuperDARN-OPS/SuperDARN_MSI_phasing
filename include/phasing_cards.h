@@ -21,14 +21,14 @@ static const uint_fast8_t PHASE_SELECT_MASK = 0x7f;
 static const uint_fast8_t ATTENUATOR_SELECT_MASK = 0x80;
 
 struct Port{
-    uintptr_t A0;
-    uintptr_t A1;
-    uintptr_t B0;
-    uintptr_t B1;
-    uintptr_t C0;
-    uintptr_t C1;
-    uintptr_t cntrl0;
-    uintptr_t cntrl1;
+    int A0;
+    int A1;
+    int B0;
+    int B1;
+    int C0;
+    int C1;
+    int cntrl0;
+    int cntrl1;
 };
 
 struct DIO{

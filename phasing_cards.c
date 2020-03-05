@@ -1,22 +1,13 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <time.h>
 #include <math.h>
-#ifdef __QNX__
-  #include <hw/pci.h>
-  #include <hw/inout.h>
-  #include <sys/neutrino.h>
-  #include <sys/mman.h>
-#else
-#include "include/qnx_functions_mock.h"
-#endif
 
-#include "include/registers.h"
 #include "include/phasing_cards.h"
+#include "include/pci_dio_120.h"
 
 int32_t set_ports(struct DIO *phasing_matrix) {
-    switch(phasing_matrix->radar_number) {
+    switch (phasing_matrix->radar_number) {
         case 1:
             phasing_matrix->port.A0 = PA_GRP_0;
             phasing_matrix->port.A1 = PA_GRP_1;
@@ -56,44 +47,44 @@ int32_t set_ports(struct DIO *phasing_matrix) {
 void disable_write(struct DIO const *phasing_matrix) {
     uint8_t temp;
 
-    temp = in8(phasing_matrix->base_address + phasing_matrix->port.C0);
-    out8(phasing_matrix->base_address + phasing_matrix->port.C0, temp & WRITE_DISABLE_MASK);
+    temp = read_pci_dio_120(phasing_matrix->port.C0);
+    write_pci_dio_120(phasing_matrix->port.C0, temp & WRITE_DISABLE_MASK);
 }
 
 void enable_write(struct DIO const *phasing_matrix) {
     uint8_t temp;
 
-    temp = in8(phasing_matrix->base_address + phasing_matrix->port.C0);
-    out8(phasing_matrix->base_address + phasing_matrix->port.C0, temp | WRITE_ENABLE_MASK);
+    temp = read_pci_dio_120(phasing_matrix->port.C0);
+    write_pci_dio_120(phasing_matrix->port.C0, temp | WRITE_ENABLE_MASK);
 }
 
 void select_read(struct DIO const *phasing_matrix) {
     uint8_t temp;
 
-    temp = in8(phasing_matrix->base_address + phasing_matrix->port.C0);
-    out8(phasing_matrix->base_address + phasing_matrix->port.C0, temp & READ_SELECT_MASK);
+    temp = read_pci_dio_120(phasing_matrix->port.C0);
+    write_pci_dio_120(phasing_matrix->port.C0, temp & READ_SELECT_MASK);
 }
 
 void select_write(struct DIO const *phasing_matrix) {
     uint8_t temp;
 
-    temp = in8(phasing_matrix->base_address + phasing_matrix->port.C0);
-    out8(phasing_matrix->base_address + phasing_matrix->port.C0, temp | WRITE_SELECT_MASK);
+    temp = read_pci_dio_120(phasing_matrix->port.C0);
+    write_pci_dio_120(phasing_matrix->port.C0, temp | WRITE_SELECT_MASK);
 }
 
 void select_phase(struct DIO const *phasing_matrix) {
     uint8_t temp;
 
-    temp = in8(phasing_matrix->base_address + phasing_matrix->port.C0);
-    out8(phasing_matrix->base_address + phasing_matrix->port.C0, temp & PHASE_SELECT_MASK);
+    temp = read_pci_dio_120(phasing_matrix->port.C0);
+    write_pci_dio_120(phasing_matrix->port.C0, temp & PHASE_SELECT_MASK);
 
 }
 
 void select_attenuator(struct DIO const *phasing_matrix) {
     uint8_t temp;
 
-    temp = in8(phasing_matrix->base_address + phasing_matrix->port.C0);
-    out8(phasing_matrix->base_address + phasing_matrix->port.C0, temp | ATTENUATOR_SELECT_MASK);
+    temp = read_pci_dio_120(phasing_matrix->port.C0);
+    write_pci_dio_120(phasing_matrix->port.C0, temp | ATTENUATOR_SELECT_MASK);
 }
 
 int32_t reverse_bits(int32_t data) {
@@ -151,20 +142,20 @@ int32_t beam_code(struct DIO const *phasing_matrix, int32_t code) {
     // set CH0, Port A to lowest 8 bits of beam code and output on PortA
     temp = code & 0xff;
 
-    out8(phasing_matrix->base_address + phasing_matrix->port.A0, temp);
+    write_pci_dio_120(phasing_matrix->port.A0, temp);
 
 
     // set CH0, Port B to upper 5 bits of beam code and output on PortB
     temp = code & 0x1f00;
     temp = temp >> 8;
 
-    out8(phasing_matrix->base_address + phasing_matrix->port.B0, temp);
+    write_pci_dio_120(phasing_matrix->port.B0, temp);
 
     // verify that proper beam code was sent out
 
-    temp = in8(phasing_matrix->base_address + phasing_matrix->port.B0);
+    temp = read_pci_dio_120(phasing_matrix->port.B0);
     temp = (temp & 0x1f) << 8;
-    temp = temp + in8(phasing_matrix->base_address + phasing_matrix->port.A0);
+    temp = temp + read_pci_dio_120(phasing_matrix->port.A0);
 
 
     if (temp != code) {
@@ -197,15 +188,15 @@ int32_t select_card(struct DIO const *phasing_matrix, int32_t address) {
     address = address & 0x3e;
 
     // check for other bits in CH0, PortC that may be on
-    temp = in8(phasing_matrix->base_address + phasing_matrix->port.C0);
+    temp = read_pci_dio_120(phasing_matrix->port.C0);
     temp = temp & 0xc1;
     // add other bit of PortC to the address bits
     address = address + temp;
     // output the address and original other bits to PortC
-    out8(phasing_matrix->base_address + phasing_matrix->port.C0, address);
+    write_pci_dio_120(phasing_matrix->port.C0, address);
     usleep(3000);
     // verify the output
-    temp = in8(phasing_matrix->base_address + phasing_matrix->port.C0);
+    temp = read_pci_dio_120(phasing_matrix->port.C0);
 
     if (temp != address) {
         fprintf(stderr, "CARD SELECT OUTPUT ERROR - requested code not sent\n");
@@ -234,7 +225,7 @@ int32_t write_attenuators(const struct DIO *phasing_matrix, int32_t card, int32_
     select_write(phasing_matrix);
     // set CH1, PortA and Port B to output for writing
 
-    out8(phasing_matrix->base_address + phasing_matrix->port.cntrl1, 0x81);
+    write_pci_dio_120(phasing_matrix->port.cntrl1, 0x81);
 
     // bit reverse the data
     data = reverse_bits(data);
@@ -242,22 +233,22 @@ int32_t write_attenuators(const struct DIO *phasing_matrix, int32_t card, int32_
     // set CH1, Port A to lowest 8 bits of data and output on PortA
     temp = data & 0xff;
 
-    out8(phasing_matrix->base_address + phasing_matrix->port.A1, temp);
+    write_pci_dio_120(phasing_matrix->port.A1, temp);
 
     // set CH0, Port B to upper 5 bits of data and output on PortB
     temp = data & 0x1f00;
     temp = (temp >> 8);
 
-    out8(phasing_matrix->base_address + phasing_matrix->port.B1, temp);
-    out8(phasing_matrix->base_address + phasing_matrix->port.cntrl1, 0x01);
+    write_pci_dio_120(phasing_matrix->port.B1, temp);
+    write_pci_dio_120(phasing_matrix->port.cntrl1, 0x01);
 
     // toggle write enable bit
     enable_write(phasing_matrix);
     disable_write(phasing_matrix);
     // reset CH1, PortA and PortB to inputs
 
-    out8(phasing_matrix->base_address + phasing_matrix->port.cntrl1, 0x93);
-    out8(phasing_matrix->base_address + phasing_matrix->port.cntrl1, 0x13);
+    write_pci_dio_120(phasing_matrix->port.cntrl1, 0x93);
+    write_pci_dio_120(phasing_matrix->port.cntrl1, 0x13);
 
     // disable writing
     select_read(phasing_matrix);
@@ -265,10 +256,10 @@ int32_t write_attenuators(const struct DIO *phasing_matrix, int32_t card, int32_
     // verify written data
     // read PortA and PortB to see if EEPROM output is same as progammed
 
-    temp = in8(phasing_matrix->base_address + phasing_matrix->port.B1);
+    temp = read_pci_dio_120(phasing_matrix->port.B1);
     temp = temp & 0x1f;
     temp = temp << 8;
-    temp = temp + in8(phasing_matrix->base_address + phasing_matrix->port.A1);
+    temp = temp + read_pci_dio_120(phasing_matrix->port.A1);
     temp = temp & 0x1f80;
 
 
@@ -303,10 +294,10 @@ int32_t verify_attenuators(const struct DIO *phasing_matrix, int32_t card, int32
     // verify written data
     // read PortA and PortB to see if EEPROM output is same as progammed
 
-    temp = in8(phasing_matrix->base_address + phasing_matrix->port.B1);
+    temp = read_pci_dio_120(phasing_matrix->port.B1);
     temp = temp & 0x1f;
     temp = temp << 8;
-    temp = temp + in8(phasing_matrix->base_address + phasing_matrix->port.A1);
+    temp = temp + read_pci_dio_120(phasing_matrix->port.A1);
     temp = temp & 0x1f80;
 
     if (temp != data) {
@@ -335,7 +326,7 @@ int32_t write_data(struct DIO const *phasing_matrix, int32_t card, int32_t code,
     select_write(phasing_matrix);
     // set CH1, PortA and Port B to output for writing
 
-    out8(phasing_matrix->base_address + phasing_matrix->port.cntrl1, 0x81);
+    write_pci_dio_120(phasing_matrix->port.cntrl1, 0x81);
 
     // bit reverse the data
     data = reverse_bits(data);
@@ -343,14 +334,14 @@ int32_t write_data(struct DIO const *phasing_matrix, int32_t card, int32_t code,
     // set CH1, Port A to lowest 8 bits of data and output on PortA
     temp = data & 0xff;
 
-    out8(phasing_matrix->base_address + phasing_matrix->port.A1, temp);
+    write_pci_dio_120(phasing_matrix->port.A1, temp);
 
     // set CH0, Port B to upper 5 bits of data and output on PortB
     temp = data & 0x1f00;
     temp = (temp >> 8);
 
-    out8(phasing_matrix->base_address + phasing_matrix->port.B1, temp);
-    out8(phasing_matrix->base_address + phasing_matrix->port.cntrl1, 0x01);
+    write_pci_dio_120(phasing_matrix->port.B1, temp);
+    write_pci_dio_120(phasing_matrix->port.cntrl1, 0x01);
 
 
     // toggle write enable bit
@@ -358,8 +349,8 @@ int32_t write_data(struct DIO const *phasing_matrix, int32_t card, int32_t code,
     disable_write(phasing_matrix);
     // reset CH1, PortA and PortB to inputs
 
-    out8(phasing_matrix->base_address + phasing_matrix->port.cntrl1, 0x93);
-    out8(phasing_matrix->base_address + phasing_matrix->port.cntrl1, 0x13);
+    write_pci_dio_120(phasing_matrix->port.cntrl1, 0x93);
+    write_pci_dio_120(phasing_matrix->port.cntrl1, 0x13);
 
     // disable writing
     select_read(phasing_matrix);
@@ -367,10 +358,10 @@ int32_t write_data(struct DIO const *phasing_matrix, int32_t card, int32_t code,
     // verify written data
     // read PortA and PortB to see if EEPROM output is same as progammed
 
-    temp = in8(phasing_matrix->base_address + phasing_matrix->port.B1);
+    temp = read_pci_dio_120(phasing_matrix->port.B1);
     temp = temp & 0x1f;
     temp = temp << 8;
-    temp = temp + in8(phasing_matrix->base_address + phasing_matrix->port.A1);
+    temp = temp + read_pci_dio_120(phasing_matrix->port.A1);
     temp = temp & 0x1fff;
 
     if (temp != data) {
@@ -401,8 +392,8 @@ int32_t verify_data(const struct DIO *phasing_matrix, int32_t card, int32_t code
 
     // reset CH1, PortA and PortB to inputs
 
-    out8(phasing_matrix->base_address + phasing_matrix->port.cntrl1, 0x93);
-    out8(phasing_matrix->base_address + phasing_matrix->port.cntrl1, 0x13);
+    write_pci_dio_120(phasing_matrix->port.cntrl1, 0x93);
+    write_pci_dio_120(phasing_matrix->port.cntrl1, 0x13);
 
     // disable writing
     select_write(phasing_matrix);
@@ -410,10 +401,10 @@ int32_t verify_data(const struct DIO *phasing_matrix, int32_t card, int32_t code
     // verify written data
     // read PortA and PortB to see if EEPROM output is same as progammed
 
-    temp = in8(phasing_matrix->base_address + phasing_matrix->port.B1);
+    temp = read_pci_dio_120(phasing_matrix->port.B1);
     temp = temp & 0x1f;
     temp = temp << 8;
-    temp = temp + in8(phasing_matrix->base_address + phasing_matrix->port.A1);
+    temp = temp + read_pci_dio_120(phasing_matrix->port.A1);
     temp = temp & 0x1fff;
 
     if ((temp != data)) {
