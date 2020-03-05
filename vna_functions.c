@@ -7,6 +7,7 @@
 
 #include "include/MSI_functions.h"
 #include "include/vna_functions.h"
+#include "include/utils.h"
 
 int32_t VNA_triggers=4;
 int32_t VNA_wait_delay_ms=10;
@@ -14,7 +15,68 @@ int32_t VNA_min_nave=3;
 
 extern int32_t MSI_phasecodes;
 
-int mlog_data_command(int sock,char *command,double *array[VNA_FREQS],int b,int verbose) {
+struct VNA vna;
+
+void init_vna(char * host_ip, int host_port) {
+    char output[40], strout[40];
+    ssize_t rval;
+    vna.host_ip = host_ip;
+    vna.host_port = host_port;
+
+    vna.socket = opentcpsock(vna.host_ip, vna.host_port);
+
+    if(vna.socket < 0) {
+        printf("Error: VNA connection failed\n");
+        exit(-1);
+    }
+
+    rval = read(vna.socket, &output, sizeof(char) * 10);
+    fprintf(stdout, "Initial Output Length: %ld\n", rval);
+    strcpy(strout, "");
+    strncat(strout, output, rval);
+    fprintf(stdout, "Initial Output String: %s\n", strout);
+}
+
+void calibrate_vna(char * freq_start, char * freq_stop, char * freq_steps) {
+    char command[80];
+    int verbose = 1;
+
+    vna_button_command(":SYST:PRES\r\n", 0, verbose);
+    sprintf(command, ":SENS1:FREQ:STAR %s\r\n", freq_start);
+    vna_button_command(command, 0, verbose);
+    sprintf(command, ":SENS1:FREQ:STOP %s\r\n", freq_stop);
+    vna_button_command(command, 0, verbose);
+    sprintf(command, ":SENS1:SWE:POIN %s\r\n", freq_steps);
+    vna_button_command(command, 0, verbose);
+    vna_button_command(":CALC1:PAR:COUN 2\r\n", 0, verbose);
+    vna_button_command(":CALC1:PAR1:SEL\r\n", 0, verbose);
+    vna_button_command(":CALC1:PAR1:DEF S12\r\n", 0, verbose);
+    vna_button_command(":CALC1:FORM UPH\r\n", 0, verbose);
+    vna_button_command(":CALC1:PAR2:SEL\r\n", 0, verbose);
+    vna_button_command(":CALC1:PAR2:DEF S12\r\n", 0, verbose);
+    vna_button_command(":CALC1:FORM MLOG\r\n", 0, verbose);
+    vna_button_command(":SENS1:AVER OFF\r\n", 0, verbose);
+    vna_button_command(":SENS1:AVER:COUN 4\r\n", 0, verbose);
+    vna_button_command(":SENS1:AVER:CLE\r\n", 0, verbose);
+    vna_button_command(":INIT1:CONT OFF\r\n", 0, verbose);
+
+    printf("\n\n\7\7Calibrate Network Analyzer for S12,S21\n");
+    mypause();
+    vna_button_command(":SENS1:CORR:COLL:METH:THRU 1,2\r\n", 0, verbose);
+    sleep(1);
+    vna_button_command(":SENS1:CORR:COLL:THRU 1,2\r\n", 0, verbose);
+    printf("  Doing S1,2 Calibration..wait 4 seconds\n");
+    sleep(4);
+
+    vna_button_command(":SENS1:CORR:COLL:METH:THRU 2,1\r\n", 0, verbose);
+    sleep(1);
+    vna_button_command(":SENS1:CORR:COLL:THRU 2,1\r\n", 0, verbose);
+    printf("  Doing S2,1 Calibration..wait 4 seconds\n");
+    sleep(4);
+    vna_button_command(":SENS1:CORR:COLL:SAVE\r\n", 0, verbose);
+}
+
+int log_vna_data(char *command, double **array, int b, int verbose) {
   int32_t count, rval, sample_count;
   char output[10]="";
   char command2[80];
@@ -23,14 +85,14 @@ int mlog_data_command(int sock,char *command,double *array[VNA_FREQS],int b,int 
   int32_t cr,lf;
       strcpy(command2,command);
       if (verbose>2) printf("%d Command: %s\n",(int) strlen(command2),command2);
-      write(sock, &command2, sizeof(char)*strlen(command2));
+      write(vna.socket, &command2, sizeof(char)*strlen(command2));
       cr=0;
       lf=0;
       count=0;
       if (verbose>2) fprintf(stdout,"Command Output String::\n");
       strcpy(cmd_str,"");
       while((cr==0) || (lf==0)){
-        rval=read(sock, &output, sizeof(char)*1);
+        rval=read(vna.socket, &output, sizeof(char)*1);
 #ifdef __QNX__
         if (rval<1) usleep(1000);
 #else
@@ -61,7 +123,7 @@ int mlog_data_command(int sock,char *command,double *array[VNA_FREQS],int b,int 
       strcpy(data_str,"");
       if (verbose>2) fprintf(stdout,"%d: ",sample_count);
       while((cr==0) || (lf==0)){
-        rval=read(sock, &output, sizeof(char)*1);
+        rval=read(vna.socket, &output, sizeof(char)*1);
         if (output[0]==13) {
           cr++;
           continue;
@@ -103,7 +165,7 @@ int mlog_data_command(int sock,char *command,double *array[VNA_FREQS],int b,int 
       if (verbose>2) fprintf(stdout,"\nSamples: %d\n",sample_count/2);
       if (verbose>2) fprintf(stdout,"\nPrompt String::\n");
       while(output[0]!='>'){
-        rval=read(sock, &output, sizeof(char)*1);
+        rval=read(vna.socket, &output, sizeof(char)*1);
 #ifdef __QNX__
         if (rval<1) usleep(1000);
 #else
@@ -115,7 +177,7 @@ int mlog_data_command(int sock,char *command,double *array[VNA_FREQS],int b,int 
   return 0;
 }
 
-int button_command(int sock, char *command, int delay_ms, int verbose) {
+int vna_button_command(char *command, int delay_ms, int verbose) {
   int32_t count,rval;
   char output[10]="";
   char command2[80];
@@ -125,11 +187,11 @@ int button_command(int sock, char *command, int delay_ms, int verbose) {
  * */
   strcpy(command2,command);
   if (verbose>2) fprintf(stdout,"%d Command: %s\n",(int) strlen(command2),command2);
-  write(sock, &command2, sizeof(char)*strlen(command2));
+  write(vna.socket, &command2, sizeof(char)*strlen(command2));
   count=0;
   if (verbose>2) fprintf(stdout,"\nPrompt String::\n");
   while(output[0]!='>'){
-    rval=read(sock, &output, sizeof(char)*1);
+    rval=read(vna.socket, &output, sizeof(char)*1);
     strncat(prompt_str,output,rval);
     if (verbose>2) fprintf(stdout,"%c",output[0]);
     count++;
@@ -139,9 +201,8 @@ int button_command(int sock, char *command, int delay_ms, int verbose) {
   return 0;
 }
 
-int take_data(int sock, int b, struct DIO const *phasing_matrix, int c, int p, int a, double **pwr_mag, double **phase,
-              double **tdelay,
-              int wait_ms, int ssh_flag, int verbose, double target_tdelay, double target_pwr){
+int take_data(int b, struct DIO const *phasing_matrix, int c, int p, int a, double **pwr_mag, double **phase,
+              double **tdelay, int wait_ms, int ssh_flag, int verbose, double target_tdelay, double target_pwr) {
   int t,rval,takeidx;
   char command[128]="";
  
@@ -157,25 +218,25 @@ int take_data(int sock, int b, struct DIO const *phasing_matrix, int c, int p, i
 	usleep(100000);	
   }
   usleep(1000*wait_ms);
-  button_command(sock,":SENS1:AVER:CLE\r\n",30,verbose);
+    vna_button_command(":SENS1:AVER:CLE\r\n", 30, verbose);
   for(t=0;t<VNA_triggers;t++) {
-                      button_command(sock,":TRIG:SING\r\n",0,verbose);
-                      button_command(sock,"*OPC?\r\n",0,verbose);
+      vna_button_command(":TRIG:SING\r\n", 0, verbose);
+      vna_button_command("*OPC?\r\n", 0, verbose);
   }
-  button_command(sock,"DISP:WIND1:TRAC1:Y:AUTO\r\n",10,verbose);
-  button_command(sock,"DISP:WIND1:TRAC3:Y:AUTO\r\n",10,verbose);
+    vna_button_command("DISP:WIND1:TRAC1:Y:AUTO\r\n", 10, verbose);
+    vna_button_command("DISP:WIND1:TRAC3:Y:AUTO\r\n", 10, verbose);
   sprintf(command,"DISP:WIND1:TRAC3:Y:RLEV %E\r\n",target_tdelay*1E-9);
   fprintf(stdout, "%s", command);
-  button_command(sock,command,10,verbose);
+    vna_button_command(command, 10, verbose);
   sprintf(command,"DISP:WIND1:TRAC2:Y:RLEV %E\r\n",target_pwr);
-  button_command(sock,command,10,verbose);
+    vna_button_command(command, 10, verbose);
 
-  button_command(sock,":CALC1:PAR1:SEL\r\n",10,verbose);
-  mlog_data_command(sock,":CALC1:DATA:FDAT?\r\n",phase,b,verbose) ;
-  button_command(sock,":CALC1:PAR2:SEL\r\n",10,verbose);
-  mlog_data_command(sock,":CALC1:DATA:FDAT?\r\n",pwr_mag,b,verbose) ;
-  button_command(sock,":CALC1:PAR3:SEL\r\n",10,verbose);
-  mlog_data_command(sock,":CALC1:DATA:FDAT?\r\n",tdelay,b,verbose) ;
+    vna_button_command(":CALC1:PAR1:SEL\r\n", 10, verbose);
+    log_vna_data(":CALC1:DATA:FDAT?\r\n", phase, b, verbose) ;
+    vna_button_command(":CALC1:PAR2:SEL\r\n", 10, verbose);
+    log_vna_data(":CALC1:DATA:FDAT?\r\n", pwr_mag, b, verbose) ;
+    vna_button_command(":CALC1:PAR3:SEL\r\n", 10, verbose);
+    log_vna_data(":CALC1:DATA:FDAT?\r\n", tdelay, b, verbose) ;
   return 0;
 }
 

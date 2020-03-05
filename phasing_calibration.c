@@ -137,54 +137,16 @@ int main(int argc, char **argv) {
 
 // Open Socket and initial IO
     if (verbose > 0) printf("Opening Socket %s %d\n", hostip, port);
-    sock = opentcpsock(hostip, port);
-    if (sock < 0) {
-        if (verbose > 0) printf("Socket failure %d\n", sock);
-    } else if (verbose > 0) printf("Socket %d\n", sock);
-    rval = read(sock, &output, sizeof(char) * 10);
-    if (verbose > 0) fprintf(stdout, "Initial Output Length: %d\n", rval);
-    strcpy(strout, "");
-    strncat(strout, output, rval);
-    if (verbose > 0) fprintf(stdout, "Initial Output String: %s\n", strout);
+    init_vna(hostip, port);
 
-    if (setup_flag != 0) {
-        button_command(sock, ":SYST:PRES\r\n", 0, verbose);
-        sprintf(command, ":SENS1:FREQ:STAR %s\r\n", freq_start);
-        button_command(sock, command, 0, verbose);
-        sprintf(command, ":SENS1:FREQ:STOP %s\r\n", freq_stop);
-        button_command(sock, command, 0, verbose);
-        sprintf(command, ":SENS1:SWE:POIN %s\r\n", freq_steps);
-        button_command(sock, command, 0, verbose);
-        button_command(sock, ":CALC1:PAR:COUN 2\r\n", 0, verbose);
-        button_command(sock, ":CALC1:PAR1:SEL\r\n", 0, verbose);
-        button_command(sock, ":CALC1:PAR1:DEF S12\r\n", 0, verbose);
-        button_command(sock, ":CALC1:FORM UPH\r\n", 0, verbose);
-        button_command(sock, ":CALC1:PAR2:SEL\r\n", 0, verbose);
-        button_command(sock, ":CALC1:PAR2:DEF S12\r\n", 0, verbose);
-        button_command(sock, ":CALC1:FORM MLOG\r\n", 0, verbose);
-        button_command(sock, ":SENS1:AVER OFF\r\n", 0, verbose);
-        button_command(sock, ":SENS1:AVER:COUN 4\r\n", 0, verbose);
-        button_command(sock, ":SENS1:AVER:CLE\r\n", 0, verbose);
-        button_command(sock, ":INIT1:CONT OFF\r\n", 0, verbose);
 
-        printf("\n\n\7\7Calibrate Network Analyzer for S12,S21\n");
-        mypause();
-        button_command(sock, ":SENS1:CORR:COLL:METH:THRU 1,2\r\n", 0, verbose);
-        sleep(1);
-        button_command(sock, ":SENS1:CORR:COLL:THRU 1,2\r\n", 0, verbose);
-        printf("  Doing S1,2 Calibration..wait 4 seconds\n");
-        sleep(4);
+    calibrate_vna(freq_start, freq_stop, freq_steps);
 
-        button_command(sock, ":SENS1:CORR:COLL:METH:THRU 2,1\r\n", 0, verbose);
-        sleep(1);
-        button_command(sock, ":SENS1:CORR:COLL:THRU 2,1\r\n", 0, verbose);
-        printf("  Doing S2,1 Calibration..wait 4 seconds\n");
-        sleep(4);
-        button_command(sock, ":SENS1:CORR:COLL:SAVE\r\n", 0, verbose);
-    }
-    button_command(sock, ":INIT1:IMM\r\n", 0, verbose);
+
+    vna_button_command(":INIT1:IMM\r\n", 0, verbose);
     printf("\n\nCalibration Complete\nReconfigure for Phasing Card Measurements");
     mypause();
+
     c = -1;
     printf("\n\nEnter Radar Name: ");
     fflush(stdin);
@@ -333,7 +295,7 @@ int main(int argc, char **argv) {
                 exit(-1);
             }
             gettimeofday(&t10, NULL);
-            button_command(sock, ":INIT1:IMM\r\n", 0, verbose);
+            vna_button_command(":INIT1:IMM\r\n", 0, verbose);
             if (b == 0) sleep(1);
 
             usleep(wait_delay_ms * 1000);
@@ -343,10 +305,10 @@ int main(int argc, char **argv) {
             while ((take_data) && (attempt < max_attempts)) {
 
                 attempt++;
-                button_command(sock, ":CALC1:PAR1:SEL\r\n", 0, verbose);
-                mlog_data_command(sock, ":CALC1:DATA:FDAT?\r\n", phase, b, verbose);
-                button_command(sock, ":CALC1:PAR2:SEL\r\n", 0, verbose);
-                mlog_data_command(sock, ":CALC1:DATA:FDAT?\r\n", pwr_mag, b, verbose);
+                vna_button_command(":CALC1:PAR1:SEL\r\n", 0, verbose);
+                log_vna_data(":CALC1:DATA:FDAT?\r\n", phase, b, verbose);
+                vna_button_command(":CALC1:PAR2:SEL\r\n", 0, verbose);
+                log_vna_data(":CALC1:DATA:FDAT?\r\n", pwr_mag, b, verbose);
                 pd_new = phase[fnum - 1][b] - phase[0][b];
                 if (b != 0) {
                     pd_old = phase[fnum - 1][last_collect] - phase[0][last_collect];

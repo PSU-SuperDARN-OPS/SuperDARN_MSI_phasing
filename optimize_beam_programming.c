@@ -387,88 +387,88 @@ int main(int argc, char **argv) {
 
     /************* Calibrate the VNA ********************/
     if (iflag) {
-        button_command(sock, ":SYST:PRES\r\n", 10, verbose);
-        button_command(sock, ":INIT1:CONT ON\r\n", 10, verbose);
-        button_command(sock, ":TRIG:SOUR BUS\r\n", 10, verbose);
+        vna_button_command(":SYST:PRES\r\n", 10, verbose);
+        vna_button_command(":INIT1:CONT ON\r\n", 10, verbose);
+        vna_button_command(":TRIG:SOUR BUS\r\n", 10, verbose);
         sprintf(command, ":SENS1:FREQ:STAR %E\r\n", VNA_MIN);
-        button_command(sock, command, 10, verbose);
+        vna_button_command(command, 10, verbose);
         sprintf(command, ":SENS1:FREQ:STOP %E\r\n", VNA_MAX);
-        button_command(sock, command, 10, verbose);
+        vna_button_command(command, 10, verbose);
         sprintf(command, ":SENS1:SWE:POIN %d\r\n", VNA_FREQS);
-        button_command(sock, command, 10, verbose);
-        button_command(sock, ":CALC1:PAR:COUN 3\r\n", 10, verbose);
+        vna_button_command(command, 10, verbose);
+        vna_button_command(":CALC1:PAR:COUN 3\r\n", 10, verbose);
 
         /* First Trace: Unwrapped Phase */
-        button_command(sock, ":CALC1:PAR1:SEL\r\n", 10, verbose);
-        button_command(sock, ":CALC1:PAR1:DEF S12\r\n", 10, verbose);
-        button_command(sock, ":CALC1:FORM UPH\r\n", 10, verbose);
+        vna_button_command(":CALC1:PAR1:SEL\r\n", 10, verbose);
+        vna_button_command(":CALC1:PAR1:DEF S12\r\n", 10, verbose);
+        vna_button_command(":CALC1:FORM UPH\r\n", 10, verbose);
 
         /* Second Trace: Log Pwr*/
-        button_command(sock, ":CALC1:PAR2:SEL\r\n", 10, verbose);
-        button_command(sock, ":CALC1:PAR2:DEF S12\r\n", 10, verbose);
-        button_command(sock, ":CALC1:FORM MLOG\r\n", 10, verbose);
+        vna_button_command(":CALC1:PAR2:SEL\r\n", 10, verbose);
+        vna_button_command(":CALC1:PAR2:DEF S12\r\n", 10, verbose);
+        vna_button_command(":CALC1:FORM MLOG\r\n", 10, verbose);
 
         /* Third Trace: Smoothed Group Delay*/
-        button_command(sock, ":CALC1:PAR3:SEL\r\n", 10, verbose);
-        button_command(sock, ":CALC1:PAR3:DEF S12\r\n", 10, verbose);
-        button_command(sock, ":CALC1:FORM GDEL\r\n", 10, verbose);
-        button_command(sock, ":CALC1:SMO:APER 5.0\r\n", 10, verbose);
-        button_command(sock, ":CALC1:SMO:STAT ON\r\n", 10, verbose);
+        vna_button_command(":CALC1:PAR3:SEL\r\n", 10, verbose);
+        vna_button_command(":CALC1:PAR3:DEF S12\r\n", 10, verbose);
+        vna_button_command(":CALC1:FORM GDEL\r\n", 10, verbose);
+        vna_button_command(":CALC1:SMO:APER 5.0\r\n", 10, verbose);
+        vna_button_command(":CALC1:SMO:STAT ON\r\n", 10, verbose);
 
-        button_command(sock, ":SENS1:AVER ON\r\n", 10, verbose);
+        vna_button_command(":SENS1:AVER ON\r\n", 10, verbose);
         sprintf(command, ":SENS1:AVER:COUN 32\r\n");
-        button_command(sock, command, 10, verbose);
-        button_command(sock, ":TRIG:SOUR INTERNAL\r\n", 10, verbose);
+        vna_button_command(command, 10, verbose);
+        vna_button_command(":TRIG:SOUR INTERNAL\r\n", 10, verbose);
 
 
         printf("\n\n\7\7Calibrate Network Analyzer for S21,S12\n");
         mypause();
-        button_command(sock, ":SENS1:CORR:COLL:METH:THRU 1,2\r\n", 10, verbose);
+        vna_button_command(":SENS1:CORR:COLL:METH:THRU 1,2\r\n", 10, verbose);
         sleep(1);
-        button_command(sock, ":SENS1:CORR:COLL:THRU 1,2\r\n", 10, verbose);
+        vna_button_command(":SENS1:CORR:COLL:THRU 1,2\r\n", 10, verbose);
         printf("  Doing S1,2 Calibration..wait 4 seconds\n");
         sleep(4);
 
-        button_command(sock, ":SENS1:CORR:COLL:METH:THRU 2,1\r\n", 10, verbose);
+        vna_button_command(":SENS1:CORR:COLL:METH:THRU 2,1\r\n", 10, verbose);
         sleep(1);
-        button_command(sock, ":SENS1:CORR:COLL:THRU 2,1\r\n", 10, verbose);
+        vna_button_command(":SENS1:CORR:COLL:THRU 2,1\r\n", 10, verbose);
         printf("  Doing S2,1 Calibration..wait 4 seconds\n");
         sleep(4);
-        button_command(sock, ":SENS1:CORR:COLL:SAVE\r\n", 10, verbose);
+        vna_button_command(":SENS1:CORR:COLL:SAVE\r\n", 10, verbose);
 
         fprintf(stdout, "Thru Calibration completed.\n  Please visually inspect calibration now.\n");
         mypause();
 
-        button_command(sock, ":SENS1:AVER ON\r\n", 10, verbose);
+        vna_button_command(":SENS1:AVER ON\r\n", 10, verbose);
         sprintf(command, ":SENS1:AVER:COUN %d\r\n", VNA_triggers);
-        button_command(sock, command, 10, verbose);
-        button_command(sock, ":TRIG:SOUR BUS\r\n", 10, verbose);
-        button_command(sock, ":SENS1:AVER:CLE\r\n", 10, verbose);
+        vna_button_command(command, 10, verbose);
+        vna_button_command(":TRIG:SOUR BUS\r\n", 10, verbose);
+        vna_button_command(":SENS1:AVER:CLE\r\n", 10, verbose);
 
         for (t = 0; t < VNA_triggers; t++) {
-            button_command(sock, ":TRIG:SING\r\n", 0, verbose);
-            button_command(sock, "*OPC?\r\n", 0, verbose);
+            vna_button_command(":TRIG:SING\r\n", 0, verbose);
+            vna_button_command("*OPC?\r\n", 0, verbose);
         }
     }
 
     /* Make sure Markers are setup for span viewing */
-    button_command(sock, ":CALC1:MARK1 ON\r\n", 10, verbose);
-    button_command(sock, ":CALC1:MARK2 ON\r\n", 10, verbose);
-    button_command(sock, ":CALC1:PAR1:SEL\r\n", 10, verbose);
-    button_command(sock, ":CALC1:MARK:MATH:STAT ON\r\n", 10, verbose);
-    button_command(sock, ":CALC1:PAR2:SEL\r\n", 10, verbose);
-    button_command(sock, ":CALC1:MARK:MATH:STAT ON\r\n", 10, verbose);
-    button_command(sock, ":CALC1:PAR3:SEL\r\n", 10, verbose);
-    button_command(sock, ":CALC1:MARK:MATH:STAT ON\r\n", 10, verbose);
+    vna_button_command(":CALC1:MARK1 ON\r\n", 10, verbose);
+    vna_button_command(":CALC1:MARK2 ON\r\n", 10, verbose);
+    vna_button_command(":CALC1:PAR1:SEL\r\n", 10, verbose);
+    vna_button_command(":CALC1:MARK:MATH:STAT ON\r\n", 10, verbose);
+    vna_button_command(":CALC1:PAR2:SEL\r\n", 10, verbose);
+    vna_button_command(":CALC1:MARK:MATH:STAT ON\r\n", 10, verbose);
+    vna_button_command(":CALC1:PAR3:SEL\r\n", 10, verbose);
+    vna_button_command(":CALC1:MARK:MATH:STAT ON\r\n", 10, verbose);
     sprintf(command, ":CALC1:MARK1:X %E\r\n", VNA_MIN);
-    button_command(sock, command, 10, verbose);
+    vna_button_command(command, 10, verbose);
     sprintf(command, ":CALC1:MARK2:X %E\r\n", VNA_MAX);
-    button_command(sock, command, 10, verbose);
+    vna_button_command(command, 10, verbose);
 
-    button_command(sock, ":SENS1:AVER:CLE\r\n", 10, verbose);
+    vna_button_command(":SENS1:AVER:CLE\r\n", 10, verbose);
     for (t = 0; t < VNA_triggers; t++) {
-        button_command(sock, ":TRIG:SING\r\n", 0, verbose);
-        button_command(sock, "*OPC?\r\n", 0, verbose);
+        vna_button_command(":TRIG:SING\r\n", 0, verbose);
+        vna_button_command("*OPC?\r\n", 0, verbose);
     }
     fprintf(stdout, "\n\nVNA Init Complete\n Please Confirm the following VNA Settings:\n");
     fprintf(stdout, "  VNA Min Freq: %10.5lf MHz\n", VNA_MIN * 1E-6);
@@ -491,8 +491,8 @@ int main(int argc, char **argv) {
             perror("stat");
             exit(1);
         }
-        button_command(sock, ":INIT1:CONT ON\r\n", 10, verbose);
-        button_command(sock, ":TRIG:SOUR BUS\r\n", 10, verbose);
+        vna_button_command(":INIT1:CONT ON\r\n", 10, verbose);
+        vna_button_command(":TRIG:SOUR BUS\r\n", 10, verbose);
         fprintf(stdout, "\nPrepare Connections for Card: %02d\n", c);
         mypause();
         loops_done = 0;
@@ -640,19 +640,20 @@ int main(int argc, char **argv) {
                     fflush(stdout);
                 }
                 sprintf(command, ":CALC1:MARK1:X %E\r\n", freq_lo[f]);
-                button_command(sock, command, 10, verbose);
+                vna_button_command(command, 10, verbose);
                 sprintf(command, ":CALC1:MARK2:X %E\r\n", freq_hi[f]);
-                button_command(sock, command, 10, verbose);
+                vna_button_command(command, 10, verbose);
 
                 /* Take a measurement at best phasecode and acode */
                 while (wflag > 0) {
-                    rval = take_data(sock, b, &phasing_matrix, c, best_phasecode, best_attencode, opwr_mag, ophase, otdelay,
+                    rval = take_data(b, &phasing_matrix, c, best_phasecode, best_attencode, opwr_mag, ophase, otdelay,
                                      wait_ms, sshflag, verbose, needed_tdelay, MSI_target_pwr_dB);
                     if (rval != 0) {
                         fprintf(stderr, "Error: Take data failed!\n");
                         exit(rval);
                     }
-                    rval = take_data(sock, b, &phasing_matrix, c, best_phasecode, best_attencode, pwr_mag, phase, tdelay, wait_ms,
+                    rval = take_data(b, &phasing_matrix, c, best_phasecode, best_attencode, pwr_mag, phase, tdelay,
+                                     wait_ms,
                                      sshflag, verbose, needed_tdelay, MSI_target_pwr_dB);
                     if (rval != 0) {
                         fprintf(stderr, "Error: Take data failed!\n");
@@ -719,7 +720,7 @@ int main(int argc, char **argv) {
                             ac = ac - acode_step;
                             if (ac < 0) ac = 0;
                             if (ac > 63) ac = 63;
-                            rval = take_data(sock, b, &phasing_matrix, c, best_phasecode, ac, pwr_mag, phase, tdelay, wait_ms,
+                            rval = take_data(b, &phasing_matrix, c, best_phasecode, ac, pwr_mag, phase, tdelay, wait_ms,
                                              sshflag, verbose, needed_tdelay, MSI_target_pwr_dB);
                             if (rval != 0) {
                                 fprintf(stderr, "Error: Take data failed!\n");
@@ -773,7 +774,7 @@ int main(int argc, char **argv) {
                         if (acode_min < 0) acode_min = 0;
                         if (acode_max > 63) acode_max = 63;
                         for (ac = acode_min; ac <= acode_max; ac++) {
-                            rval = take_data(sock, b, &phasing_matrix, c, best_phasecode, ac, pwr_mag, phase, tdelay, wait_ms,
+                            rval = take_data(b, &phasing_matrix, c, best_phasecode, ac, pwr_mag, phase, tdelay, wait_ms,
                                              sshflag, verbose, needed_tdelay, MSI_target_pwr_dB);
                             if (rval != 0) {
                                 fprintf(stderr, "Error: Take data failed!\n");
@@ -804,7 +805,8 @@ int main(int argc, char **argv) {
                                 MSI_target_pwr_dB);
                     }
 
-                    rval = take_data(sock, b, &phasing_matrix, c, best_phasecode, best_attencode, pwr_mag, phase, tdelay, wait_ms,
+                    rval = take_data(b, &phasing_matrix, c, best_phasecode, best_attencode, pwr_mag, phase, tdelay,
+                                     wait_ms,
                                      sshflag, verbose, needed_tdelay, MSI_target_pwr_dB);
                     if (rval != 0) {
                         fprintf(stderr, "Error: Take data failed!\n");
@@ -857,7 +859,7 @@ int main(int argc, char **argv) {
                             pc = pc + pcode_step;
                             if (pc < 0) pc = 0;
                             if (pc >= MSI_phasecodes) pc = MSI_phasecodes - 1;
-                            rval = take_data(sock, b, &phasing_matrix, c, pc, best_attencode, pwr_mag, phase, tdelay, wait_ms,
+                            rval = take_data(b, &phasing_matrix, c, pc, best_attencode, pwr_mag, phase, tdelay, wait_ms,
                                              sshflag, verbose, needed_tdelay, MSI_target_pwr_dB);
                             if (rval != 0) {
                                 fprintf(stderr, "Error: Take data failed!\n");
@@ -944,7 +946,8 @@ int main(int argc, char **argv) {
                     fprintf(stdout, "        Optimizing phasecode.... %d measurements needed\n", pcode_range);
 
                     for (pc = pcode_min; pc <= pcode_max; pc++) {
-                        rval = take_data(sock, b, &phasing_matrix, c, pc, best_attencode, pwr_mag, phase, tdelay, wait_ms, sshflag,
+                        rval = take_data(b, &phasing_matrix, c, pc, best_attencode, pwr_mag, phase, tdelay, wait_ms,
+                                         sshflag,
                                          verbose, needed_tdelay, MSI_target_pwr_dB);
                         if (rval != 0) {
                             fprintf(stderr, "Error: Take data failed!\n");
@@ -970,7 +973,7 @@ int main(int argc, char **argv) {
                         }
                     }
                 }
-                rval = take_data(sock, b, &phasing_matrix, c, best_phasecode, best_attencode, pwr_mag, phase, tdelay, wait_ms,
+                rval = take_data(b, &phasing_matrix, c, best_phasecode, best_attencode, pwr_mag, phase, tdelay, wait_ms,
                                  sshflag, verbose, needed_tdelay, MSI_target_pwr_dB);
                 if (rval != 0) {
                     fprintf(stderr, "Error: Take data failed!\n");

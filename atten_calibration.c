@@ -274,41 +274,41 @@ if(test_flag==1) {
         if (verbose > 0) fprintf(stdout, "Initial Output String: %s\n", strout);
 
         if (setup_flag != 0) {
-            button_command(sock, ":SYST:PRES\r\n", 0, verbose);
+            vna_button_command(":SYST:PRES\r\n", 0, verbose);
             sprintf(command, ":SENS1:FREQ:STAR %s\r\n", freq_start);
-            button_command(sock, command, 0, verbose);
+            vna_button_command(command, 0, verbose);
             sprintf(command, ":SENS1:FREQ:STOP %s\r\n", freq_stop);
-            button_command(sock, command, 0, verbose);
+            vna_button_command(command, 0, verbose);
             sprintf(command, ":SENS1:SWE:POIN %s\r\n", freq_steps);
-            button_command(sock, command, 0, verbose);
-            button_command(sock, ":CALC1:PAR:COUN 2\r\n", 0, verbose);
-            button_command(sock, ":CALC1:PAR1:SEL\r\n", 0, verbose);
-            button_command(sock, ":CALC1:PAR1:DEF S12\r\n", 0, verbose);
-            button_command(sock, ":CALC1:FORM UPH\r\n", 0, verbose);
-            button_command(sock, ":CALC1:PAR2:SEL\r\n", 0, verbose);
-            button_command(sock, ":CALC1:PAR2:DEF S12\r\n", 0, verbose);
-            button_command(sock, ":CALC1:FORM MLOG\r\n", 0, verbose);
-            button_command(sock, ":SENS1:AVER OFF\r\n", 0, verbose);
-            button_command(sock, ":SENS1:AVER:COUN 4\r\n", 0, verbose);
-            button_command(sock, ":SENS1:AVER:CLE\r\n", 0, verbose);
-            button_command(sock, ":INIT1:CONT OFF\r\n", 0, verbose);
+            vna_button_command(command, 0, verbose);
+            vna_button_command(":CALC1:PAR:COUN 2\r\n", 0, verbose);
+            vna_button_command(":CALC1:PAR1:SEL\r\n", 0, verbose);
+            vna_button_command(":CALC1:PAR1:DEF S12\r\n", 0, verbose);
+            vna_button_command(":CALC1:FORM UPH\r\n", 0, verbose);
+            vna_button_command(":CALC1:PAR2:SEL\r\n", 0, verbose);
+            vna_button_command(":CALC1:PAR2:DEF S12\r\n", 0, verbose);
+            vna_button_command(":CALC1:FORM MLOG\r\n", 0, verbose);
+            vna_button_command(":SENS1:AVER OFF\r\n", 0, verbose);
+            vna_button_command(":SENS1:AVER:COUN 4\r\n", 0, verbose);
+            vna_button_command(":SENS1:AVER:CLE\r\n", 0, verbose);
+            vna_button_command(":INIT1:CONT OFF\r\n", 0, verbose);
 
             printf("\n\n\7\7Calibrate Network Analyzer for S12,S21\n");
             mypause();
-            button_command(sock, ":SENS1:CORR:COLL:METH:THRU 1,2\r\n", 0, verbose);
+            vna_button_command(":SENS1:CORR:COLL:METH:THRU 1,2\r\n", 0, verbose);
             sleep(1);
-            button_command(sock, ":SENS1:CORR:COLL:THRU 1,2\r\n", 0, verbose);
+            vna_button_command(":SENS1:CORR:COLL:THRU 1,2\r\n", 0, verbose);
             printf("  Doing S1,2 Calibration..wait 4 seconds\n");
             sleep(4);
 
-            button_command(sock, ":SENS1:CORR:COLL:METH:THRU 2,1\r\n", 0, verbose);
+            vna_button_command(":SENS1:CORR:COLL:METH:THRU 2,1\r\n", 0, verbose);
             sleep(1);
-            button_command(sock, ":SENS1:CORR:COLL:THRU 2,1\r\n", 0, verbose);
+            vna_button_command(":SENS1:CORR:COLL:THRU 2,1\r\n", 0, verbose);
             printf("  Doing S2,1 Calibration..wait 4 seconds\n");
             sleep(4);
-            button_command(sock, ":SENS1:CORR:COLL:SAVE\r\n", 0, verbose);
+            vna_button_command(":SENS1:CORR:COLL:SAVE\r\n", 0, verbose);
         }
-        button_command(sock, ":INIT1:IMM\r\n", 0, verbose);
+        vna_button_command(":INIT1:IMM\r\n", 0, verbose);
         printf("\n\nCalibration Complete\nReconfigure for Phasing Card Measurements");
         mypause();
         c = -1;
@@ -414,7 +414,7 @@ if(test_flag==1) {
             beamcode = b;
             temp = select_card(IOBASE, c);
             beam_code(IOBASE, beamcode);
-            button_command(sock, ":INIT1:IMM\r\n", 0, verbose);
+            vna_button_command(":INIT1:IMM\r\n", 0, verbose);
             if (b == 0) sleep(1);
 #ifdef __QNX__
             delay(wait_delay); //NO AVERAGE
@@ -426,10 +426,10 @@ if(test_flag==1) {
             while ((take_data) && (attempt < max_attempts)) {
 
                 attempt++;
-                button_command(sock, ":CALC1:PAR1:SEL\r\n", 0, verbose);
-                mlog_data_command(sock, ":CALC1:DATA:FDAT?\r\n", atten_phase, b, verbose);
-                button_command(sock, ":CALC1:PAR2:SEL\r\n", 0, verbose);
-                mlog_data_command(sock, ":CALC1:DATA:FDAT?\r\n", atten_pwr_mag, b, verbose);
+                vna_button_command(":CALC1:PAR1:SEL\r\n", 0, verbose);
+                log_vna_data(":CALC1:DATA:FDAT?\r\n", atten_phase, b, verbose);
+                vna_button_command(":CALC1:PAR2:SEL\r\n", 0, verbose);
+                log_vna_data(":CALC1:DATA:FDAT?\r\n", atten_pwr_mag, b, verbose);
                 pd_new = atten_pwr_mag[fnum - 1][b] - atten_pwr_mag[0][b];
                 if (b != 0) {
                     pd_old = atten_pwr_mag[fnum - 1][last_collect] - atten_pwr_mag[0][last_collect];
