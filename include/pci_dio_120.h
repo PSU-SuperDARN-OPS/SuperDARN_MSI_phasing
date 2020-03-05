@@ -7,8 +7,10 @@
 
 #include <stdint.h>
 
+/*
+ * PCI-DIO-120 device IDs
+ */
 #define VENDOR_ID 0x494f
-//#define DEVICE_ID 0x0e60
 #define DEVICE_ID 0x0c78
 
 /*
