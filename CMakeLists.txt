@@ -27,6 +27,7 @@ add_executable(phasing_calibration phasing_calibration.c pci_dio_120.c
         phasing_cards.c utils.c vna_functions.c MSI_functions.c qnx_functions_mock.c include/qnx_functions_mock.h)
 target_link_libraries(phasing_calibration m)
 target_compile_options(phasing_calibration PRIVATE -Wall -Wextra -Wpedantic -Wconversion)
+target_sources(phasing_calibration PRIVATE external/APCI/apcilib/apcilib.c)
 
 add_executable(atten_calibration atten_calibration.c pci_dio_120.c
         phasing_cards.c _prog_conventions.c utils.c vna_functions.c MSI_functions.c qnx_functions_mock.c include/qnx_functions_mock.h)
@@ -51,7 +52,6 @@ target_link_libraries(optimize_beam_programming m)
 target_compile_options(optimize_beam_programming PRIVATE -Wall -Wextra -Wpedantic -Wconversion)
 
 add_executable(dio_test dio_output_test.c pci_dio_120.c)
-message(STATUS "${CMAKE_HOME_DIRECTORY}")
 target_link_libraries(dio_test m)
 target_compile_options(dio_test PRIVATE -Wall -Wextra -Wpedantic -Wconversion)
 target_sources(dio_test PRIVATE external/APCI/apcilib/apcilib.c)
