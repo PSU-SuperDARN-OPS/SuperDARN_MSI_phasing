@@ -39,6 +39,8 @@ struct DIO{
 
 int32_t set_ports(struct DIO *phasing_matrix);
 
+void init_phasing_cards(struct DIO * phasing_matrix);
+
 /*-SET WRITE ENABLE BIT-------------------------------------------------------*/
 void disable_write(struct DIO const *phasing_matrix);
 void enable_write(struct DIO const *phasing_matrix);

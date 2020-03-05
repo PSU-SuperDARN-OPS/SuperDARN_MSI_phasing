@@ -44,6 +44,26 @@ int32_t set_ports(struct DIO *phasing_matrix) {
     return 0;
 }
 
+void init_phasing_cards(struct DIO * phasing_matrix) {
+    uint8_t temp;
+
+    // GROUP 0 - PortA=output, PortB=output, PortClo=output, PortChi=output
+    write_pci_dio_120(phasing_matrix->port.cntrl0, 0x80);
+    // GROUP 1 - PortAinput, PortB=input, PortClo=input, PortChi=output
+    write_pci_dio_120(phasing_matrix->port.cntrl1, 0x93);
+    write_pci_dio_120(phasing_matrix->port.A0, 0x00);
+    write_pci_dio_120(phasing_matrix->port.B0, 0x00);
+    write_pci_dio_120(phasing_matrix->port.C0, 0x00);
+    write_pci_dio_120(phasing_matrix->port.A1, 0x00);
+    write_pci_dio_120(phasing_matrix->port.B1, 0x00);
+    write_pci_dio_120(phasing_matrix->port.cntrl0, 0x00);
+    write_pci_dio_120(phasing_matrix->port.cntrl1, 0x13);
+    temp = read_pci_dio_120(phasing_matrix->port.C1);
+    temp = temp & 0x0f;
+    printf("input on group 1, port c is %x\n", temp);
+
+}
+
 void disable_write(struct DIO const *phasing_matrix) {
     uint8_t temp;
 
