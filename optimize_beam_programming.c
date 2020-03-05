@@ -36,7 +36,7 @@
 #include "include/MSI_functions.h"
 #include "include/phasing_cards.h"
 #include "include/utils.h"
-#include "include/_open_PLX9050.h"
+#include "include/pci_dio_120.h"
 
 /* variables defined elsewhere */
 extern int32_t MSI_max_angles;
@@ -344,7 +344,7 @@ int main(int argc, char **argv) {
 
     /* OPEN THE PLX9656 AND GET LOCAL BASE ADDRESSES */
     fprintf(stderr, "PLX9052 CONFIGURATION ********************\n");
-    temp = _open_PLX9052(&mmap_io_ptr);
+    temp = init_pci_dio_120();
     phasing_matrix.base_address = mmap_io_ptr;
     if (temp == -1) {
         fprintf(stderr, "	PLX9052 configuration failed");

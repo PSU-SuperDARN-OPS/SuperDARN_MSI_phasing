@@ -30,7 +30,7 @@
 #include "include/registers.h"
 #include "include/phasing_cards.h"
 #include "include/utils.h"
-#include "include/_open_PLX9050.h"
+#include "include/pci_dio_120.h"
 #include "include/vna_functions.h"
 
 #define SWITCHES 0

@@ -16,7 +16,7 @@
 
 #include "include/MSI_functions.h"
 #include "include/phasing_cards.h"
-#include "include/_open_PLX9050.h"
+#include "include/pci_dio_120.h"
 /* settings which I could probably move to an ini file */
 uint32_t    MSI_phasecodes=8192;
 int32_t    MSI_num_angles=24;
@@ -188,7 +188,7 @@ int MSI_dio_verify_memory(int code,int rnum,int card, int phasecode,int attencod
 
     /* OPEN THE PLX9656 AND GET LOCAL BASE ADDRESSES */
     fprintf(stderr, "PLX9052 CONFIGURATION ********************\n");
-    temp = _open_PLX9052(&mmap_io_ptr);
+    temp = init_pci_dio_120();
     IOBASE = mmap_io_ptr;
     if (temp == -1) {
         fprintf(stderr, "	PLX9052 configuration failed");
