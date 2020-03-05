@@ -170,6 +170,7 @@ int MSI_dio_write_memory(struct DIO const *phasing_matrix, int code, int card, i
     return 0;
 }
 
+/*
 int MSI_dio_verify_memory(int code,int rnum,int card, int phasecode,int attencode,int ssh_flag,int verbose){
     int temp, pci_handle, IRQ;
     unsigned int mmap_io_ptr, IOBASE;
@@ -186,16 +187,10 @@ int MSI_dio_verify_memory(int code,int rnum,int card, int phasecode,int attencod
         return 1;
     }
 
-    /* OPEN THE PLX9656 AND GET LOCAL BASE ADDRESSES */
-    fprintf(stderr, "PLX9052 CONFIGURATION ********************\n");
-    temp = init_pci_dio_120();
-    IOBASE = mmap_io_ptr;
-    if (temp == -1) {
-        fprintf(stderr, "	PLX9052 configuration failed");
-    } else {
-        fprintf(stderr, "	PLX9052 configuration successful!\n");
-    }
-    printf("IOBASE=%x\n", IOBASE);
+    // OPEN THE PLX9656 AND GET LOCAL BASE ADDRESSES
+    fprintf(stderr, "PCI-DIO-120 CONFIGURATION ********************\n");
+    init_pci_dio_120();
+
 
     while (try > 0) {
         rval_a = verify_attenuators(IOBASE, card, code, attencode);
@@ -218,3 +213,4 @@ int MSI_dio_verify_memory(int code,int rnum,int card, int phasecode,int attencod
     fflush(stdout);
     return 0;
 }
+*/
