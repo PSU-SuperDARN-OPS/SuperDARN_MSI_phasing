@@ -179,24 +179,24 @@ int log_vna_data(char *command, double **array, int b, int verbose) {
 
 int vna_button_command(char *command, int delay_ms, int verbose) {
   int32_t count,rval;
-  char output[10]="";
-  char command2[80];
-  char prompt_str[80];
+  char output[20]="";
+  char command2[80]="";
+  char prompt_str[80]="";
 /*
  * *  Process Command String with No feedback 
  * */
   strcpy(command2,command);
-  if (verbose>2) fprintf(stdout,"%d Command: %s\n",(int) strlen(command2),command2);
+  if (verbose>2) fprintf(stdout,"%d Command: %s",(int) strlen(command2),command2);
   write(vna.socket, &command2, sizeof(char)*strlen(command2));
   count=0;
-  if (verbose>2) fprintf(stdout,"\nPrompt String::\n");
+  if (verbose>2) fprintf(stdout,"Prompt String::\n");
   while(output[0]!='>'){
     rval=read(vna.socket, &output, sizeof(char)*1);
     strncat(prompt_str,output,rval);
     if (verbose>2) fprintf(stdout,"%c",output[0]);
     count++;
   }
-  if (verbose>2) fprintf(stdout,"Command is done\n");
+  if (verbose>2) fprintf(stdout,"Command is done\n\n");
   fflush(stdout);
   return 0;
 }
