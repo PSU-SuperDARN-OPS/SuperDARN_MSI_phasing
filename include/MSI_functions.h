@@ -10,5 +10,7 @@ double MSI_timedelay_needed(double angle_degrees,double spacing_meter,int32_t ca
 int MSI_dio_write_memory(struct DIO const *phasing_matrix, int code, int card, int phasecode, int attencode);
 int MSI_dio_verify_memory(int code,int rnum,int card, int phasecode,int attencode,int ssh_flag,int verbose);
 
+int take_data(int b, struct DIO const *phasing_matrix, int c, int p, int a, double **pwr_mag, double **phase,
+              double **tdelay, int wait_ms, int ssh_flag, int verbose, double target_tdelay, double target_pwr);
 
 #endif
