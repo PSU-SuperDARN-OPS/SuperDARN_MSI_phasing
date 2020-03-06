@@ -216,7 +216,7 @@ int MSI_dio_verify_memory(int code,int rnum,int card, int phasecode,int attencod
 }
 */
 
-int32_t VNA_triggers=4;
+extern VNA_triggers;
 int take_data(int b, struct DIO const *phasing_matrix, int c, int p, int a, double **pwr_mag, double **phase,
               double **tdelay, int wait_ms, int ssh_flag, int verbose, double target_tdelay, double target_pwr) {
     int t,rval,takeidx;
