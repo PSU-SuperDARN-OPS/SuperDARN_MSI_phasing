@@ -55,3 +55,7 @@ add_executable(dio_test dio_output_test.c pci_dio_120.c)
 target_link_libraries(dio_test m)
 target_compile_options(dio_test PRIVATE -Wall -Wextra -Wpedantic -Wconversion)
 target_sources(dio_test PRIVATE external/APCI/apcilib/apcilib.c)
+
+add_executable(vna_test vna_test.c vna_functions.c utils.c)
+target_link_libraries(vna_test m)
+target_compile_options(vna_test PRIVATE -Wall -Wextra -Wpedantic -Wconversion)
