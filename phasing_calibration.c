@@ -35,7 +35,6 @@
 #define CARDS 200
 #define PHASECODES 8192
 #define ATTENCODES 64
-//##define PHASECODES  64
 #define _QUICK_
 
 int stupid_flag = 0;
@@ -44,49 +43,34 @@ int test_flag = -1000;
 int sock = -1;
 int verbose = 2;
 char *hostip = "192.168.1.2";
-//char *hostip="209.114.113.119";
-//char *hostip="137.229.27.122";
-//char *hostip="67.59.83.38";
 char *file_prefix = "phasing_cal";
 char *file_ext = ".dat";
-char filename[120];
+char filename[120]="";
 char *dir = "/data/cal/";
 FILE *calfile = NULL;
 int port = 23;
-char command[80];
-char radar_name[80];
+char command[80]="";
+char radar_name[80]="";
 char freq_start[10] = "8E6";
 char freq_stop[10] = "20E6";
 char freq_steps[10] = "201";
 
-struct timeval t0, t1, t2, t3, t4, t5, t6;
-struct timeval t10, t11;
-unsigned long elapsed;
-
 
 int main(int argc, char **argv) {
-    char output[40], strout[40];
-    char cmd_str[80], prompt_str[10], data_str[1000];
     double *phase[VNA_FREQS], *pwr_mag[VNA_FREQS];
     double freq[VNA_FREQS];
     double pd_old, pd_new, phase_diff = 0.0;
-    int32_t rval, count, sample_count, fail, cr, lf;
-    int32_t ii, i = 0, c = 31, data = 0, index = 0, wait_delay_ms = 30;
+    int32_t count;
+    int32_t i = 0, c = 31, data = 0, wait_delay_ms = 30;
     unsigned int b = 0;
     int last_collect, current_collect, collect = 0, beamcode = 0, take_data = 0, attempt = 0, max_attempts = 20;
     double fstart;
     double fstop;
     double fstep;
     int fnum;
-    int radar;
-    char serial_number[80];
-    unsigned int portA0, portB0, portC0, cntrl0;
-    unsigned int portA1, portB1, portC1, cntrl1;
-    int temp, pci_handle, j, IRQ;
-    unsigned char *BASE0, *BASE1;
-    unsigned int mmap_io_ptr, IOBASE, CLOCK_RES;
-    float time;
-    struct timespec start_p, stop_p, start, stop, nsleep;
+    uint_fast8_t radar;
+    char serial_number[80]="";
+    int temp;
 
     struct DIO phasing_matrix;
 
@@ -140,11 +124,11 @@ int main(int argc, char **argv) {
     init_vna(hostip, port);
 
 
-    calibrate_vna(freq_start, freq_stop, freq_steps);
+    //calibrate_vna(freq_start, freq_stop, freq_steps);
 
 
     vna_button_command(":INIT1:IMM\r\n", 0, verbose);
-    printf("\n\nCalibration Complete\nReconfigure for Phasing Card Measurements");
+    printf("\n\nCalibration Complete\nReconfigure for Phasing Card Measurements\n");
     mypause();
 
     c = -1;
@@ -169,8 +153,14 @@ int main(int argc, char **argv) {
             sprintf(filename, "%s%s_%s_%02d_%s%s", dir, file_prefix, radar_name, c, serial_number, file_ext);
             if (verbose > 0) fprintf(stdout, "Using file: %s\n", filename);
             fflush(stdout);
-            gettimeofday(&t0, NULL);
+
             calfile = fopen(filename, "w");
+            if(calfile == NULL) {
+                perror("Error in opening calibration file, "
+                       "make sure /data/cal is created and permissions set to allow writing");
+                exit(-1);
+            }
+
             count = PHASECODES;
             fwrite(&count, sizeof(int32_t), 1, calfile);
             count = CARDS;
@@ -181,7 +171,6 @@ int main(int argc, char **argv) {
             fwrite(freq, sizeof(double), fnum, calfile);
             if (verbose > 0) {
                 fprintf(stdout, "Writing beamcodes to phasing card\n");
-                gettimeofday(&t2, NULL);
             }
             usleep(10000);
         } //test flag if
@@ -192,13 +181,13 @@ int main(int argc, char **argv) {
             data = 0;
             beamcode = b;
 
-            temp = write_data(IOBASE, c, beamcode, data);
-            temp = write_attenuators(IOBASE, c, beamcode, data);
+            temp = write_data(&phasing_matrix, c, beamcode, data);
+            temp = write_attenuators(&phasing_matrix, c, beamcode, data);
         }
 
         printf("Verifying all zero programming attenuation coding\n");
         for (b = 0; b < ATTENCODES; b++) {
-            temp = verify_attenuators(IOBASE, c, b, 0);
+            temp = verify_attenuators(&phasing_matrix, c, b, 0);
         }
 
         printf("Programming 1-to-1 attenuation coding no phase\n");
@@ -206,13 +195,13 @@ int main(int argc, char **argv) {
             data = b;
             beamcode = b;
 
-            temp = write_data(IOBASE, c, beamcode, 0);
-            temp = write_attenuators(IOBASE, c, beamcode, b);
+            temp = write_data(&phasing_matrix, c, beamcode, 0);
+            temp = write_attenuators(&phasing_matrix, c, beamcode, b);
         }
 
         printf("Verifying 1-to-1 programming attenuation coding\n");
         for (b = 0; b < ATTENCODES; b++) {
-            temp = verify_attenuators(IOBASE, c, b, b);
+            temp = verify_attenuators(&phasing_matrix, c, b, b);
         }
 
         printf("Programming all ones phase coding\n");
@@ -221,12 +210,12 @@ int main(int argc, char **argv) {
             beamcode = b;
 
             if (b % 512 == 0) printf("B: %d data: %d BC: %d\n", b, data, beamcode);
-            temp = write_data(IOBASE, c, beamcode, 8191);
-            temp = write_attenuators(IOBASE, c, beamcode, 63);
+            temp = write_data(&phasing_matrix, c, beamcode, 8191);
+            temp = write_attenuators(&phasing_matrix, c, beamcode, 63);
         }
         printf("Verifying all ones programming phase coding\n");
         for (b = 0; b < PHASECODES; b++) {
-            temp = verify_data(IOBASE, c, b, 8191);
+            temp = verify_data(&phasing_matrix, c, b, 8191);
         }
 
         printf("Programming 1-to-1 phase coding no attenuation\n");
@@ -235,13 +224,13 @@ int main(int argc, char **argv) {
             beamcode = b;
 
             if (b % 512 == 0) printf("B: %d data: %d BC: %d\n", b, data, beamcode);
-            temp = write_data(IOBASE, c, beamcode, 0);
-            temp = write_data(IOBASE, c, beamcode, data);
-            temp = write_attenuators(IOBASE, c, beamcode, 0);
+            temp = write_data(&phasing_matrix, c, beamcode, 0);
+            temp = write_data(&phasing_matrix, c, beamcode, data);
+            temp = write_attenuators(&phasing_matrix, c, beamcode, 0);
         }
         printf("Verifying 1-to-1 programming phase coding\n");
         for (b = 0; b < PHASECODES; b++) {
-            temp = verify_data(IOBASE, c, b, b);
+            temp = verify_data(&phasing_matrix, c, b, b);
         }
 
 
@@ -252,8 +241,8 @@ int main(int argc, char **argv) {
         current_collect = 0;
         for (b = 0; b < PHASECODES; b++) {
             beamcode = b;
-            temp = select_card(IOBASE, c);
-            beam_code(IOBASE, beamcode);
+            temp = select_card(&phasing_matrix, c);
+            beam_code(&phasing_matrix, beamcode);
             collect = 0;
             if (b == 0) collect = 1;
             if (b == (PHASECODES - 1)) collect = 1;
@@ -272,29 +261,29 @@ int main(int argc, char **argv) {
 #else
             for (b=0;b<PHASECODES;b++) {
               beamcode=b;
-              temp=select_card(IOBASE,c,radar);
-              beam_code(IOBASE,beamcode,radar);
+              temp=select_card(&phasing_matrix,c,radar);
+              beam_code(&phasing_matrix,beamcode,radar);
               last_collect=current_collect;
               current_collect=b;
 #endif
-            temp = verify_data(IOBASE, c, b, b);
+            temp = verify_data(&phasing_matrix, c, b, b);
 
             if (temp != 0) {
                 data = b;
 
                 if (b % 512 == 0) printf("B: %d data: %d BC: %d\n", b, data, beamcode);
-                temp = write_data(IOBASE, c, beamcode, 0);
-                temp = write_data(IOBASE, c, beamcode, data);
-                temp = write_attenuators(IOBASE, c, beamcode, 0);
+                temp = write_data(&phasing_matrix, c, beamcode, 0);
+                temp = write_data(&phasing_matrix, c, beamcode, data);
+                temp = write_attenuators(&phasing_matrix, c, beamcode, 0);
 
                 usleep(10000);
-                temp = verify_data(IOBASE, c, b, b);
+                temp = verify_data(&phasing_matrix, c, b, b);
             }
             if (temp != 0) {
                 printf("Failed Verification for beamcode: %d  %x\n", b, b);
                 exit(-1);
             }
-            gettimeofday(&t10, NULL);
+
             vna_button_command(":INIT1:IMM\r\n", 0, verbose);
             if (b == 0) sleep(1);
 
