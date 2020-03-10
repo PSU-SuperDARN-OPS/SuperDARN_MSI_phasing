@@ -59,3 +59,8 @@ target_sources(dio_test PRIVATE external/APCI/apcilib/apcilib.c)
 add_executable(vna_test vna_test.c vna_functions.c utils.c)
 target_link_libraries(vna_test m)
 target_compile_options(vna_test PRIVATE -Wall -Wextra -Wpedantic -Wconversion)
+
+add_executable(test_cards test_writing_cards.c pci_dio_120.c phasing_cards.c)
+target_link_libraries(test_cards m)
+target_compile_options(test_cards PRIVATE -Wall -Wextra -Wpedantic -Wconversion)
+target_sources(test_cards PRIVATE external/APCI/apcilib/apcilib.c)
