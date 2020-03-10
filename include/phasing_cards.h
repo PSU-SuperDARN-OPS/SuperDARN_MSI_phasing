@@ -13,12 +13,12 @@ static const uint_fast8_t WRITE_SELECT_BIT = 1;
 static const uint_fast8_t WRITE_ENABLE_BIT = 1;
 static const uint_fast8_t WRITE_DISABLE_BIT = 0;
 
-static const uint8_t WRITE_ENABLE_MASK = 0x01;
-static const uint8_t WRITE_DISABLE_MASK = 0xfe;
-static const uint8_t READ_SELECT_MASK = 0xbf;
-static const uint8_t WRITE_SELECT_MASK = 0x40;
-static const uint8_t PHASE_SELECT_MASK = 0x7f;
-static const uint8_t ATTENUATOR_SELECT_MASK = 0x80;
+#define WRITE_ENABLE_MASK  0x01
+#define WRITE_DISABLE_MASK  0xfe
+#define READ_SELECT_MASK  0xbf
+#define WRITE_SELECT_MASK  0x40
+#define PHASE_SELECT_MASK  0x7f
+#define ATTENUATOR_SELECT_MASK  0x80
 
 struct Port{
     int A0;
