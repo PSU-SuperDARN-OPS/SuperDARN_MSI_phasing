@@ -48,16 +48,16 @@ void init_phasing_cards(struct DIO * phasing_matrix) {
     uint8_t temp;
 
     // GROUP 0 - PortA=output, PortB=output, PortClo=output, PortChi=output
-    write_pci_dio_120(phasing_matrix->port.cntrl0, 0x80);
+    write_pci_dio_120(phasing_matrix->port.cntrl0, CONTROL_ACTIVE);
     // GROUP 1 - PortAinput, PortB=input, PortClo=input, PortChi=output
-    write_pci_dio_120(phasing_matrix->port.cntrl1, 0x93);
+    write_pci_dio_120(phasing_matrix->port.cntrl1, CONTROL_ACTIVE & CONTROL_ALL_PORTS_INPUT);
     write_pci_dio_120(phasing_matrix->port.A0, 0x00);
     write_pci_dio_120(phasing_matrix->port.B0, 0x00);
     write_pci_dio_120(phasing_matrix->port.C0, 0x00);
     write_pci_dio_120(phasing_matrix->port.A1, 0x00);
     write_pci_dio_120(phasing_matrix->port.B1, 0x00);
-    write_pci_dio_120(phasing_matrix->port.cntrl0, 0x00);
-    write_pci_dio_120(phasing_matrix->port.cntrl1, 0x13);
+    write_pci_dio_120(phasing_matrix->port.cntrl0, 0x00); //WHY?
+    write_pci_dio_120(phasing_matrix->port.cntrl1, 0x13); //WHY?
     temp = read_pci_dio_120(phasing_matrix->port.C1);
     temp = temp & 0x0f;
     printf("input on group 1, port c is %x\n", temp);
@@ -226,7 +226,7 @@ int32_t select_card(struct DIO const *phasing_matrix, int32_t address) {
     return 0;
 }
 
-int32_t write_attenuators(const struct DIO *phasing_matrix, int32_t card, int32_t code, int32_t data) {
+int32_t write_attenuators(const struct DIO *phasing_matrix, int32_t card, int32_t address, int32_t data) {
     int32_t temp;
 
     // check that the data to write is valid
@@ -239,7 +239,7 @@ int32_t write_attenuators(const struct DIO *phasing_matrix, int32_t card, int32_
     // select card to write
     temp = select_card(phasing_matrix, card);
     // choose the beam code to write (output appropriate EEPROM address
-    temp = beam_code(phasing_matrix, code);
+    temp = beam_code(phasing_matrix, address);
     select_attenuator(phasing_matrix);
     // enable writing
     select_write(phasing_matrix);
@@ -285,7 +285,7 @@ int32_t write_attenuators(const struct DIO *phasing_matrix, int32_t card, int32_
 
     if (temp != data) {
         printf(" ERROR - ATTEN DATA NOT WRITTEN: data: %x != readback: %x :: Code: %d Card: %d\n", reverse_bits(data),
-               reverse_bits(temp), code, card);
+               reverse_bits(temp), address, card);
         return -1;
     }
 

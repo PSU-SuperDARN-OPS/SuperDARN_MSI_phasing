@@ -37,6 +37,18 @@
 #define PB_GRP_4    17
 #define PC_GRP_4    18
 
+/*
+ * PCI-DIO Control Register Bits
+ */
+static const uint8_t CONTROL_PORT_C_LO_INPUT = 0x01;
+static const uint8_t CONTROL_PORT_B_INPUT = 0x02;
+static const uint8_t CONTROL_PORT_C_HI_INPUT = 0x08;
+static const uint8_t CONTROL_PORT_A_INPUT = 0x10;
+static const uint8_t CONTROL_ALL_PORTS_INPUT = CONTROL_PORT_A_INPUT & CONTROL_PORT_B_INPUT
+        & CONTROL_PORT_C_HI_INPUT & CONTROL_PORT_C_LO_INPUT;
+static const uint8_t CONTROL_ACTIVE = 0x80;
+
+
 void init_pci_dio_120();
 void write_pci_dio_120(int reg, uint8_t data);
 uint8_t read_pci_dio_120(int reg);

@@ -13,12 +13,12 @@ static const uint_fast8_t WRITE_SELECT_BIT = 1;
 static const uint_fast8_t WRITE_ENABLE_BIT = 1;
 static const uint_fast8_t WRITE_DISABLE_BIT = 0;
 
-static const uint_fast8_t WRITE_ENABLE_MASK = 0x01;
-static const uint_fast8_t WRITE_DISABLE_MASK = 0xfe;
-static const uint_fast8_t READ_SELECT_MASK = 0xbf;
-static const uint_fast8_t WRITE_SELECT_MASK = 0x40;
-static const uint_fast8_t PHASE_SELECT_MASK = 0x7f;
-static const uint_fast8_t ATTENUATOR_SELECT_MASK = 0x80;
+static const uint8_t WRITE_ENABLE_MASK = 0x01;
+static const uint8_t WRITE_DISABLE_MASK = 0xfe;
+static const uint8_t READ_SELECT_MASK = 0xbf;
+static const uint8_t WRITE_SELECT_MASK = 0x40;
+static const uint8_t PHASE_SELECT_MASK = 0x7f;
+static const uint8_t ATTENUATOR_SELECT_MASK = 0x80;
 
 struct Port{
     int A0;
@@ -61,7 +61,7 @@ float get_delay(int32_t code);
 int32_t beam_code(struct DIO const *phasing_matrix, int32_t code);
 /*-SELECT_CARD------------------------------------------------------*/
 int32_t select_card(struct DIO const *phasing_matrix, int32_t address);
-int32_t write_attenuators(const struct DIO *phasing_matrix, int32_t card, int32_t code, int32_t data);
+int32_t write_attenuators(const struct DIO *phasing_matrix, int32_t card, int32_t address, int32_t data);
 
 int32_t verify_attenuators(const struct DIO *phasing_matrix, int32_t card, int32_t code, int32_t data);
 

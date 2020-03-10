@@ -39,7 +39,7 @@ void init_vna(char * host_ip, int host_port) {
 
 void calibrate_vna(char * freq_start, char * freq_stop, char * freq_steps) {
     char command[80];
-    int verbose = 3;
+    int verbose = 0;
 
     vna_button_command(":SYST:PRES\r\n", 0, verbose);
     sprintf(command, ":SENS1:FREQ:STAR %s\r\n", freq_start);
