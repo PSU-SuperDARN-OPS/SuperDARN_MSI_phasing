@@ -141,7 +141,7 @@ float get_delay(int32_t code) {
     return delay;
 }
 
-int32_t beam_code(struct DIO const *phasing_matrix, int32_t code) {
+int32_t select_beam_code(struct DIO const *phasing_matrix, int32_t code) {
     /* the beam code is 13 bits, pAD0 thru pAD12.  This code
        uses bits 0-7 of CH0, PortA, and bits 0-4 of CH0, PortB
        to output the beam code. Note: The beam code is an address
@@ -159,17 +159,18 @@ int32_t beam_code(struct DIO const *phasing_matrix, int32_t code) {
     }
     // bit reverse the code
     code = reverse_bits(code);
+
     // set CH0, Port A to lowest 8 bits of beam code and output on PortA
     temp = code & 0xff;
 
     write_pci_dio_120(phasing_matrix->port.A0, temp);
-
 
     // set CH0, Port B to upper 5 bits of beam code and output on PortB
     temp = code & 0x1f00;
     temp = temp >> 8;
 
     write_pci_dio_120(phasing_matrix->port.B0, temp);
+
 
     // verify that proper beam code was sent out
 
@@ -239,7 +240,7 @@ int32_t write_attenuators(const struct DIO *phasing_matrix, int32_t card, int32_
     // select card to write
     temp = select_card(phasing_matrix, card);
     // choose the beam code to write (output appropriate EEPROM address
-    temp = beam_code(phasing_matrix, address);
+    temp = select_beam_code(phasing_matrix, address);
     select_attenuator(phasing_matrix);
     // enable writing
     select_write(phasing_matrix);
@@ -306,10 +307,10 @@ int32_t verify_attenuators(const struct DIO *phasing_matrix, int32_t card, int32
     // select card to write
     temp = select_card(phasing_matrix, card);
     // choose the beam code to write (output appropriate EEPROM address
-    temp = beam_code(phasing_matrix, code);
+    temp = select_beam_code(phasing_matrix, code);
     select_attenuator(phasing_matrix);
     // disable writing
-    select_write(phasing_matrix);
+    select_read(phasing_matrix);
     usleep(10000);
     // verify written data
     // read PortA and PortB to see if EEPROM output is same as progammed
@@ -340,7 +341,7 @@ int32_t write_data(struct DIO const *phasing_matrix, int32_t card, int32_t code,
     // select card to write
     temp = select_card(phasing_matrix, card);
     // choose the beam code to write (output appropriate EEPROM address
-    temp = beam_code(phasing_matrix, code);
+    temp = select_beam_code(phasing_matrix, code);
     select_phase(phasing_matrix);
     // enable writing
     select_write(phasing_matrix);
@@ -405,18 +406,18 @@ int32_t verify_data(const struct DIO *phasing_matrix, int32_t card, int32_t code
     // select card to write
     temp = select_card(phasing_matrix, card);
     // choose the beam code to write (output appropriate EEPROM address
-    temp = beam_code(phasing_matrix, code);
+    temp = select_beam_code(phasing_matrix, code);
     select_phase(phasing_matrix);
     // bit reverse the data
     data = reverse_bits(data);
 
     // reset CH1, PortA and PortB to inputs
 
-    write_pci_dio_120(phasing_matrix->port.cntrl1, 0x93);
+    write_pci_dio_120(phasing_matrix->port.cntrl1, CONTROL_ACTIVE & CONTROL_ALL_PORTS_INPUT);
     write_pci_dio_120(phasing_matrix->port.cntrl1, 0x13);
 
     // disable writing
-    select_write(phasing_matrix);
+    select_read(phasing_matrix);
     usleep(10000);
     // verify written data
     // read PortA and PortB to see if EEPROM output is same as progammed

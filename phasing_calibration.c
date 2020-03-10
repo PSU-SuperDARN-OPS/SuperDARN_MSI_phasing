@@ -25,10 +25,10 @@
 #include "include/pci_dio_120.h"
 #include "include/vna_functions.h"
 
-#define SWITCHES 0
-#define ATTEN    1
-#define READ     0
-#define WRITE    1
+//#define SWITCHES 0
+//#define ATTEN    1
+//#define READ     0
+//#define WRITE    1
 #define ON       1
 #define OFF      0
 
@@ -124,7 +124,7 @@ int main(int argc, char **argv) {
     init_vna(hostip, port);
 
 
-    //calibrate_vna(freq_start, freq_stop, freq_steps);
+    calibrate_vna(freq_start, freq_stop, freq_steps);
 
 
     vna_button_command(":INIT1:IMM\r\n", 0, verbose);
@@ -242,7 +242,7 @@ int main(int argc, char **argv) {
     for (b = 0; b < PHASECODES; b++) {
         beamcode = b;
         temp = select_card(&phasing_matrix, c);
-        beam_code(&phasing_matrix, beamcode);
+        select_beam_code(&phasing_matrix, beamcode);
         collect = 0;
         if (b == 0) collect = 1;
         if (b == (PHASECODES - 1)) collect = 1;

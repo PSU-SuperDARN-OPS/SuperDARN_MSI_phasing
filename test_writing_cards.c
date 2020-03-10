@@ -42,12 +42,24 @@ void test_read_write_bit(struct DIO * phasing_matrix) {
     sleep(1);
 
     printf("Select write (led on)\n");
+    enable_write(phasing_matrix);
     select_write(phasing_matrix);
     sleep(2);
 
     printf("Select read (led off)\n");
     select_read(phasing_matrix);
     sleep(2);
+
+    printf("Select write (led on)\n");
+    enable_write(phasing_matrix);
+    select_write(phasing_matrix);
+    sleep(2);
+
+    printf("Select read (led off)\n");
+    disable_write(phasing_matrix);
+    sleep(2);
+
+    select_read(phasing_matrix);
 }
 
 int main(){
@@ -61,20 +73,16 @@ int main(){
 
     init_phasing_cards(&phasing_matrix);
 
-    test_card_select(&phasing_matrix);
+//    test_card_select(&phasing_matrix);
 
-    test_sa_bit(&phasing_matrix);
+//    test_sa_bit(&phasing_matrix);
 
-    test_read_write_bit(&phasing_matrix);
+//    test_read_write_bit(&phasing_matrix);
 
-//    printf("Testing writing to phase delay bits");
-//    select_card(&phasing_matrix, 0);
-//    select_phase(&phasing_matrix);
-//    select_write(&phasing_matrix);
-//
-//    write_pci_dio_120(phasing_matrix.port.cntrl1, 0x81);
-//
-//    beam_code(&phasing_matrix, 1);
+    printf("Testing writing to phase delay bits\n");
+
+    write_data(&phasing_matrix, 0, 1, 1);
+    verify_data(&phasing_matrix, 0, 1, 1);
 
 
     printf("**** End of Tests ****\n");

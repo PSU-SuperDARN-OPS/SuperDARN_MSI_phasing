@@ -58,7 +58,7 @@ int32_t reverse_bits(int32_t data);
 /*-GET_DEALY---------------------------------------------------------*/
 float get_delay(int32_t code);
 /*-BEAM_CODE---------------------------------------------------------*/
-int32_t beam_code(struct DIO const *phasing_matrix, int32_t code);
+int32_t select_beam_code(struct DIO const *phasing_matrix, int32_t code);
 /*-SELECT_CARD------------------------------------------------------*/
 int32_t select_card(struct DIO const *phasing_matrix, int32_t address);
 int32_t write_attenuators(const struct DIO *phasing_matrix, int32_t card, int32_t address, int32_t data);
