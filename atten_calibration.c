@@ -1,24 +1,11 @@
-#include <errno.h>
-#include <stdarg.h>
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <stdlib.h>
-#include <signal.h>
 #include <math.h>
-#include <netdb.h>
-#include <string.h>
-#include <time.h>
 #include <sys/time.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
 
 
 #include "include/registers.h"
