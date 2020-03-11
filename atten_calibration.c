@@ -20,12 +20,6 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 
-#ifdef __QNX__
-#include <hw/pci.h>
-#include <hw/inout.h>
-#include <sys/neutrino.h>
-#include <sys/mman.h>
-#endif
 
 #include "include/registers.h"
 #include "include/phasing_cards.h"
@@ -89,10 +83,12 @@ int main(int argc, char **argv) {
     unsigned int portA1, portB1, portC1, cntrl1;
     int temp, pci_handle, j, IRQ;
     unsigned char *BASE0, *BASE1;
-    unsigned int mmap_io_ptr, IOBASE, CLOCK_RES;
+    unsigned int mmap_io_ptr, CLOCK_RES;
     float time;
-#ifdef __QNX__
-    struct		 _clockperiod new, old;
+
+    struct DIO phasing_matrix;
+
+
     struct		 timespec start_p, stop_p, start, stop, nsleep;
 
     if(argc <2 ) {
@@ -115,142 +111,15 @@ int main(int argc, char **argv) {
     radar=atoi(argv[1]);
     printf("Radar: %d Card: %d\n",radar,c);
     printf("Test flag: %d\n",test_flag);
-    switch(radar) {
-      case 1:
-            portC0=PC_GRP_0;
-            portC1=PC_GRP_1;
-            portB0=PB_GRP_0;
-            portB1=PB_GRP_1;
-            portA0=PA_GRP_0;
-            portA1=PA_GRP_1;
-            cntrl0=CNTRL_GRP_0;
-            cntrl1=CNTRL_GRP_1;
-        break;
-      case 2:
-            portC0=PC_GRP_2;
-            portC1=PC_GRP_3;
-            portB0=PB_GRP_2;
-            portB1=PB_GRP_3;
-            portA0=PA_GRP_2;
-            portA1=PA_GRP_3;
-            cntrl0=CNTRL_GRP_2;
-            cntrl1=CNTRL_GRP_3;
-        break;
-      case 3:
-            portC0=PC_GRP_4;
-            portC1=PC_GRP_3;
-            portB0=PB_GRP_4;
-            portB1=PB_GRP_3;
-            portA0=PA_GRP_4;
-            portA1=PA_GRP_3;
-            cntrl0=CNTRL_GRP_4;
-            cntrl1=CNTRL_GRP_3;
-        break;
-      default:
-        fprintf(stderr,"Invalid radar number %d",radar);
-        exit(-1);
-    }
-    /* SET THE SYSTEM CLOCK RESOLUTION AND GET THE START TIME OF THIS PROCESS */
-    new.nsec=10000;
-    new.fract=0;
-    temp=ClockPeriod(CLOCK_REALTIME,&new,0,0);
-    if(temp==-1){
-        perror("Unable to change system clock resolution");
-    }
-    temp=clock_gettime(CLOCK_REALTIME, &start_p);
-    if(temp==-1){
-        perror("Unable to read sytem time");
-    }
-    temp=ClockPeriod(CLOCK_REALTIME,0,&old,0);
-    CLOCK_RES=old.nsec;
-    printf("CLOCK_RES: %d\n", CLOCK_RES);
-    /* OPEN THE PLX9656 AND GET LOCAL BASE ADDRESSES */
-    fprintf(stderr,"PLX9052 CONFIGURATION ********************\n");
-    clock_gettime(CLOCK_REALTIME, &start);
-    temp=_open_PLX9052(&pci_handle, &mmap_io_ptr, &IRQ, 1);
-    IOBASE=mmap_io_ptr;
-    if(temp==-1){
-        fprintf(stderr, "	PLX9052 configuration failed");
-    }
-    else{
-        fprintf(stderr, "	PLX9052 configuration successful!\n");
-    }
-    printf("IOBASE=%x\n",IOBASE);
-    /* INITIALIZE THE CARD FOR PROPER IO */
-    // GROUP 0 - PortA=output, PortB=output, PortClo=output, PortChi=output
-    out8(IOBASE+cntrl0,0x80);
-    // GROUP 1 - PortAinput, PortB=input, PortClo=input, PortChi=output
-    out8(IOBASE+cntrl1,0x93);
-    out8(IOBASE+portA0,0x00);
-    out8(IOBASE+portB0,0x00);
-    out8(IOBASE+portC0,0x00);
-    out8(IOBASE+portA1,0x00);
-    out8(IOBASE+portB1,0x00);
-    out8(IOBASE+cntrl0,0x00);
-    out8(IOBASE+cntrl1,0x13);
-    temp=in8(IOBASE+portC1);
-    temp=temp & 0x0f;
-    printf("input on group 1, port c is %x\n", temp);
-        select_card(IOBASE,c,radar);
-/*
-        while(1) { 
-        printf("Set Write\n");
-          set_RW(IOBASE,WRITE,radar);
-          sleep(1);
-        printf("Set Read\n");
-          select_read(IOBASE,READ,radar);
-          sleep(1);
-        printf("Set switches \n");
-          set_SA(IOBASE,SWITCHES,radar);
-          sleep(1);
-        printf("Set atten\n");
-          set_SA(IOBASE,ATTEN,radar);
-          sleep(1);
-        }
-        exit(0);
-*/
-#endif
-    if (test_flag == -3) {
-        while (1) {
-            for (i = 0; i <= 12; i = i + 1) {
-                //     b=0;
-                //     printf("Selecting Beamcode: %d 0x%x\n",b,b);
-                //     select_beam_code(IOBASE,b,1);
-                //     sleep(1);
-                if (i == -1) b = 0;
-                if (i == 0) b = 1;
-                if (i > 0) b = 1 << i;
-                b = b | 0x200;
-//        b= (b |  0x4);
-                printf("Selecting Beamcode: %d 0x%x\n", b, b);
-                select_beam_code(IOBASE, b);
-                sleep(1);
-            }
-        }
-    }
-    if (test_flag >= 0) {
-        //stupid_flag=1;
-        //printf("test flag %d radar %d\n",test_flag,radar);
-        select_beam_code(IOBASE, test_flag);
-        //      temp=write_data(IOBASE,c,test_flag,test_flag,radar,0);
-        verify_data(IOBASE, c, test_flag, test_flag);
-        exit(0);
-    }
-    if (test_flag == -2) {
-        printf("test flag %d radar %d icard %d verify programming\n", test_flag, radar, c);
-        for (b = 0; b <= 8191; b++) {
-//    select_beam_code(IOBASE,b,radar);
-            usleep(10000);
-            temp = verify_data(IOBASE, c, b, b);
-        }
-        exit(0);
-    }
-/*
-if(test_flag==1) {
-  select_beam_code(IOBASE,8191,radar);
-  exit(0);
-}
-*/
+
+    phasing_matrix.radar_number = radar;
+    set_ports(&phasing_matrix);
+
+    init_pci_dio_120();
+
+    init_phasing_cards(&phasing_matrix);
+
+
     fnum = atoi(freq_steps);
     fstart = atof(freq_start);
     fstop = atof(freq_stop);
@@ -260,126 +129,71 @@ if(test_flag==1) {
         atten_phase[i] = calloc(ATTENCODES, sizeof(double));
         atten_pwr_mag[i] = calloc(ATTENCODES, sizeof(double));
     }
-    if (test_flag == -1000) {
+    
 // Open Socket and initial IO
-        if (verbose > 0) printf("Opening Socket %s %d\n", hostip, port);
-        sock = opentcpsock(hostip, port);
-        if (sock < 0) {
-            if (verbose > 0) printf("Socket failure %d\n", sock);
-        } else if (verbose > 0) printf("Socket %d\n", sock);
-        rval = read(sock, &output, sizeof(char) * 10);
-        if (verbose > 0) fprintf(stdout, "Initial Output Length: %d\n", rval);
-        strcpy(strout, "");
-        strncat(strout, output, rval);
-        if (verbose > 0) fprintf(stdout, "Initial Output String: %s\n", strout);
+    init_vna(hostip, port);
 
-        if (setup_flag != 0) {
-            vna_button_command(":SYST:PRES\r\n", 0, verbose);
-            sprintf(command, ":SENS1:FREQ:STAR %s\r\n", freq_start);
-            vna_button_command(command, 0, verbose);
-            sprintf(command, ":SENS1:FREQ:STOP %s\r\n", freq_stop);
-            vna_button_command(command, 0, verbose);
-            sprintf(command, ":SENS1:SWE:POIN %s\r\n", freq_steps);
-            vna_button_command(command, 0, verbose);
-            vna_button_command(":CALC1:PAR:COUN 2\r\n", 0, verbose);
-            vna_button_command(":CALC1:PAR1:SEL\r\n", 0, verbose);
-            vna_button_command(":CALC1:PAR1:DEF S12\r\n", 0, verbose);
-            vna_button_command(":CALC1:FORM UPH\r\n", 0, verbose);
-            vna_button_command(":CALC1:PAR2:SEL\r\n", 0, verbose);
-            vna_button_command(":CALC1:PAR2:DEF S12\r\n", 0, verbose);
-            vna_button_command(":CALC1:FORM MLOG\r\n", 0, verbose);
-            vna_button_command(":SENS1:AVER OFF\r\n", 0, verbose);
-            vna_button_command(":SENS1:AVER:COUN 4\r\n", 0, verbose);
-            vna_button_command(":SENS1:AVER:CLE\r\n", 0, verbose);
-            vna_button_command(":INIT1:CONT OFF\r\n", 0, verbose);
-
-            printf("\n\n\7\7Calibrate Network Analyzer for S12,S21\n");
-            mypause();
-            vna_button_command(":SENS1:CORR:COLL:METH:THRU 1,2\r\n", 0, verbose);
-            sleep(1);
-            vna_button_command(":SENS1:CORR:COLL:THRU 1,2\r\n", 0, verbose);
-            printf("  Doing S1,2 Calibration..wait 4 seconds\n");
-            sleep(4);
-
-            vna_button_command(":SENS1:CORR:COLL:METH:THRU 2,1\r\n", 0, verbose);
-            sleep(1);
-            vna_button_command(":SENS1:CORR:COLL:THRU 2,1\r\n", 0, verbose);
-            printf("  Doing S2,1 Calibration..wait 4 seconds\n");
-            sleep(4);
-            vna_button_command(":SENS1:CORR:COLL:SAVE\r\n", 0, verbose);
-        }
-        vna_button_command(":INIT1:IMM\r\n", 0, verbose);
-        printf("\n\nCalibration Complete\nReconfigure for Phasing Card Measurements");
-        mypause();
-        c = -1;
-        printf("\n\nEnter Radar Name: ");
-        fflush(stdin);
-        scanf("%s", radar_name);
-        fflush(stdout);
-        fflush(stdin);
-        printf("\n\nEnter Phasing Card Number: ");
-        fflush(stdin);
-        fflush(stdout);
-        scanf("%d", &c);
-        printf("\n\nEnter Serial Number: ");
-        fflush(stdin);
-        fflush(stdout);
-        scanf("%s", serial_number);
-        printf("Radar: <%s>  Card: %d Serial: %s\n", radar_name, c, serial_number);
-        fflush(stdout);
-    }
+    calibrate_vna(freq_start, freq_stop, freq_steps);
+    
+    vna_button_command(":INIT1:IMM\r\n", 0, verbose);
+    printf("\n\nCalibration Complete\nReconfigure for Phasing Card Measurements");
+    mypause();
+    c = -1;
+    printf("\n\nEnter Radar Name: ");
+    fflush(stdin);
+    scanf("%s", radar_name);
+    fflush(stdout);
+    fflush(stdin);
+    printf("\n\nEnter Phasing Card Number: ");
+    fflush(stdin);
+    fflush(stdout);
+    scanf("%d", &c);
+    printf("\n\nEnter Serial Number: ");
+    fflush(stdin);
+    fflush(stdout);
+    scanf("%s", serial_number);
+    printf("Radar: <%s>  Card: %d Serial: %s\n", radar_name, c, serial_number);
+    fflush(stdout);
+    
     while ((c < CARDS) && (c >= 0)) {
-        if (test_flag == -1000) {
-            sprintf(attenfilename, "%s%s_%s_%02d_%s%s", dir, file_prefix, radar_name, c, serial_number, atten_ext);
-            if (verbose > 0) fprintf(stdout, "Using file: %s\n", attenfilename);
-            fflush(stdout);
-            gettimeofday(&t0, NULL);
-            attenfile = fopen(attenfilename, "w");
-            count = ATTENCODES;
-            fwrite(&count, sizeof(int32), 1, attenfile);
-            count = CARDS;
-            fwrite(&count, sizeof(int32), 1, attenfile);
-            count = fnum;
-            fwrite(&count, sizeof(int32), 1, attenfile);
-            count = 0;
-            fwrite(freq, sizeof(double), fnum, attenfile);
-            if (verbose > 0) {
-                fprintf(stdout, "Writing beamcodes to phasing card\n");
-                gettimeofday(&t2, NULL);
-            }
-            usleep(10000);
-        } //test flag if
-        if (stupid_flag) {
-            while (1) {  //JDS
-                if (b == 0) b = 8; //JDS
-                else b = 0;//JDS
-                data = b;
-                beamcode = b;
-
-                printf("B: %d data: %d BC: %d\n", b, data, beamcode);
-                temp = write_data(IOBASE, c, beamcode, data);
-                sleep(2); //JDS
-                temp = write_attenuators(IOBASE, c, beamcode, 0);
-
-            }
+        
+        sprintf(attenfilename, "%s%s_%s_%02d_%s%s", dir, file_prefix, radar_name, c, serial_number, atten_ext);
+        if (verbose > 0) fprintf(stdout, "Using file: %s\n", attenfilename);
+        fflush(stdout);
+        gettimeofday(&t0, NULL);
+        attenfile = fopen(attenfilename, "w");
+        count = ATTENCODES;
+        fwrite(&count, sizeof(int32), 1, attenfile);
+        count = CARDS;
+        fwrite(&count, sizeof(int32), 1, attenfile);
+        count = fnum;
+        fwrite(&count, sizeof(int32), 1, attenfile);
+        count = 0;
+        fwrite(freq, sizeof(double), fnum, attenfile);
+        if (verbose > 0) {
+            fprintf(stdout, "Writing beamcodes to phasing card\n");
+            gettimeofday(&t2, NULL);
         }
+        usleep(10000);
+        
+        
         printf("Programming all zeros attenuation coding\n");
         for (b = 0; b < ATTENCODES; b++) {
             data = 0;
             beamcode = b;
 
             //printf("B: %d data: %d BC: %d\n",b,data,beamcode);
-            temp = write_data(IOBASE, c, beamcode, data);
-            temp = write_attenuators(IOBASE, c, beamcode, data);
+            temp = write_data(&phasing_matrix, c, beamcode, data);
+            temp = write_attenuators(&phasing_matrix, c, beamcode, data);
 
         }
 
         printf("Verifying all zero programming attenuation coding\n");
         for (b = 0; b < ATTENCODES; b++) {
-            select_card(IOBASE, c);
-            select_beam_code(IOBASE, b);
+            select_card(&phasing_matrix, c);
+            select_beam_code(&phasing_matrix, b);
             usleep(10000);
-            temp = verify_attenuators(IOBASE, c, b, 0);
+            temp = verify_attenuators(&phasing_matrix, c, b, 0);
         }
 
         printf("Programming 1-to-1 attenuation coding no phase\n");
@@ -388,15 +202,15 @@ if(test_flag==1) {
             beamcode = b;
 
             //printf("B: %d data: %d BC: %d\n",b,data,beamcode);
-            temp = write_data(IOBASE, c, beamcode, 0);
-            temp = write_attenuators(IOBASE, c, beamcode, b);
+            temp = write_data(&phasing_matrix, c, beamcode, 0);
+            temp = write_attenuators(&phasing_matrix, c, beamcode, b);
         }
         printf("Verifying 1-to-1 programming attenuation coding\n");
         for (b = 0; b < ATTENCODES; b++) {
-            select_card(IOBASE, c);
-            select_beam_code(IOBASE, b);
+            select_card(&phasing_matrix, c);
+            select_beam_code(&phasing_matrix, b);
             usleep(10000);
-            temp = verify_attenuators(IOBASE, c, b, b);
+            temp = verify_attenuators(&phasing_matrix, c, b, b);
         }
 
 
@@ -412,15 +226,13 @@ if(test_flag==1) {
         current_collect = 0;
         for (b = 0; b < ATTENCODES; b++) {
             beamcode = b;
-            temp = select_card(IOBASE, c);
-            select_beam_code(IOBASE, beamcode);
+            temp = select_card(&phasing_matrix, c);
+            select_beam_code(&phasing_matrix, beamcode);
             vna_button_command(":INIT1:IMM\r\n", 0, verbose);
             if (b == 0) sleep(1);
-#ifdef __QNX__
-            delay(wait_delay); //NO AVERAGE
-#else
+
             usleep(wait_delay);
-#endif
+
             take_data = 1;
             attempt = 0;
             while ((take_data) && (attempt < max_attempts)) {

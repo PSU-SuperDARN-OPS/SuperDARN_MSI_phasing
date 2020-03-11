@@ -24,14 +24,16 @@ project(PhasingCalibration  VERSION 1.0
 link_directories(${CMAKE_HOME_DIRECTORY}/external/APCI/apcilib)
 
 add_executable(phasing_calibration phasing_calibration.c pci_dio_120.c
-        phasing_cards.c utils.c vna_functions.c MSI_functions.c qnx_functions_mock.c include/qnx_functions_mock.h)
+        phasing_cards.c utils.c vna_functions.c MSI_functions.c )
 target_link_libraries(phasing_calibration m)
 target_compile_options(phasing_calibration PRIVATE -Wall -Wextra -Wpedantic -Wconversion)
 target_sources(phasing_calibration PRIVATE external/APCI/apcilib/apcilib.c)
 
 add_executable(atten_calibration atten_calibration.c pci_dio_120.c
-        phasing_cards.c _prog_conventions.c utils.c vna_functions.c MSI_functions.c qnx_functions_mock.c include/qnx_functions_mock.h)
+        phasing_cards.c utils.c vna_functions.c MSI_functions.c )
 target_link_libraries(atten_calibration m)
+target_compile_options(atten_calibration PRIVATE -Wall -Wextra -Wpedantic -Wconversion)
+target_sources(atten_calibration PRIVATE external/APCI/apcilib/apcilib.c)
 
 add_executable(time_delay time_delay.c)
 target_link_libraries(time_delay m)
