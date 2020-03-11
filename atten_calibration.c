@@ -14,90 +14,54 @@
 #include "include/pci_dio_120.h"
 #include "include/vna_functions.h"
 
-#define SWITCHES 0
-#define ATTEN    1
-#define READ     0
-#define WRITE    1
-#define ON       1
-#define OFF      0
-
 
 #define CARDS 200
 #define ATTENCODES 64
 #define FREQS 1500
-#define _QUICK_
 
-int stupid_flag = 0;
-int setup_flag = 1;
-int test_flag = -1000;
-int sock = -1;
-int verbose = 2;
-char *hostip = "192.168.1.2";
-char *file_prefix = "phasing_cal";
-char *file_ext = ".dat";
-char *atten_ext = ".att";
-char attenfilename[120];
-char *dir = "/data/cal/";
-FILE *attenfile = NULL;
-int port = 23;
-char command[80];
-char radar_name[80];
-char freq_start[10] = "8E6";
-char freq_stop[10] = "20E6";
-char freq_steps[10] = "201";
 
-struct timeval t0, t1, t2, t3, t4, t5, t6;
-struct timeval t10, t11;
-unsigned long elapsed;
 
 int main(int argc, char **argv) {
-    char output[40], strout[40];
-    char cmd_str[80], prompt_str[10], data_str[1000];
     double *atten_phase[FREQS], *atten_pwr_mag[FREQS];
     double freq[FREQS];
     double pd_old, pd_new, pwr_diff = 0.0;
-    int32 rval, count, sample_count, fail, cr, lf;
-    int32 ii, i = 0, c = 31, data = 0, index = 0, wait_delay = 10;
+    int32_t count;
+    int32_t i = 0, c = 31, data = 0, wait_delay = 10;
     unsigned int b = 0;
-    int last_collect, current_collect, collect = 0, beamcode = 0, take_data = 0, attempt = 0, max_attempts = 20;
+    int last_collect, current_collect, beamcode = 0, take_data = 0, attempt = 0, max_attempts = 20;
     double fstart;
     double fstop;
     double fstep;
     int fnum;
     int radar;
     char serial_number[80];
-    unsigned int portA0, portB0, portC0, cntrl0;
-    unsigned int portA1, portB1, portC1, cntrl1;
-    int temp, pci_handle, j, IRQ;
-    unsigned char *BASE0, *BASE1;
-    unsigned int mmap_io_ptr, CLOCK_RES;
-    float time;
+    int temp;
+    int verbose = 2;
+    char *hostip = "192.168.1.2";
+    char *file_prefix = "phasing_cal";
+    char *file_ext = ".dat";
+    char *atten_ext = ".att";
+    char attenfilename[120];
+    char *dir = "/data/cal/";
+    FILE *attenfile = NULL;
+    int port = 23;
+    char radar_name[80];
+    char freq_start[10] = "8E6";
+    char freq_stop[10] = "20E6";
+    char freq_steps[10] = "201";
+
 
     struct DIO phasing_matrix;
 
-
-    struct		 timespec start_p, stop_p, start, stop, nsleep;
 
     if(argc <2 ) {
       fprintf(stderr,"%s: invoke with radar number (1 or 2 or 3)\n",argv[0]);
       fflush(stderr);
       exit(0);
     }
-    if(argc ==3 ) {
-      if(atoi(argv[2])==0) setup_flag=0;
-      else setup_flag=1;
-    } else {
-      test_flag=-1000;
-    }
-    if(argc ==4 ) {
-      test_flag=atoi(argv[3]);
-      c=atoi(argv[2]);
-    } else {
-      test_flag=-1000;
-    }
+
     radar=atoi(argv[1]);
     printf("Radar: %d Card: %d\n",radar,c);
-    printf("Test flag: %d\n",test_flag);
 
     phasing_matrix.radar_number = radar;
     set_ports(&phasing_matrix);
@@ -147,7 +111,6 @@ int main(int argc, char **argv) {
         sprintf(attenfilename, "%s%s_%s_%02d_%s%s", dir, file_prefix, radar_name, c, serial_number, atten_ext);
         if (verbose > 0) fprintf(stdout, "Using file: %s\n", attenfilename);
         fflush(stdout);
-        gettimeofday(&t0, NULL);
         attenfile = fopen(attenfilename, "w");
         count = ATTENCODES;
         fwrite(&count, sizeof(int32), 1, attenfile);
@@ -159,7 +122,6 @@ int main(int argc, char **argv) {
         fwrite(freq, sizeof(double), fnum, attenfile);
         if (verbose > 0) {
             fprintf(stdout, "Writing beamcodes to phasing card\n");
-            gettimeofday(&t2, NULL);
         }
         usleep(10000);
         
@@ -169,7 +131,6 @@ int main(int argc, char **argv) {
             data = 0;
             beamcode = b;
 
-            //printf("B: %d data: %d BC: %d\n",b,data,beamcode);
             temp = write_data(&phasing_matrix, c, beamcode, data);
             temp = write_attenuators(&phasing_matrix, c, beamcode, data);
 
@@ -188,7 +149,6 @@ int main(int argc, char **argv) {
             data = b;
             beamcode = b;
 
-            //printf("B: %d data: %d BC: %d\n",b,data,beamcode);
             temp = write_data(&phasing_matrix, c, beamcode, 0);
             temp = write_attenuators(&phasing_matrix, c, beamcode, b);
         }
@@ -200,10 +160,6 @@ int main(int argc, char **argv) {
             temp = verify_attenuators(&phasing_matrix, c, b, b);
         }
 
-
-        if (test_flag == -1) {
-            exit(0);
-        }
 
         sleep(10);
 
@@ -261,21 +217,17 @@ int main(int argc, char **argv) {
             count = fwrite(atten_pwr_mag[i], sizeof(double), ATTENCODES, attenfile);
         }
         for (i = 0; i < fnum; i++) {
-            //if (verbose > 1) printf("Freq %lf:  Phase 0:%lf Phase Max: %lf\n",freq[i],atten_phase[i][0],atten_phase[i][ATTENCODES-1]);
             if (verbose > 1)
                 printf("Freq %lf:  Pwr 0:%lf Pwr Max: %lf\n", freq[i], atten_pwr_mag[i][0],
                        atten_pwr_mag[i][ATTENCODES - 1]);
             fwrite(&i, sizeof(int32), 1, attenfile);
             count = fwrite(atten_phase[i], sizeof(double), ATTENCODES, attenfile);
             count = fwrite(atten_pwr_mag[i], sizeof(double), ATTENCODES, attenfile);
-            //printf("Freq index: %d Count: %d\n",i,count);
+
         }
         printf("Closing File\n");
         fclose(attenfile);
         c = -1;
-//    if (verbose>0) fprintf(stdout,"Asking for another card:\n");
-//    printf("Enter Next Card Number (CTRL-C to exit): ");
-//    scanf("%d", &c);
     } // end of Card loop
 }
 
