@@ -224,7 +224,7 @@ int take_data(int b, struct DIO const *phasing_matrix, int c, int p, int a, doub
 
 
     rval= MSI_dio_write_memory(phasing_matrix, b, c, p, a);
-    if(rval == 0) {
+    if(rval != 0) {
         printf("Error Writing to DIO card");
         exit(rval);
     }
