@@ -222,23 +222,21 @@ int take_data(int b, struct DIO const *phasing_matrix, int c, int p, int a, doub
     int t,rval,takeidx;
     char command[128]="";
 
-    for(takeidx=0; takeidx < 5; takeidx++) {
-        rval= MSI_dio_write_memory(phasing_matrix, b, c, p, a);
-        if(rval == 0) {
-            break;
-        }
-        if(takeidx == 4) {
-            return rval;
-        }
-        fprintf(stdout, "retrying write command\n");
-        usleep(100000);
+
+    rval= MSI_dio_write_memory(phasing_matrix, b, c, p, a);
+    if(rval == 0) {
+        printf("Error Writing to DIO card");
+        exit(rval);
     }
+
     usleep(1000*wait_ms);
+
     vna_button_command(":SENS1:AVER:CLE\r\n", 30, verbose);
     for(t=0;t<VNA_triggers;t++) {
         vna_button_command(":TRIG:SING\r\n", 0, verbose);
         vna_button_command("*OPC?\r\n", 0, verbose);
     }
+
     vna_button_command("DISP:WIND1:TRAC1:Y:AUTO\r\n", 10, verbose);
     vna_button_command("DISP:WIND1:TRAC3:Y:AUTO\r\n", 10, verbose);
     sprintf(command,"DISP:WIND1:TRAC3:Y:RLEV %E\r\n",target_tdelay*1E-9);
