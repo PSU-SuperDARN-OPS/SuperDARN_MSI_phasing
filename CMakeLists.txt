@@ -52,6 +52,7 @@ add_executable(optimize_beam_programming optimize_beam_programming.c MSI_functio
         pci_dio_120.c include/pci_dio_120.h qnx_functions_mock.c include/qnx_functions_mock.h)
 target_link_libraries(optimize_beam_programming m)
 target_compile_options(optimize_beam_programming PRIVATE -Wall -Wextra -Wpedantic -Wconversion)
+target_sources(optimize_beam_programming PRIVATE external/APCI/apcilib/apcilib.c)
 
 add_executable(dio_test dio_output_test.c pci_dio_120.c)
 target_link_libraries(dio_test m)

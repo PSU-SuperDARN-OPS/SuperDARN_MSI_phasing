@@ -344,46 +344,19 @@ int main(int argc, char **argv) {
 
     /* OPEN THE PLX9656 AND GET LOCAL BASE ADDRESSES */
     fprintf(stderr, "PLX9052 CONFIGURATION ********************\n");
-    temp = init_pci_dio_120();
-    phasing_matrix.base_address = mmap_io_ptr;
-    if (temp == -1) {
-        fprintf(stderr, "	PLX9052 configuration failed");
-    } else {
-        fprintf(stderr, "	PLX9052 configuration successful!\n");
-    }
-    printf("IOBASE=%x\n", phasing_matrix.base_address);
+    init_pci_dio_120();
+
     /* INITIALIZE THE CARD FOR PROPER IO */
-    // GROUP 0 - PortA=output, PortB=output, PortClo=output, PortChi=output
-    out8(phasing_matrix.base_address + phasing_matrix.port.cntrl0, 0x80);
-    // GROUP 1 - PortAinput, PortB=input, PortClo=input, PortChi=output
-    out8(phasing_matrix.base_address + phasing_matrix.port.cntrl1, 0x93);
-    out8(phasing_matrix.base_address + phasing_matrix.port.A0, 0x00);
-    out8(phasing_matrix.base_address + phasing_matrix.port.B0, 0x00);
-    out8(phasing_matrix.base_address + phasing_matrix.port.C0, 0x00);
-    out8(phasing_matrix.base_address + phasing_matrix.port.A1, 0x00);
-    out8(phasing_matrix.base_address + phasing_matrix.port.B1, 0x00);
-    out8(phasing_matrix.base_address + phasing_matrix.port.cntrl0, 0x00);
-    out8(phasing_matrix.base_address + phasing_matrix.port.cntrl1, 0x13);
-    temp = in8(phasing_matrix.base_address + phasing_matrix.port.C1);
-    temp = temp & 0x0f;
-    printf("input on group 1, port c is %x\n", temp);
+    init_phasing_cards(&phasing_matrix);
 
     mypause();
 
     /****************************************************
      * Initialize VNA
      ****************************************************/
-    if (verbose > 0) fprintf(stdout, "Opening Socket %s %d\n", vna_host, port);
-    sock = opentcpsock(vna_host, port);
-    if (sock < 0) {
-        fprintf(stderr, "Socket failure %d\n", sock);
-        exit(-1);
-    } else if (verbose > 0) fprintf(stdout, "Socket %d\n", sock);
-    rval = read(sock, &output, sizeof(char) * 10);
-    if (verbose > 0) fprintf(stdout, "Initial Output Length: %d\n", rval);
-    strcpy(strout, "");
-    strncat(strout, output, rval);
-    if (verbose > 0) fprintf(stdout, "Initial Output String: %s\n", strout);
+
+    init_vna(vna_host, port);
+
 
     /************* Calibrate the VNA ********************/
     if (iflag) {
