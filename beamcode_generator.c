@@ -6,8 +6,8 @@
 #include <sys/time.h>
 
 #define EXIT_ON_ATTEN_CHECK 1 
-#define MIN_CARD 03
-#define MAX_CARD 03
+#define MIN_CARD 0
+#define MAX_CARD 19
 #define MAX_FSTEPS 36 
 #define MAX_FREQS 1501 
 //#define MAX_FREQS 1201 
@@ -27,11 +27,11 @@ struct timeval t0,t1,t2,t3;
 unsigned long elapsed;
 double angles[MAX_ANGLES],angles_requested_delay[MAX_ANGLES],angles_needed_delay[MAX_ANGLES];
 int32_t attenfile_exists=0;
-/*
-double spacing=12.8016; //meters : MSI 42 feet == 12.8016 meters 
-*/
 
-double spacing=15.24; //meters : SPS 50 feet == 15.24 meters 
+double spacing=12.8016; //meters : MSI 42 feet == 12.8016 meters 
+
+
+//double spacing=15.24; //meters : SPS 50 feet == 15.24 meters 
 
 double bm_sep=3.24;
 //double middle=11.5; //(NUM_ANGLES-1)/2

@@ -5,8 +5,8 @@
 #include <string.h>
 #include <sys/time.h>
 
-#define MIN_CARD  3 
-#define MAX_CARD  3 
+#define MIN_CARD  0 
+#define MAX_CARD  19 
 #define MAX_CARDS 20 
 #define MAX_FREQS 1201 
 #define MAX_PHASES 8192
