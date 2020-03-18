@@ -1,46 +1,21 @@
-#include <errno.h>
-#include <stdarg.h>
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <stdlib.h>
-#include <signal.h>
 #include <math.h>
-#include <netdb.h>
-#include <string.h>
-#include <time.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
 
 #include "include/phasing_cards.h"
 #include "include/utils.h"
 #include "include/pci_dio_120.h"
 #include "include/vna_functions.h"
 
-//#define SWITCHES 0
-//#define ATTEN    1
-//#define READ     0
-//#define WRITE    1
-#define ON       1
-#define OFF      0
 
 #define CARDS 200
 #define PHASECODES 8192
 #define ATTENCODES 64
-#define _QUICK_
 
-int stupid_flag = 0;
-int setup_flag = 1;
-int test_flag = -1000;
-int sock = -1;
 int verbose = 2;
 char *hostip = "192.168.1.2";
 char *file_prefix = "phasing_cal";
@@ -49,7 +24,6 @@ char filename[120] = "";
 char *dir = "/data/cal/";
 FILE *calfile = NULL;
 int port = 23;
-char command[80] = "";
 char radar_name[80] = "";
 char freq_start[10] = "8E6";
 char freq_stop[10] = "20E6";
@@ -62,7 +36,7 @@ int main(int argc, char **argv) {
     double pd_old, pd_new, phase_diff = 0.0;
     int32_t count;
     int32_t i = 0, c = 31, data = 0, wait_delay_ms = 30;
-    unsigned int b = 0;
+    int b = 0;
     int last_collect, current_collect, collect = 0, beamcode = 0, take_data = 0, attempt = 0, max_attempts = 20;
     double fstart;
     double fstop;
@@ -79,21 +53,9 @@ int main(int argc, char **argv) {
         fflush(stderr);
         exit(0);
     }
-    if (argc == 3) {
-        if (atoi(argv[2]) == 0) setup_flag = 0;
-        else setup_flag = 1;
-    } else {
-        test_flag = -1000;
-    }
-    if (argc == 4) {
-        test_flag = atoi(argv[3]);
-        c = atoi(argv[2]);
-    } else {
-        test_flag = -1000;
-    }
+
     radar = atoi(argv[1]);
     printf("Radar: %d Card: %d\n", radar, c);
-    printf("Test flag: %d\n", test_flag);
 
     phasing_matrix.radar_number = radar;
     temp = set_ports(&phasing_matrix);
@@ -113,21 +75,20 @@ int main(int argc, char **argv) {
     fstart = atof(freq_start);
     fstop = atof(freq_stop);
     fstep = (fstop - fstart) / (fnum - 1);
+
     for (i = 0; i < fnum; i++) {
         freq[i] = fstart + i * fstep;
         phase[i] = calloc(PHASECODES, sizeof(double));
         pwr_mag[i] = calloc(PHASECODES, sizeof(double));
     }
 
-// Open Socket and initial IO
+    // Open Socket and initial IO
     if (verbose > 0) printf("Opening Socket %s %d\n", hostip, port);
     init_vna(hostip, port);
 
-
     calibrate_vna(freq_start, freq_stop, freq_steps);
 
-
-    vna_button_command(":INIT1:IMM\r\n", 0, verbose);
+    vna_trigger_single(verbose);
     printf("\n\nCalibration Complete\nReconfigure for Phasing Card Measurements\n");
     mypause();
 
@@ -161,6 +122,9 @@ int main(int argc, char **argv) {
         exit(-1);
     }
 
+    if (verbose > 0) {
+        fprintf(stdout, "Writing beamcodes to phasing card\n");
+    }
     count = PHASECODES;
     fwrite(&count, sizeof(int32_t), 1, calfile);
     count = CARDS;
@@ -169,10 +133,7 @@ int main(int argc, char **argv) {
     fwrite(&count, sizeof(int32_t), 1, calfile);
     count = 0;
     fwrite(freq, sizeof(double), fnum, calfile);
-    if (verbose > 0) {
-        fprintf(stdout, "Writing beamcodes to phasing card\n");
-    }
-    usleep(10000);
+        usleep(10000);
 
 
 
@@ -327,7 +288,7 @@ int main(int argc, char **argv) {
     printf("Closing File\n");
     fclose(calfile);
     c = -1;
-} // end of Card loop
+}
 
 
 
