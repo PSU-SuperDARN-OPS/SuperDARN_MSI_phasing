@@ -149,31 +149,31 @@ int main(int argc, char **argv) {
     fflush(stdout);
 
 
-    if (test_flag == -1000) {
-        sprintf(filename, "%s%s_%s_%02d_%s%s", dir, file_prefix, radar_name, c, serial_number, file_ext);
-        if (verbose > 0) fprintf(stdout, "Using file: %s\n", filename);
-        fflush(stdout);
 
-        calfile = fopen(filename, "w");
-        if (calfile == NULL) {
-            perror("Error in opening calibration file, "
-                   "make sure /data/cal is created and permissions set to allow writing");
-            exit(-1);
-        }
+    sprintf(filename, "%s%s_%s_%02d_%s%s", dir, file_prefix, radar_name, c, serial_number, file_ext);
+    if (verbose > 0) fprintf(stdout, "Using file: %s\n", filename);
+    fflush(stdout);
 
-        count = PHASECODES;
-        fwrite(&count, sizeof(int32_t), 1, calfile);
-        count = CARDS;
-        fwrite(&count, sizeof(int32_t), 1, calfile);
-        count = fnum;
-        fwrite(&count, sizeof(int32_t), 1, calfile);
-        count = 0;
-        fwrite(freq, sizeof(double), fnum, calfile);
-        if (verbose > 0) {
-            fprintf(stdout, "Writing beamcodes to phasing card\n");
-        }
-        usleep(10000);
-    } //test flag if
+    calfile = fopen(filename, "w");
+    if (calfile == NULL) {
+        perror("Error in opening calibration file, "
+               "make sure /data/cal is created and permissions set to allow writing");
+        exit(-1);
+    }
+
+    count = PHASECODES;
+    fwrite(&count, sizeof(int32_t), 1, calfile);
+    count = CARDS;
+    fwrite(&count, sizeof(int32_t), 1, calfile);
+    count = fnum;
+    fwrite(&count, sizeof(int32_t), 1, calfile);
+    count = 0;
+    fwrite(freq, sizeof(double), fnum, calfile);
+    if (verbose > 0) {
+        fprintf(stdout, "Writing beamcodes to phasing card\n");
+    }
+    usleep(10000);
+
 
 
     printf("Programming all zeros attenuation coding\n");
@@ -277,7 +277,7 @@ int main(int argc, char **argv) {
             exit(-1);
         }
 
-        vna_button_command(":INIT1:IMM\r\n", 0, verbose);
+        vna_trigger_single(verbose);
         if (b == 0) sleep(1);
 
         usleep(wait_delay_ms * 1000);
@@ -287,10 +287,8 @@ int main(int argc, char **argv) {
         while ((take_data) && (attempt < max_attempts)) {
 
             attempt++;
-            vna_button_command(":CALC1:PAR1:SEL\r\n", 0, verbose);
-            log_vna_data(":CALC1:DATA:FDAT?\r\n", phase, b, verbose);
-            vna_button_command(":CALC1:PAR2:SEL\r\n", 0, verbose);
-            log_vna_data(":CALC1:DATA:FDAT?\r\n", pwr_mag, b, verbose);
+            vna_get_data(1, phase, b, verbose);
+            vna_get_data(2, pwr_mag, b, verbose);
             pd_new = phase[fnum - 1][b] - phase[0][b];
             if (b != 0) {
                 pd_old = phase[fnum - 1][last_collect] - phase[0][last_collect];

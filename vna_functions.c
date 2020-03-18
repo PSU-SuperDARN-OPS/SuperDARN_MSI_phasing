@@ -205,6 +205,15 @@ int vna_button_command(char *command, int delay_ms, int verbose) {
   return 0;
 }
 
+void vna_trigger_single(int verbose) {
+    vna_button_command(":INIT1:IMM\r\n", 0, verbose);
+}
 
+void vna_get_data(int trace, double ** data_ptr, int b, int verbose) {
+    char command[80] = "";
 
+    sprintf(command, ":CALC1:PAR%d:SEL\r\n", trace);
+    vna_button_command(command, 0, verbose);
+    log_vna_data(":CALC1:DATA:FDAT?\r\n", data_ptr, b, verbose);
+}
 
