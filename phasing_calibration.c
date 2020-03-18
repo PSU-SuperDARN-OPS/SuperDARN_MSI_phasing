@@ -327,7 +327,6 @@ int main(int argc, char **argv) {
     }
     printf("Closing File\n");
     fclose(calfile);
-    card = -1;
 }
 
 
