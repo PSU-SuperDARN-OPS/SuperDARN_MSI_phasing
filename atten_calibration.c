@@ -18,12 +18,11 @@
 
 #define CARDS 200
 #define ATTENCODES 64
-#define FREQS 1500
 
 
 int main(int argc, char **argv) {
-    double *atten_phase[FREQS], *atten_pwr_mag[FREQS];
-    double freq[FREQS];
+    double *atten_phase[VNA_FREQS], *atten_pwr_mag[VNA_FREQS];
+    double freq[VNA_FREQS];
     double pd_old, pd_new, pwr_diff = 0.0;
     int32_t count;
     int32_t i = 0, card = 31, data = 0, wait_delay = 10;
