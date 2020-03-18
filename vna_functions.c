@@ -23,11 +23,15 @@ void init_vna(char * host_ip, int host_port) {
     vna.host_ip = host_ip;
     vna.host_port = host_port;
 
+    printf("Connecting to VNA...\n");
+
     vna.socket = opentcpsock(vna.host_ip, vna.host_port);
 
     if(vna.socket < 0) {
         printf("Error: VNA connection failed\n");
         exit(-1);
+    } else {
+        printf("Connection successful\n");
     }
 
     rval = read(vna.socket, &output, sizeof(char) * 10);
