@@ -84,6 +84,12 @@ int main(int argc, char **argv) {
     double *ophase[VNA_FREQS], *opwr_mag[VNA_FREQS], *otdelay[VNA_FREQS];
     double freq[VNA_FREQS];
 
+
+    double timedelay_error[VNA_FREQS], powermagnitude_error[VNA_FREQS];
+    double timedelay_error_sum = 0, timedelay_error_mean, timedelay_error_deviation, timedelay_variance = 0;
+    double powermagnitude_error_sum = 0, powermagnitude_error_mean, powermagnitude_error_deviation, powermagnitude_variance =0;
+    FILE * error_file = NULL;
+
     double middle = (float) (MSI_num_angles - 1) / 2.0;
     double angles_degrees[MSI_num_angles];
     double freq_center[MSI_max_freq_steps];
@@ -343,11 +349,12 @@ int main(int argc, char **argv) {
     }
 
     /* OPEN THE PLX9656 AND GET LOCAL BASE ADDRESSES */
-    fprintf(stderr, "PLX9052 CONFIGURATION ********************\n");
+    fprintf(stderr, "PCI-DIO-120 CONFIGURATION ********************\n");
     init_pci_dio_120();
 
     /* INITIALIZE THE CARD FOR PROPER IO */
     init_phasing_cards(&phasing_matrix);
+    printf("PCI-DIO-120 configured successfully\n");
 
     mypause();
 
@@ -358,42 +365,42 @@ int main(int argc, char **argv) {
     init_vna(vna_host, port);
 
 
+
+    vna_button_command(":SYST:PRES\r\n", 10, verbose);
+    vna_button_command(":INIT1:CONT ON\r\n", 10, verbose);
+    vna_button_command(":TRIG:SOUR BUS\r\n", 10, verbose);
+    sprintf(command, ":SENS1:FREQ:STAR %E\r\n", VNA_MIN);
+    vna_button_command(command, 10, verbose);
+    sprintf(command, ":SENS1:FREQ:STOP %E\r\n", VNA_MAX);
+    vna_button_command(command, 10, verbose);
+    sprintf(command, ":SENS1:SWE:POIN %d\r\n", VNA_FREQS);
+    vna_button_command(command, 10, verbose);
+    vna_button_command(":CALC1:PAR:COUN 3\r\n", 10, verbose);
+
+    /* First Trace: Unwrapped Phase */
+    vna_button_command(":CALC1:PAR1:SEL\r\n", 10, verbose);
+    vna_button_command(":CALC1:PAR1:DEF S12\r\n", 10, verbose);
+    vna_button_command(":CALC1:FORM UPH\r\n", 10, verbose);
+
+    /* Second Trace: Log Pwr*/
+    vna_button_command(":CALC1:PAR2:SEL\r\n", 10, verbose);
+    vna_button_command(":CALC1:PAR2:DEF S12\r\n", 10, verbose);
+    vna_button_command(":CALC1:FORM MLOG\r\n", 10, verbose);
+
+    /* Third Trace: Smoothed Group Delay*/
+    vna_button_command(":CALC1:PAR3:SEL\r\n", 10, verbose);
+    vna_button_command(":CALC1:PAR3:DEF S12\r\n", 10, verbose);
+    vna_button_command(":CALC1:FORM GDEL\r\n", 10, verbose);
+    vna_button_command(":CALC1:SMO:APER 5.0\r\n", 10, verbose);
+    vna_button_command(":CALC1:SMO:STAT ON\r\n", 10, verbose);
+
+    vna_button_command(":SENS1:AVER ON\r\n", 10, verbose);
+    sprintf(command, ":SENS1:AVER:COUN 64\r\n");
+    vna_button_command(command, 10, verbose);
+    vna_button_command(":TRIG:SOUR INTERNAL\r\n", 10, verbose);
+
     /************* Calibrate the VNA ********************/
     if (iflag) {
-        vna_button_command(":SYST:PRES\r\n", 10, verbose);
-        vna_button_command(":INIT1:CONT ON\r\n", 10, verbose);
-        vna_button_command(":TRIG:SOUR BUS\r\n", 10, verbose);
-        sprintf(command, ":SENS1:FREQ:STAR %E\r\n", VNA_MIN);
-        vna_button_command(command, 10, verbose);
-        sprintf(command, ":SENS1:FREQ:STOP %E\r\n", VNA_MAX);
-        vna_button_command(command, 10, verbose);
-        sprintf(command, ":SENS1:SWE:POIN %d\r\n", VNA_FREQS);
-        vna_button_command(command, 10, verbose);
-        vna_button_command(":CALC1:PAR:COUN 3\r\n", 10, verbose);
-
-        /* First Trace: Unwrapped Phase */
-        vna_button_command(":CALC1:PAR1:SEL\r\n", 10, verbose);
-        vna_button_command(":CALC1:PAR1:DEF S12\r\n", 10, verbose);
-        vna_button_command(":CALC1:FORM UPH\r\n", 10, verbose);
-
-        /* Second Trace: Log Pwr*/
-        vna_button_command(":CALC1:PAR2:SEL\r\n", 10, verbose);
-        vna_button_command(":CALC1:PAR2:DEF S12\r\n", 10, verbose);
-        vna_button_command(":CALC1:FORM MLOG\r\n", 10, verbose);
-
-        /* Third Trace: Smoothed Group Delay*/
-        vna_button_command(":CALC1:PAR3:SEL\r\n", 10, verbose);
-        vna_button_command(":CALC1:PAR3:DEF S12\r\n", 10, verbose);
-        vna_button_command(":CALC1:FORM GDEL\r\n", 10, verbose);
-        vna_button_command(":CALC1:SMO:APER 5.0\r\n", 10, verbose);
-        vna_button_command(":CALC1:SMO:STAT ON\r\n", 10, verbose);
-
-        vna_button_command(":SENS1:AVER ON\r\n", 10, verbose);
-        sprintf(command, ":SENS1:AVER:COUN 32\r\n");
-        vna_button_command(command, 10, verbose);
-        vna_button_command(":TRIG:SOUR INTERNAL\r\n", 10, verbose);
-
-
         printf("\n\n\7\7Calibrate Network Analyzer for S21,S12\n");
         mypause();
         vna_button_command(":SENS1:CORR:COLL:METH:THRU 1,2\r\n", 10, verbose);
@@ -412,6 +419,7 @@ int main(int argc, char **argv) {
         fprintf(stdout, "Thru Calibration completed.\n  Please visually inspect calibration now.\n");
         mypause();
 
+
         vna_button_command(":SENS1:AVER ON\r\n", 10, verbose);
         sprintf(command, ":SENS1:AVER:COUN %d\r\n", VNA_triggers);
         vna_button_command(command, 10, verbose);
@@ -425,6 +433,8 @@ int main(int argc, char **argv) {
     }
 
     /* Make sure Markers are setup for span viewing */
+
+    vna_button_command(":CALC1:PAR:COUN 3\r\n", 10, verbose);
     vna_button_command(":CALC1:MARK1 ON\r\n", 10, verbose);
     vna_button_command(":CALC1:MARK2 ON\r\n", 10, verbose);
     vna_button_command(":CALC1:PAR1:SEL\r\n", 10, verbose);
@@ -443,6 +453,7 @@ int main(int argc, char **argv) {
         vna_button_command(":TRIG:SING\r\n", 0, verbose);
         vna_button_command("*OPC?\r\n", 0, verbose);
     }
+
     fprintf(stdout, "\n\nVNA Init Complete\n Please Confirm the following VNA Settings:\n");
     fprintf(stdout, "  VNA Min Freq: %10.5lf MHz\n", VNA_MIN * 1E-6);
     fprintf(stdout, "  VNA Max Freq: %10.5lf MHz\n", VNA_MAX * 1E-6);
@@ -579,6 +590,7 @@ int main(int argc, char **argv) {
                         timedelay_nsecs);
             for (f = 0; f < freq_steps; f++) {
                 clock_gettime(CLOCK_MONOTONIC, &begin_step);
+
                 if (f == 0) {
                     best_beam_freq_index = 0;
                 } else {
@@ -591,6 +603,7 @@ int main(int argc, char **argv) {
                         }
                     }
                 }
+
                 if ((best_beam_angle_index < 0) || (best_beam_freq_index < 0)) {
                     best_tdelay = needed_tdelay;
                     best_pwr = 10.0 - MSI_target_pwr_dB;
@@ -602,6 +615,7 @@ int main(int argc, char **argv) {
                     best_phasecode = beam_phasecode[(best_beam_freq_index * num_beam_angles) + best_beam_angle_index];
                     best_attencode = beam_attencode[(best_beam_freq_index * num_beam_angles) + best_beam_angle_index];
                 }
+
                 b = f * opt_mem_offset + a;
                 if (f > 0) b += opt_mem_offset;
                 if (verbose > -1) {
@@ -616,6 +630,13 @@ int main(int argc, char **argv) {
                 vna_button_command(command, 10, verbose);
                 sprintf(command, ":CALC1:MARK2:X %E\r\n", freq_hi[f]);
                 vna_button_command(command, 10, verbose);
+
+                /* Error Analysis */
+//                error_file = fopen("/home/radar/time_delay_error.txt", "w");
+//                if(error_file == NULL) {
+//                    printf("error file not opened\n");
+//                    exit(-1);
+//                }
 
                 /* Take a measurement at best phasecode and acode */
                 while (wflag > 0) {
@@ -633,9 +654,56 @@ int main(int argc, char **argv) {
                         exit(rval);
                     }
                     wflag = 0;
+
+                    /* Error Distribution */
+//                    for(i = 0; i < VNA_FREQS; i++) {
+//                        timedelay_error[i] = otdelay[i][b]; //fabs(otdelay[i][b] - tdelay[i][b]);
+//                        timedelay_error_sum = timedelay_error[i] + timedelay_error_sum;
+//
+//                        sprintf(command, "%E\n", timedelay_error[i]);
+//                        fputs(command, error_file);
+//
+//                        powermagnitude_error[i] = opwr_mag[i][b]; //fabs(opwr_mag[i][b] - pwr_mag[i][b]);
+//                        powermagnitude_error_sum = powermagnitude_error[i] + powermagnitude_error_sum;
+//                    }
+//
+//                    timedelay_error_mean = timedelay_error_sum / VNA_FREQS;
+//                    powermagnitude_error_mean = powermagnitude_error_sum / VNA_FREQS;
+//
+//                    for(i = 0; i < VNA_FREQS; i++) {
+//                        timedelay_variance = pow(timedelay_error[i] - timedelay_error_mean, 2) + timedelay_variance;
+//                        powermagnitude_variance = pow(powermagnitude_error[i] - powermagnitude_error_mean, 2) + powermagnitude_variance;
+//                    }
+//
+//                    timedelay_variance = timedelay_variance / VNA_FREQS;
+//                    powermagnitude_variance = powermagnitude_variance / VNA_FREQS;
+//
+//                    timedelay_error_deviation = sqrt(timedelay_variance);
+//                    powermagnitude_error_deviation = sqrt(powermagnitude_variance);
+//
+//                    printf("Time delay error information:\n");
+//                    printf("  Mean: %e\n", timedelay_error_mean);
+//                    printf("  Variance: %e\n", timedelay_variance);
+//                    printf("  Standard deviation: %e\n\n", timedelay_error_deviation);
+//
+//                    printf("Power magnitude error information:\n");
+//                    printf("  Mean: %e\n", powermagnitude_error_mean);
+//                    printf("  Variance: %e\n", powermagnitude_variance);
+//                    printf("  Standard deviation: %e\n\n", powermagnitude_error_deviation);
+//
+//                    fclose(error_file);
+//                    exit(0);
+
                     for (i = 0; i < VNA_FREQS; i++) {
-                        if (fabs(otdelay[i][b] - tdelay[i][b]) > 1E-9 || fabs(opwr_mag[i][b] - pwr_mag[i][b]) > 0.1) {
+                        if (fabs(otdelay[i][b] - tdelay[i][b]) > 1E-8 || fabs(opwr_mag[i][b] - pwr_mag[i][b]) > 1) {
                             wflag = 1;
+                            if(fabs(otdelay[i][b] - tdelay[i][b]) > 1E-8){
+                                printf("Time delay not within tolerance\n");
+                            }
+                            if(fabs(opwr_mag[i][b] - pwr_mag[i][b]) > 1){
+                                printf("Power Magnitude not withing tolerance\n");
+                            }
+                            printf("time_delay: %e, %e    power_magnitute: %f, %f\n\n", otdelay[i][b], tdelay[i][b], opwr_mag[i][b], pwr_mag[i][b]);
                             fprintf(stderr, "Info:: Adjusting wait time to let dio card settle: %d ms\n", wait_ms);
                             fflush(stderr);
                             wait_ms += 30;
