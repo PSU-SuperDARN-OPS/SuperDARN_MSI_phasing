@@ -135,6 +135,8 @@ int main(int argc, char **argv) {
     if (verbose > 0) printf("Opening Socket %s %d\n", hostip, port);
     init_vna(hostip, port);
 
+    vna_trigger_single(verbose);
+
     if (iflag) {
         calibrate_vna(freq_start, freq_stop, freq_steps);
 
@@ -143,14 +145,8 @@ int main(int argc, char **argv) {
         mypause();
     }
 
-    printf("\n\nEnter Serial Number: ");
-    fflush(stdin);
-    fflush(stdout);
-    scanf("%s", serial_number);
     printf("Radar: <%s>  Card: %d Serial: %s\n", radar_name, card, serial_number);
     fflush(stdout);
-
-
 
     sprintf(filename, "%s%s_%s_%02d_%s%s", dir, file_prefix, radar_name, card, serial_number, file_ext);
     if (verbose > 0) fprintf(stdout, "Using file: %s\n", filename);

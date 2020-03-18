@@ -126,29 +126,19 @@ int main(int argc, char **argv) {
         atten_pwr_mag[i] = calloc(ATTENCODES, sizeof(double));
     }
 
-// Open Socket and initial IO
+    // Open Socket and initial IO
     init_vna(hostip, port);
-
-    calibrate_vna(freq_start, freq_stop, freq_steps);
-
     vna_trigger_single(verbose);
-    printf("\n\nCalibration Complete\nReconfigure for Phasing Card Measurements");
-    mypause();
 
-    card = -1;
-    printf("\n\nEnter Radar Name: ");
-    fflush(stdin);
-    scanf("%s", radar_name);
-    fflush(stdout);
-    fflush(stdin);
-    printf("\n\nEnter Phasing Card Number: ");
-    fflush(stdin);
-    fflush(stdout);
-    scanf("%d", &card);
-    printf("\n\nEnter Serial Number: ");
-    fflush(stdin);
-    fflush(stdout);
-    scanf("%s", serial_number);
+    if(iflag) {
+        calibrate_vna(freq_start, freq_stop, freq_steps);
+
+        vna_trigger_single(verbose);
+        printf("\n\nCalibration Complete\nReconfigure for Phasing Card Measurements");
+        mypause();
+    }
+
+
     printf("Radar: <%s>  Card: %d Serial: %s\n", radar_name, card, serial_number);
     fflush(stdout);
 
