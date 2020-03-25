@@ -44,7 +44,7 @@ add_executable(beamcode_generator beamcode_generator.c)
 target_link_libraries(beamcode_generator m)
 
 add_executable(write_final_beamcodes write_final_beamcodes.c phasing_cards.c
-        pci_dio_120.c _prog_conventions.c utils.c)
+        pci_dio_120.c  utils.c)
 target_link_libraries(write_final_beamcodes m)
 
 add_executable(optimize_beam_programming optimize_beam_programming.c MSI_functions.c include/MSI_functions.h
