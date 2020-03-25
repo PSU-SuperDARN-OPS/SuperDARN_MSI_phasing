@@ -21,20 +21,9 @@
 #include <math.h>
 #include <time.h>
 #include <signal.h>
-#ifdef __QNX__
-#include <hw/pci.h>
-  #include <hw/inout.h>
-  #include <sys/neutrino.h>
-  #include <sys/mman.h>
-#else
-#include "include/qnx_functions_mock.h"
-#endif
 
-/* helper functions  for vna */
 #include "include/vna_functions.h"
-/* Useful defines for MSI phasing cards */
 #include "include/MSI_functions.h"
-#include "include/phasing_cards.h"
 #include "include/utils.h"
 #include "include/pci_dio_120.h"
 
