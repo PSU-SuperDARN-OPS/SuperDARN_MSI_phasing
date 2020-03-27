@@ -477,6 +477,7 @@ int main(int argc, char **argv) {
         /* Inside the card loop */
         if (verbose > 0) fprintf(stdout, "  Starting optimization for Card: %d\n", c);
         clock_gettime(CLOCK_MONOTONIC, &begin_card);
+
         /* Load the beamtable file for this card*/
         sprintf(filename, "%s/beamcodes_cal_%s_%02d.dat", dirstub, radar_name, c);
         beamcodefile = fopen(filename, "r");
