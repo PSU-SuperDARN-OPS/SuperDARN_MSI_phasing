@@ -41,12 +41,12 @@ extern int32_t VNA_min_nave;
 
 int main(){
     char filename[512] = "";
-    char dirstub[256] = "";
-    char radar_name[16] = "cve";
-    int c = 0;
+    char dirstub[256] = "/data/cal/ice";
+    char radar_name[16] = "ice";
+    int c = 6;
     unsigned int f,a;
     FILE *beamcodefile = NULL;
-    int verbose = 0;
+    int verbose = 2;
 
     double beam_highest_time0_nsec, beam_lowest_pwr_dB, beam_middle;
     uint32_t num_beam_freqs, num_beam_angles, num_beam_steps;
@@ -69,12 +69,15 @@ int main(){
     if (beamcodefile != NULL) {
         if (verbose > -1) fprintf(stdout, "    Opened: %s\n", filename);
         fread(&beam_highest_time0_nsec, sizeof(double), 1, beamcodefile);
-        fread(&beam_lowest_pwr_dB, sizeof(double), 1, beamcodefile);
+        printf("Longest delay 0: %f ns\n", beam_highest_time0_nsec);
         if (beam_highest_time0_nsec != MSI_target_tdelay0_nsecs) {
             fprintf(stderr, "Error:: Card %d Target time0 mismatch: %lf  %lf\n", c, beam_highest_time0_nsec,
                     MSI_target_tdelay0_nsecs);
 //                 exit(-1);
         }
+
+        fread(&beam_lowest_pwr_dB, sizeof(double), 1, beamcodefile);
+        printf("Lowest power: %f dB\n", beam_lowest_pwr_dB);
         if (beam_lowest_pwr_dB != MSI_target_pwr_dB) {
             fprintf(stderr, "Error:: Card %d Target pwr  mismatch: %lf  %lf\n", c, beam_lowest_pwr_dB,
                     MSI_target_pwr_dB);
@@ -82,11 +85,13 @@ int main(){
         }
 
         fread(&num_beam_freqs, sizeof(int), 1, beamcodefile);
+        printf("Number of beam frequencies: %d\n", num_beam_freqs);
 
         if (beam_freqs != NULL) free(beam_freqs);
         beam_freqs = calloc(num_beam_freqs, sizeof(double));
         fread(beam_freqs, sizeof(double), num_beam_freqs, beamcodefile);
         fread(&num_beam_angles, sizeof(int32_t), 1, beamcodefile);
+        printf("Number of beam angles: %d \n", num_beam_angles);
         fread(&beam_middle, sizeof(double), 1, beamcodefile);
 
         if (beam_angles != NULL) free(beam_angles);
@@ -143,8 +148,17 @@ int main(){
             for (a = 0; a < num_beam_angles; a++)
                 fread(&beam_phasecode[(f * num_beam_angles) + a], sizeof(int32_t), 1, beamcodefile);
 
-            if (verbose > 1)
-                fprintf(stdout, "    Findex: %5d :: %-8.5e  %-8.5e Hz\n", f, beam_freq_lo[f], beam_freq_hi[f]);
+            printf("Frequency step %2d \n", f);
+            printf("Center Frequency: %.2f MHz\n", (beam_freq_center[f] / 1000000));
+            printf("Frequency Range: %.2f - %.2f Mhz \n", (beam_freq_lo[f] / 1000000), (beam_freq_hi[f] / 1000000));
+            printf("Angle | Phasecode | Delay (ns) | Attencode | Power (dB) \n");
+            for (a = 0; a < num_beam_angles; a++) {
+                printf("%5d | %9d | %10.2f | %9d | %.2f \n", a, beam_phasecode[(f * num_beam_angles) + a],
+                        beam_tdelay_nsec[(f * num_beam_angles) + a], beam_attencode[(f * num_beam_angles) + a],
+                        beam_pwr_dB[(f * num_beam_angles) + a]);
+            }
+
+
         }
 
         fclose(beamcodefile);

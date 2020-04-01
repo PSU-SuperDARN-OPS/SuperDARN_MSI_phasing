@@ -68,7 +68,7 @@ target_link_libraries(test_cards m)
 target_compile_options(test_cards PRIVATE -Wall -Wextra -Wpedantic -Wconversion)
 target_sources(test_cards PRIVATE external/APCI/apcilib/apcilib.c)
 
-add_executable(test_optimize test_optimize_delay.c pci_dio_120.c phasing_cards.c)
+add_executable(test_optimize test_optimize_delay.c pci_dio_120.c phasing_cards.c  MSI_functions.c vna_functions.c utils.c)
 target_link_libraries(test_optimize m)
 target_compile_options(test_optimize PRIVATE -Wall -Wextra -Wpedantic -Wconversion)
 target_sources(test_optimize PRIVATE external/APCI/apcilib/apcilib.c)
